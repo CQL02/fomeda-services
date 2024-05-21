@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getMongoConfig } from '../config/database.config';
+import { CategoryModule } from '../modules/category/category.module';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { getMongoConfig } from '../config/database.config';
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule, CategoryModule],
       useFactory: (configService: ConfigService) =>
         getMongoConfig(configService),
       inject: [ConfigService],
