@@ -44,6 +44,7 @@ import { CategoryTypeRepository } from './domain/repositories/category-type.repo
 import { SubcategorySubspecificationRepository } from './domain/repositories/subcategory-subspecification.repository';
 import { SubcategorySpecificationRepository } from './domain/repositories/subcategory-specification.repository';
 import { SubcategoryRepository } from './domain/repositories/subcategory.repository';
+import { SequenceModule } from '../sequence/sequence.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { SubcategoryRepository } from './domain/repositories/subcategory.reposit
         schema: SubcategorySubspecificationSchema,
       },
     ]),
+    SequenceModule,
   ],
   controllers: [CategoryController],
   providers: [
