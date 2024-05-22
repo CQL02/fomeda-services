@@ -12,4 +12,12 @@ export class SubcategoryRepository extends AbstractRepository<Subcategory> {
   ) {
     super(subcategoryModel);
   }
+
+  async deactivateSubcategoryById(id: string, is_active: boolean): Promise<Subcategory> {
+    return this.subcategoryModel.findByIdAndUpdate(id, { is_active }).exec();
+  }
+
+  async findSubcategoryByCatId(cat_id: string): Promise<Subcategory[]> {
+    return this.subcategoryModel.find({ cat_id: cat_id }).exec();
+  }
 }

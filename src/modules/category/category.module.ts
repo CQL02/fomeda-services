@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CategoryService } from './services/category.service';
+import { CategoryService } from './services/implementations/category.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Category, CategorySchema } from './domain/schema/category.schema';
 import { CategoryRepository } from './domain/repositories/category.repository';
@@ -50,32 +50,14 @@ import { SequenceModule } from '../sequence/sequence.module';
   imports: [
     MongooseModule.forFeature([
       { name: Category.name, schema: CategorySchema },
-      {
-        name: CategoryBaseSpecification.name,
-        schema: CategoryBaseSpecificationSchema,
-      },
-      {
-        name: CategoryBaseSubspecification.name,
-        schema: CategoryBaseSubspecificationSchema,
-      },
-      {
-        name: CategoryGeneralSpecification.name,
-        schema: CategoryGeneralSpecificationSchema,
-      },
-      {
-        name: CategoryGeneralSubspecification.name,
-        schema: CategoryGeneralSubspecificationSchema,
-      },
+      { name: CategoryBaseSpecification.name, schema: CategoryBaseSpecificationSchema, },
+      { name: CategoryBaseSubspecification.name, schema: CategoryBaseSubspecificationSchema, },
+      { name: CategoryGeneralSpecification.name, schema: CategoryGeneralSpecificationSchema, },
+      { name: CategoryGeneralSubspecification.name, schema: CategoryGeneralSubspecificationSchema, },
       { name: CategoryType.name, schema: CategoryTypeSchema },
       { name: Subcategory.name, schema: SubcategorySchema },
-      {
-        name: SubcategorySpecification.name,
-        schema: SubcategorySpecificationSchema,
-      },
-      {
-        name: SubcategorySubspecification.name,
-        schema: SubcategorySubspecificationSchema,
-      },
+      { name: SubcategorySpecification.name, schema: SubcategorySpecificationSchema, },
+      { name: SubcategorySubspecification.name, schema: SubcategorySubspecificationSchema, },
     ]),
     SequenceModule,
   ],

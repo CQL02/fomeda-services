@@ -2,19 +2,21 @@ import {
   IsString,
   IsBoolean,
   IsDate,
-  MaxLength,
   IsNotEmpty,
 } from 'class-validator';
 
-export class CreateCategoryDto {
+export class SubcategoryDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(12)
   cat_code: string;
 
   @IsString()
   @IsNotEmpty()
-  cat_name: string;
+  subcat_code: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subcat_name: string;
 
   @IsString()
   @IsNotEmpty()

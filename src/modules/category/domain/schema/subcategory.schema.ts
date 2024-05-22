@@ -6,14 +6,12 @@ export class Subcategory extends SchemaAbstract {
   @Prop({
     required: true,
     type: String,
-    maxlength: 12,
   })
   cat_code: string;
 
   @Prop({
     required: true,
     type: String,
-    maxlength: 12,
   })
   subcat_code: string;
 

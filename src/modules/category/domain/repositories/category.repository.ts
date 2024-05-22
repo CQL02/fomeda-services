@@ -12,4 +12,8 @@ export class CategoryRepository extends AbstractRepository<Category> {
   ) {
     super(categoryModel);
   }
+
+  async deactivateCategoryById(id: string, is_active: boolean): Promise<Category> {
+    return this.categoryModel.findByIdAndUpdate(id, {is_active}).exec();
+  }
 }
