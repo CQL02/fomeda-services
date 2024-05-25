@@ -12,4 +12,8 @@ export class CategoryGeneralSubspecificationRepository extends AbstractRepositor
   ) {
     super(categoryGeneralSubspecificationModel);
   }
+
+  async deactivateCategoryById(id: string, is_active: boolean): Promise<CategoryGeneralSubspecification> {
+    return this.categoryGeneralSubspecificationModel.findByIdAndUpdate(id, {is_active}).exec();
+  }
 }

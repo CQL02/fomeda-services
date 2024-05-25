@@ -5,10 +5,15 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 
-export class CategoryDto {
+export class GeneralSpecificationDto {
+
   @IsString()
   @IsNotEmpty()
-  cat_name: string;
+  cat_type: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subcat_spec_name: string;
 
   @IsString()
   @IsNotEmpty()
@@ -26,4 +31,7 @@ export class CategoryDto {
 
   @IsBoolean()
   is_active: boolean;
+
+  @IsBoolean()
+  allow_input: boolean;
 }

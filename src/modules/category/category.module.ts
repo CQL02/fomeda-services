@@ -45,6 +45,7 @@ import { SubcategorySubspecificationRepository } from './domain/repositories/sub
 import { SubcategorySpecificationRepository } from './domain/repositories/subcategory-specification.repository';
 import { SubcategoryRepository } from './domain/repositories/subcategory.repository';
 import { SequenceModule } from '../sequence/sequence.module';
+import { GeneralSpecificationService } from "./services/implementations/general-specification.service";
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { SequenceModule } from '../sequence/sequence.module';
   controllers: [CategoryController],
   providers: [
     CategoryService,
+    GeneralSpecificationService,
     CategoryRepository,
     CategoryBaseSpecificationRepository,
     CategoryBaseSubspecificationRepository,

@@ -7,12 +7,6 @@ export class CategoryGeneralSpecification extends SchemaAbstract {
     required: true,
     type: String,
   })
-  subcat_spec_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
   cat_type: string;
 
   @Prop({

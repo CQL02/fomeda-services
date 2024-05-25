@@ -5,10 +5,18 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 
-export class CategoryDto {
+export class GeneralSubspecificationDto {
   @IsString()
   @IsNotEmpty()
-  cat_name: string;
+  subcat_spec_code: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subcat_subspec_code: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subcat_subspec_name: string;
 
   @IsString()
   @IsNotEmpty()
