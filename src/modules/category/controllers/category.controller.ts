@@ -40,7 +40,7 @@ export class CategoryController {
     return this.generalSpecificationService.createGeneralSpecification(generalSpecificationDto);
   }
 
-  @Get("get-all-general-specification")
+  @Get("find-all-general-specification")
   async findAllGeneralSpecification(): Promise<CategoryGeneralSpecification[]> {
     return this.generalSpecificationService.findAllGeneralSpecification();
   }
