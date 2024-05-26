@@ -6,7 +6,7 @@ import { Subcategory } from "../../domain/schema/subcategory.schema";
 export interface ICategoryService {
   createCategory(categoryDto: CategoryDto): Promise<Category>;
   updateCategory(id: string, categoryDto: CategoryDto): Promise<Category>;
-  findAllCategories(): Promise<Category[]>;
+  findAllCategories(): Promise<CategoryDto[]>;
   findCategoryById(id: string): Promise<Category>;
   deactivateCategory(id: string, is_active: boolean): Promise<Category>;
   deleteCategory(id: string): Promise<Category>;

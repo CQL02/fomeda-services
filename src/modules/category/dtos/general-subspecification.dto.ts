@@ -8,11 +8,7 @@ import {
 export class GeneralSubspecificationDto {
   @IsString()
   @IsNotEmpty()
-  subcat_spec_code: string;
-
-  @IsString()
-  @IsNotEmpty()
-  subcat_subspec_code: string;
+  subcat_spec_id: string;
 
   @IsString()
   @IsNotEmpty()

@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { ICategoryService } from '../interfaces/category.service.interface';
-import { CategoryDto } from '../../dtos/category.dto';
-import { Category } from '../../domain/schema/category.schema';
-import { CategoryRepository } from '../../domain/repositories/category.repository';
-import { SequenceService } from '../../../sequence/services/sequence.services';
-import { SequenceConstant } from '../../../../common/constant/sequence.constant';
+import { Injectable } from "@nestjs/common";
+import { ICategoryService } from "../interfaces/category.service.interface";
+import { CategoryDto } from "../../dtos/category.dto";
+import { Category } from "../../domain/schema/category.schema";
+import { CategoryRepository } from "../../domain/repositories/category.repository";
+import { SequenceService } from "../../../sequence/services/sequence.services";
+import { SequenceConstant } from "../../../../common/constant/sequence.constant";
 import { SubcategoryDto } from "../../dtos/subcategory.dto";
 import { Subcategory } from "../../domain/schema/subcategory.schema";
 import { SubcategoryRepository } from "../../domain/repositories/subcategory.repository";
@@ -14,18 +14,25 @@ export class CategoryService implements ICategoryService {
   constructor(
     private readonly categoryRepository: CategoryRepository,
     private readonly sequenceService: SequenceService,
-    private readonly subcategoryRepository: SubcategoryRepository,
-  ) {}
+    private readonly subcategoryRepository: SubcategoryRepository
+  ) {
+  }
 
   async createCategory(categoryDto: CategoryDto): Promise<Category> {
     const _id = await this.sequenceService.generateId(
-      SequenceConstant.PRODUCT_CATEGORY_PREFIX,
+      SequenceConstant.PRODUCT_CATEGORY_PREFIX
     );
     return this.categoryRepository.create({ ...categoryDto, _id });
   }
 
-  async findAllCategories(): Promise<Category[]> {
-    return this.categoryRepository.findAll();
+  async findAllCategories(): Promise<CategoryDto[]> {
+    const categoryList = await this.categoryRepository.findAll();
+    const subcategoryList = await this.subcategoryRepository.findAll();
+    const result = categoryList.map(cat => {
+      const filteredSubcategory = subcategoryList.filter(subcat => subcat.cat_id === cat._id.toString());
+      return filteredSubcategory.length > 0 ? { ...cat.toObject(), children: filteredSubcategory } : cat.toObject();
+    });
+    return result;
   }
 
   async findCategoryById(id: string): Promise<Category> {
@@ -45,7 +52,9 @@ export class CategoryService implements ICategoryService {
   }
 
   async createSubcategory(subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
-    const _id = this.sequenceService.generateId(SequenceConstant.PRODUCT_CATEGORY_PREFIX);
+    const _id = await this.sequenceService.generateId(
+      SequenceConstant.PRODUCT_SUBCATEGORY_PREFIX
+    );
     return this.subcategoryRepository.create({ ...subcategoryDto, _id });
   }
 

@@ -18,23 +18,31 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   constructor(
     private readonly sequenceService: SequenceService,
     private readonly generalSubspecificationRepository: CategoryGeneralSubspecificationRepository,
-    private readonly generalSpecificationRepository: CategoryGeneralSpecificationRepository,
-  ) {}
+    private readonly generalSpecificationRepository: CategoryGeneralSpecificationRepository
+  ) {
+  }
 
   async createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification> {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SPECIFICATION_PREFIX
     );
-    return this.generalSpecificationRepository.create({...generalSpecificationDto, _id});
+    return this.generalSpecificationRepository.create({ ...generalSpecificationDto, _id });
   }
 
-  async findAllGeneralSpecification(): Promise<CategoryGeneralSpecification[]> {
-    return this.generalSpecificationRepository.findAll();
+  async findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]> {
+    const generalSpecificationList = await this.generalSpecificationRepository.findAll();
+    const generalSubspecificationList = await this.generalSubspecificationRepository.findAll();
+
+    const result = generalSpecificationList.map(spec => {
+      const filteredSubspec = generalSubspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
+      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+    });
+    return result;
   }
 
   async updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification> {
     return this.generalSpecificationRepository.update(id, generalSpecificationDto);
-}
+  }
 
   async deactivateGeneralSpecification(id: string, is_active: boolean): Promise<CategoryGeneralSpecification> {
     return this.generalSpecificationRepository.update(id, is_active);
@@ -46,9 +54,9 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
 
   async createGeneralSubspecification(generalSubspecificationDto: GeneralSubspecificationDto): Promise<CategoryGeneralSubspecification> {
     const _id = await this.sequenceService.generateId(
-      SequenceConstant.PRODUCT_SUBSPECIFICATION_PREFIX,
+      SequenceConstant.PRODUCT_SUBSPECIFICATION_PREFIX
     );
-    return this.generalSubspecificationRepository.create({...generalSubspecificationDto, _id});
+    return this.generalSubspecificationRepository.create({ ...generalSubspecificationDto, _id });
   }
 
   async findAllGeneralSubspecification(): Promise<CategoryGeneralSubspecification[]> {

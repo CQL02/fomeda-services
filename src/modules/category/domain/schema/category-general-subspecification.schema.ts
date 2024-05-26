@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaAbstract } from '../../../../common/database/abstracts/schema.abstract';
-import { CategoryGeneralSpecification } from './category-general-specification.schema';
 
 @Schema({ versionKey: false, collection: 'category_general_subspecification' })
 export class CategoryGeneralSubspecification extends SchemaAbstract {
@@ -8,13 +7,8 @@ export class CategoryGeneralSubspecification extends SchemaAbstract {
     required: true,
     type: String,
   })
-  subcat_spec_code: string;
+  subcat_spec_id: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
-  subcat_subspec_code: string;
 
   @Prop({
     required: true,
@@ -57,4 +51,4 @@ export class CategoryGeneralSubspecification extends SchemaAbstract {
 }
 
 export const CategoryGeneralSubspecificationSchema =
-  SchemaFactory.createForClass(CategoryGeneralSpecification);
+  SchemaFactory.createForClass(CategoryGeneralSubspecification);

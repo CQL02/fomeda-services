@@ -8,11 +8,7 @@ import {
 export class SubcategoryDto {
   @IsString()
   @IsNotEmpty()
-  cat_code: string;
-
-  @IsString()
-  @IsNotEmpty()
-  subcat_code: string;
+  cat_id: string;
 
   @IsString()
   @IsNotEmpty()

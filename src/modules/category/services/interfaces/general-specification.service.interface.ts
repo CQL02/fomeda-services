@@ -6,7 +6,7 @@ import { CategoryGeneralSubspecification } from "../../domain/schema/category-ge
 export interface IGeneralSpecificationService {
   createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification>;
   updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification>;
-  findAllGeneralSpecification(): Promise<CategoryGeneralSpecification[]>;
+  findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]>;
   deactivateGeneralSpecification(id: string, is_active: boolean): Promise<CategoryGeneralSpecification>;
   deleteGeneralSpecification(id: string): Promise<CategoryGeneralSpecification>;
 

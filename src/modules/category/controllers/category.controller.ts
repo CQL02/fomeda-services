@@ -4,7 +4,8 @@ import { Category } from "../domain/schema/category.schema";
 import { CategoryService } from "../services/implementations/category.service";
 import { GeneralSpecificationDto } from "../dtos/general-specification.dto";
 import { GeneralSpecificationService } from "../services/implementations/general-specification.service";
-import { CategoryGeneralSpecification } from "../domain/schema/category-general-specification.schema";
+import { GeneralSubspecificationDto } from "../dtos/general-subspecification.dto";
+import { SubcategoryDto } from "../dtos/subcategory.dto";
 
 @Controller("category")
 export class CategoryController {
@@ -23,8 +24,8 @@ export class CategoryController {
     return this.categoryService.updateCategory(id, categoryDto);
   }
 
-  @Get("all-category")
-  async findAllCategories(): Promise<Category[]> {
+  @Get("find-all-category")
+  async findAllCategories(): Promise<CategoryDto[]> {
     return this.categoryService.findAllCategories();
   }
 
@@ -41,7 +42,7 @@ export class CategoryController {
   }
 
   @Get("find-all-general-specification")
-  async findAllGeneralSpecification(): Promise<CategoryGeneralSpecification[]> {
+  async findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]> {
     return this.generalSpecificationService.findAllGeneralSpecification();
   }
 
@@ -57,6 +58,21 @@ export class CategoryController {
 
   @Delete("delete-general-specification")
   async deleteGeneralSpecification(@Query("id") id: string){
-    await this.generalSpecificationService.deleteGeneralSpecification(id);
+    return await this.generalSpecificationService.deleteGeneralSpecification(id);
+  }
+
+  @Post("create-general-subspecification")
+  async createGeneralSubspecification(@Body() generalSubspecificationDto: GeneralSubspecificationDto) {
+    return await this.generalSpecificationService.createGeneralSubspecification(generalSubspecificationDto);
+  }
+
+  @Get("find-all-general-subspecification")
+  async findAllGeneralSubspecification(){
+    return await this.generalSpecificationService.findAllGeneralSubspecification();
+  }
+
+  @Post("create-subcategory")
+  async createSubcategory(@Body() subcategoryDto: SubcategoryDto) {
+    return await this.categoryService.createSubcategory(subcategoryDto);
   }
 }

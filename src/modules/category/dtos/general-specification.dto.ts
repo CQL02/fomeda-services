@@ -2,8 +2,9 @@ import {
   IsString,
   IsBoolean,
   IsDate,
-  IsNotEmpty,
-} from 'class-validator';
+  IsNotEmpty, IsArray
+} from "class-validator";
+import { CategoryGeneralSubspecification } from "../domain/schema/category-general-subspecification.schema";
 
 export class GeneralSpecificationDto {
 
@@ -34,4 +35,7 @@ export class GeneralSpecificationDto {
 
   @IsBoolean()
   allow_input: boolean;
+
+  @IsArray()
+  children: Array<CategoryGeneralSubspecification>;
 }

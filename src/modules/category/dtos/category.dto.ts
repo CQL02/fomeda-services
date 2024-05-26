@@ -2,8 +2,9 @@ import {
   IsString,
   IsBoolean,
   IsDate,
-  IsNotEmpty,
-} from 'class-validator';
+  IsNotEmpty, IsArray
+} from "class-validator";
+import { Category } from "../domain/schema/category.schema";
 
 export class CategoryDto {
   @IsString()
@@ -26,4 +27,7 @@ export class CategoryDto {
 
   @IsBoolean()
   is_active: boolean;
+
+  @IsArray()
+  children: Array<Category>;
 }
