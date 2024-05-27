@@ -44,6 +44,16 @@ export class CategoryController {
     return this.categoryService.updateSubcategory(id, subcategoryDto);
   }
 
+  @Put("deactivate-category")
+  async deactivateCategory(@Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.categoryService.deactivateCategory(id, is_active);
+  }
+
+  @Put("deactivate-subcategory")
+  async deactivateSubcategory(@Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.categoryService.deactivateSubcategory(id, is_active);
+  }
+
   /* General Specification Service */
   @Post("create-general-specification")
   async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {
