@@ -34,6 +34,16 @@ export class CategoryController {
     return this.categoryService.findCategoryById(id);
   }
 
+  @Post("create-subcategory")
+  async createSubcategory(@Body() subcategoryDto: SubcategoryDto) {
+    return await this.categoryService.createSubcategory(subcategoryDto);
+  }
+
+  @Put("update-subcategory")
+  async updateSubcategory(@Query("id") id: string, @Body() subcategoryDto: SubcategoryDto) {
+    return this.categoryService.updateSubcategory(id, subcategoryDto);
+  }
+
   /* General Specification Service */
   @Post("create-general-specification")
   async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {
@@ -71,8 +81,8 @@ export class CategoryController {
     return await this.generalSpecificationService.findAllGeneralSubspecification();
   }
 
-  @Post("create-subcategory")
-  async createSubcategory(@Body() subcategoryDto: SubcategoryDto) {
-    return await this.categoryService.createSubcategory(subcategoryDto);
+  @Put("update-general-subspecification")
+  async updateGeneralSubspecification(@Query("id") id: string, @Body() generalSubspecificationDto: GeneralSubspecificationDto) {
+    return await this.generalSpecificationService.updateGeneralSubspecification(id, generalSubspecificationDto);
   }
 }
