@@ -16,22 +16,22 @@ export class CategoryController {
   /* Category Service */
   @Post("create-category")
   async createCategory(@Body() categoryDto: CategoryDto) {
-    return this.categoryService.createCategory(categoryDto);
+    return await this.categoryService.createCategory(categoryDto);
   }
 
   @Put("update-category")
   async updateCategory(@Query("id") id: string, @Body() categoryDto: CategoryDto) {
-    return this.categoryService.updateCategory(id, categoryDto);
+    return await this.categoryService.updateCategory(id, categoryDto);
   }
 
   @Get("find-all-category")
   async findAllCategories(): Promise<CategoryDto[]> {
-    return this.categoryService.findAllCategories();
+    return await this.categoryService.findAllCategories();
   }
 
   @Get("get-category")
   async findCategoryById(@Query("id") id: string): Promise<Category> {
-    return this.categoryService.findCategoryById(id);
+    return await this.categoryService.findCategoryById(id);
   }
 
   @Post("create-subcategory")
@@ -41,7 +41,7 @@ export class CategoryController {
 
   @Put("update-subcategory")
   async updateSubcategory(@Query("id") id: string, @Body() subcategoryDto: SubcategoryDto) {
-    return this.categoryService.updateSubcategory(id, subcategoryDto);
+    return await this.categoryService.updateSubcategory(id, subcategoryDto);
   }
 
   @Put("deactivate-category")
@@ -58,22 +58,22 @@ export class CategoryController {
   @Post("create-general-specification")
   async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {
     console.log(generalSpecificationDto);
-    return this.generalSpecificationService.createGeneralSpecification(generalSpecificationDto);
+    return await this.generalSpecificationService.createGeneralSpecification(generalSpecificationDto);
   }
 
   @Get("find-all-general-specification")
   async findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]> {
-    return this.generalSpecificationService.findAllGeneralSpecification();
+    return await this.generalSpecificationService.findAllGeneralSpecification();
   }
 
   @Put("update-general-specification")
   async updateGeneralSpecification(@Query() id: string, @Body() generalSpecificationDto: GeneralSpecificationDto) {
-    return this.generalSpecificationService.updateGeneralSpecification(id, generalSpecificationDto);
+    return await this.generalSpecificationService.updateGeneralSpecification(id, generalSpecificationDto);
   }
 
   @Put("deactivate-general-specification")
   async deactivateGeneralSpecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return this.generalSpecificationService.deactivateGeneralSpecification(id, is_active);
+    return await this.generalSpecificationService.deactivateGeneralSpecification(id, is_active);
   }
 
   @Delete("delete-general-specification")
