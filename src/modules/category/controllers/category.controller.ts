@@ -54,6 +54,16 @@ export class CategoryController {
     return await this.categoryService.deactivateSubcategory(id, is_active);
   }
 
+  @Delete("delete-category")
+  async deleteCategory(@Query("id") id: string) {
+    return await this.categoryService.deleteCategory(id);
+  }
+
+  @Delete("delete-subcategory")
+  async deleteSubcategory(@Query("id") id: string) {
+    return await this.categoryService.deleteSubcategory(id);
+  }
+
   /* General Specification Service */
   @Post("create-general-specification")
   async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {
