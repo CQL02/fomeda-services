@@ -45,7 +45,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async deactivateGeneralSpecification(id: string, is_active: boolean): Promise<CategoryGeneralSpecification> {
-    return this.generalSpecificationRepository.update(id, is_active);
+    return this.generalSpecificationRepository.deactivateGeneralSpecificationById(id, is_active);
   }
 
   async deleteGeneralSpecification(id: string): Promise<CategoryGeneralSpecification> {
@@ -68,7 +68,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async deactivateGeneralSubspecification(id: string, is_active: boolean): Promise<CategoryGeneralSubspecification> {
-    return this.generalSubspecificationRepository.deactivateCategoryById(id, is_active);
+    return this.generalSubspecificationRepository.deactivateGeneralSubspecificationById(id, is_active);
   }
 
   async deleteGeneralSubspecification(id: string): Promise<CategoryGeneralSubspecification> {

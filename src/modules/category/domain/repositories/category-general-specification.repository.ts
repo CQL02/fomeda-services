@@ -13,7 +13,7 @@ export class CategoryGeneralSpecificationRepository extends AbstractRepository<C
     super(categoryGeneralSpecificationModel);
   }
 
-  async deactivateCategoryById(id: string, is_active: boolean): Promise<CategoryGeneralSpecification> {
+  async deactivateGeneralSpecificationById(id: string, is_active: boolean): Promise<CategoryGeneralSpecification> {
     return this.categoryGeneralSpecificationModel.findByIdAndUpdate(id, {is_active}).exec();
   }
 }
