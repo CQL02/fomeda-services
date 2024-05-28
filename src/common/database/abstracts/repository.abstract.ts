@@ -14,12 +14,24 @@ export abstract class AbstractRepository<T extends Document> {
     return this.model.find().exec();
   }
 
+  async findAllByFilter(filterDto): Promise<T[]> {
+    return this.model.find(filterDto).exec();
+  }
+
   async findOneById(id: string): Promise<T> {
     return this.model.findById(id).exec();
   }
 
+  async findOneByFilter(filterDto): Promise<T> {
+    return this.model.findOne(filterDto).exec();
+  }
+
   async update(id: string, updateDto: any): Promise<T> {
     return this.model.findByIdAndUpdate(id, updateDto, { new: true }).exec();
+  }
+
+  async updateOneByFilter(filterDto, updateDto): Promise<T> {
+    return this.model.findOneAndUpdate(filterDto, updateDto).exec();
   }
 
   async delete(id: string): Promise<T> {
