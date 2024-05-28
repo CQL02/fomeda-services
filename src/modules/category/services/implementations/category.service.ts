@@ -3,7 +3,7 @@ import { ICategoryService } from "../interfaces/category.service.interface";
 import { CategoryDto } from "../../dtos/category.dto";
 import { Category } from "../../domain/schema/category.schema";
 import { CategoryRepository } from "../../domain/repositories/category.repository";
-import { SequenceService } from "../../../sequence/services/sequence.services";
+import { SequenceService } from "../../../sequence/services/implementations/sequence.services";
 import { SequenceConstant } from "../../../../common/constant/sequence.constant";
 import { SubcategoryDto } from "../../dtos/subcategory.dto";
 import { Subcategory } from "../../domain/schema/subcategory.schema";

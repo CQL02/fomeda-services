@@ -1,6 +1,6 @@
 import { Body, Controller, Put } from '@nestjs/common';
 import { SequenceDto } from '../dtos/sequence.dto';
-import { SequenceService } from '../services/sequence.services';
+import { SequenceService } from '../services/implementations/sequence.services';
 
 @Controller('sequence')
 export class SequenceController {

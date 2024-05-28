@@ -1,8 +1,6 @@
-// src/modules/sequence/sequence.service.ts
-
 import { Injectable } from '@nestjs/common';
-import { ISequenceService } from '../interface/sequence.service.interface';
-import { SequenceRepository } from '../domain/repositories/sequence.repository';
+import { ISequenceService } from '../interfaces/sequence.service.interface';
+import { SequenceRepository } from '../../domain/repositories/sequence.repository';
 
 @Injectable()
 export class SequenceService implements ISequenceService {

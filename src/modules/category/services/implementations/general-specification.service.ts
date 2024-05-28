@@ -10,7 +10,7 @@ import {
 import { SequenceConstant } from "../../../../common/constant/sequence.constant";
 import { CategoryGeneralSpecification } from "../../domain/schema/category-general-specification.schema";
 import { CategoryGeneralSubspecification } from "../../domain/schema/category-general-subspecification.schema";
-import { SequenceService } from "../../../sequence/services/sequence.services";
+import { SequenceService } from "../../../sequence/services/implementations/sequence.services";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
