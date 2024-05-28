@@ -105,4 +105,14 @@ export class CategoryController {
   async updateGeneralSubspecification(@Query("id") id: string, @Body() generalSubspecificationDto: GeneralSubspecificationDto) {
     return await this.generalSpecificationService.updateGeneralSubspecification(id, generalSubspecificationDto);
   }
+
+  @Put("deactivate-general-subspecification")
+  async deactivateGeneralSubspecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.generalSpecificationService.deactivateGeneralSubspecification(id, is_active);
+  }
+
+  @Delete("delete-general-subspecification")
+  async deleteGeneralSubspecification(@Query("id") id: string){
+    return await this.generalSpecificationService.deleteGeneralSubspecification(id);
+  }
 }
