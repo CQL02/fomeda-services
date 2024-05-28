@@ -67,7 +67,6 @@ export class CategoryController {
   /* General Specification Service */
   @Post("create-general-specification")
   async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {
-    console.log(generalSpecificationDto);
     return await this.generalSpecificationService.createGeneralSpecification(generalSpecificationDto);
   }
 
@@ -77,7 +76,7 @@ export class CategoryController {
   }
 
   @Put("update-general-specification")
-  async updateGeneralSpecification(@Query() id: string, @Body() generalSpecificationDto: GeneralSpecificationDto) {
+  async updateGeneralSpecification(@Query("id") id: string, @Body() generalSpecificationDto: GeneralSpecificationDto) {
     return await this.generalSpecificationService.updateGeneralSpecification(id, generalSpecificationDto);
   }
 
