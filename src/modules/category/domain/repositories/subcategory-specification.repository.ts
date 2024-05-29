@@ -12,4 +12,8 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
   ) {
     super(subcategorySpecificationModel);
   }
+
+  async deactivateSubcategorySpecificationById(id: string, is_active: boolean): Promise<SubcategorySpecification> {
+    return this.subcategorySpecificationModel.findByIdAndUpdate(id, {is_active}).exec();
+  }
 }

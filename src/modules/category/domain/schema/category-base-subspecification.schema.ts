@@ -7,19 +7,7 @@ export class CategoryBaseSubspecification extends SchemaAbstract {
     required: true,
     type: String,
   })
-  cat_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  subcat_spec_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  subcat_subspec_code: string;
+  subcat_spec_id: string;
 
   @Prop({
     required: true,
