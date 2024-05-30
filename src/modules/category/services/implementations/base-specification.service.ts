@@ -10,6 +10,8 @@ import {
 } from "../../domain/repositories/category-base-subspecification.repository";
 import { SequenceService } from "../../../sequence/services/implementations/sequence.services";
 import { SequenceConstant } from "../../../../common/constant/sequence.constant";
+import { GeneralSpecificationService } from "./general-specification.service";
+import { CategoryMapper } from "../mapper/category.mapper";
 
 @Injectable()
 export class BaseSpecificationService implements IBaseSpecificationService {
@@ -17,6 +19,8 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     private readonly categoryBaseSpecificationRepository: CategoryBaseSpecificationRepository,
     private readonly categoryBaseSubspecificationRepository: CategoryBaseSubspecificationRepository,
     private readonly sequenceService: SequenceService,
+    private readonly categoryMapper: CategoryMapper,
+    private readonly generalSpecificationService: GeneralSpecificationService
   ) {
   }
 
@@ -27,7 +31,11 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     return this.categoryBaseSpecificationRepository.create({ ...baseSpecificationDto, _id });
   }
 
-  async findBaseSpecificationByCatId(id: string): Promise<CategoryBaseSpecification[]> {
+  async findBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]> {
+    const generalSpecList = this.categoryMapper.mapGeneralSpecificationDtoListToBaseSpecificationDtoList(
+      await this.generalSpecificationService.findAllGeneralSpecification()
+    );
+
     const specificationList = await this.categoryBaseSpecificationRepository.findAllByFilter({ cat_id: id });
     const specificationIdList = specificationList.map(spec => spec._id);
     const subspecificationList = await this.categoryBaseSubspecificationRepository.findAllByFilter({ subcat_spec_id: { $in: specificationIdList } });
@@ -36,7 +44,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
       const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
       return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
     });
-    return result;
+    return [...generalSpecList, ...result];
   }
 
   async updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<CategoryBaseSpecification> {

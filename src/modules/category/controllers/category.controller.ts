@@ -73,6 +73,11 @@ export class CategoryController {
     return await this.categoryService.deleteSubcategory(id);
   }
 
+  @Get("find-name-by-id")
+  async findNameById(@Query("id") id: string) {
+    return await this.categoryService.findNameById(id);
+  }
+
   /* General Specification Service */
   @Post("create-general-specification")
   async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {

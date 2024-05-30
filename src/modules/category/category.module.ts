@@ -48,6 +48,7 @@ import { SequenceModule } from '../sequence/sequence.module';
 import { GeneralSpecificationService } from "./services/implementations/general-specification.service";
 import { BaseSpecificationService } from "./services/implementations/base-specification.service";
 import { SubcategorySpecificationService } from "./services/implementations/subcategory-specification.service";
+import { CategoryMapper } from "./services/mapper/category.mapper";
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { SubcategorySpecificationService } from "./services/implementations/subc
     SubcategoryRepository,
     SubcategorySpecificationRepository,
     SubcategorySubspecificationRepository,
+    CategoryMapper,
   ],
 })
 export class CategoryModule {}

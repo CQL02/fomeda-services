@@ -5,7 +5,7 @@ import { CategoryBaseSubspecification } from "../../domain/schema/category-base-
 
 export interface IBaseSpecificationService {
   createBaseSpecification(baseSpecificationDto: BaseSpecificationDto): Promise<CategoryBaseSpecification>
-  findBaseSpecificationByCatId(id: string): Promise<CategoryBaseSpecification[]>
+  findBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]>
   updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<CategoryBaseSpecification>
   deactivateBaseSpecification(id: string, is_active: boolean): Promise<CategoryBaseSpecification>
   deleteBaseSpecification(id: string): Promise<CategoryBaseSpecification>

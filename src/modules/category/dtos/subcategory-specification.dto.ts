@@ -4,7 +4,7 @@ import {
   IsDate,
   IsNotEmpty, IsArray
 } from "class-validator";
-import { SubcategorySubspecification } from "../domain/schema/subcategory-subspecification.schema";
+import { SubcategorySubspecificationDto } from "./subcategory-subspecification.dto";
 
 export class SubcategorySpecificationDto {
   @IsString()
@@ -40,5 +40,8 @@ export class SubcategorySpecificationDto {
   allow_input: boolean;
 
   @IsArray()
-  children: Array<SubcategorySubspecification>;
+  children: Array<SubcategorySubspecificationDto>;
+
+  @IsBoolean()
+  is_origin: boolean;
 }

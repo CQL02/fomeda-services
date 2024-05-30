@@ -2,6 +2,7 @@ import { Category } from '../../domain/schema/category.schema';
 import { CategoryDto } from '../../dtos/category.dto';
 import { SubcategoryDto } from "../../dtos/subcategory.dto";
 import { Subcategory } from "../../domain/schema/subcategory.schema";
+import { CategoryNameDto } from "../../dtos/category-name.dto";
 
 export interface ICategoryService {
   createCategory(categoryDto: CategoryDto): Promise<Category>;
@@ -17,4 +18,6 @@ export interface ICategoryService {
   deactivateSubcategory(id: string, is_active: boolean): Promise<SubcategoryDto>;
   findAllSubcategory(): Promise<Subcategory[]>;
   findAllSubcategoryByCatId(cat_id: string): Promise<Subcategory[]>;
+  findOneSubcategoryById(id: string): Promise<Subcategory>;
+  findNameById(id: string): Promise<CategoryNameDto>;
 }

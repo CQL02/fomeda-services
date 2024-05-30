@@ -8,6 +8,8 @@ import { SequenceConstant } from "../../../../common/constant/sequence.constant"
 import { SubcategoryDto } from "../../dtos/subcategory.dto";
 import { Subcategory } from "../../domain/schema/subcategory.schema";
 import { SubcategoryRepository } from "../../domain/repositories/subcategory.repository";
+import { CategoryNameDto } from "../../dtos/category-name.dto";
+import { Promise } from "mongoose";
 
 @Injectable()
 export class CategoryService implements ICategoryService {
@@ -76,5 +78,20 @@ export class CategoryService implements ICategoryService {
 
   async findAllSubcategoryByCatId(cat_id: string): Promise<Subcategory[]> {
     return this.subcategoryRepository.findSubcategoryByCatId(cat_id);
+  }
+
+  async findOneSubcategoryById(id: string): Promise<Subcategory> {
+    return this.subcategoryRepository.findOneById(id);
+  }
+
+  async findNameById(id: string): Promise<CategoryNameDto> {
+    if(id.includes(SequenceConstant.PRODUCT_SUBCATEGORY_PREFIX)) {
+      const subcat = await this.subcategoryRepository.findOneById(id);
+      const cat = await this.categoryRepository.findOneById(subcat.cat_id);
+      return {cat_name: cat.cat_name, subcat_name: subcat.subcat_name}
+    } else {
+      const cat = await this.categoryRepository.findOneById(id);
+      return {cat_name: cat.cat_name, subcat_name: null}
+    }
   }
 }
