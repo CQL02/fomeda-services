@@ -7,13 +7,7 @@ export class SubcategorySpecification extends SchemaAbstract {
     required: true,
     type: String,
   })
-  subcat_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  subcat_spec_code: string;
+  subcat_id: string;
 
   @Prop({
     required: true,
