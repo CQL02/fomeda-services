@@ -1,0 +1,8 @@
+import { Announcement } from '../../domain/schema/announcement.schema';
+import { AnnouncementDto } from "../../dtos/announcement.dto";
+
+export interface IAnnouncementService {
+  createAnnouncement(announcementDto: AnnouncementDto): Promise<Announcement>;
+  findAllAnnouncements(): Promise<Announcement[]>;
+  findAllAnnouncementByFilter(filterDto): Promise<Announcement[]>;
+}

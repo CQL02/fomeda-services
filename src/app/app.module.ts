@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getMongoConfig } from '../config/database.config';
 import { CategoryModule } from '../modules/category/category.module';
 import { AuthenticationModule } from '../modules/authentication/authentication.module';
+import { AnnouncementModule } from '../modules/announcement/announcement.module';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { AuthenticationModule } from '../modules/authentication/authentication.m
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule, CategoryModule, AuthenticationModule],
+      imports: [ConfigModule, CategoryModule, AuthenticationModule, AnnouncementModule],
       useFactory: (configService: ConfigService) =>
         getMongoConfig(configService),
       inject: [ConfigService],
