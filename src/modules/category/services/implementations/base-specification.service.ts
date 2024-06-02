@@ -48,6 +48,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<CategoryBaseSpecification> {
+    baseSpecificationDto = {...baseSpecificationDto, last_updated_on: new Date()};
     return this.categoryBaseSpecificationRepository.update(id, baseSpecificationDto);
   }
 
@@ -67,6 +68,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async updateBaseSubspecification(id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<CategoryBaseSubspecification> {
+    baseSubspecificationDto = {...baseSubspecificationDto, last_updated_on: new Date()};
     return this.categoryBaseSubspecificationRepository.update(id, baseSubspecificationDto);
   }
 

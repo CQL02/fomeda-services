@@ -41,6 +41,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification> {
+    generalSpecificationDto = { ...generalSpecificationDto, last_updated_on: new Date() };
     return this.generalSpecificationRepository.update(id, generalSpecificationDto);
   }
 
@@ -64,6 +65,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async updateGeneralSubspecification(id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<CategoryGeneralSubspecification> {
+    generalSubspecificationDto = { ...generalSubspecificationDto, last_updated_on: new Date() };
     return this.generalSubspecificationRepository.update(id, generalSubspecificationDto);
   }
 

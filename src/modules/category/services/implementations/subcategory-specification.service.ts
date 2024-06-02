@@ -22,7 +22,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     private readonly sequenceService: SequenceService,
     private readonly categoryService: CategoryService,
     private readonly baseSpecificationService: BaseSpecificationService,
-    private readonly categoryMapper: CategoryMapper,
+    private readonly categoryMapper: CategoryMapper
   ) {
   }
 
@@ -52,6 +52,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecification> {
+    subcategorySpecificationDto = { ...subcategorySpecificationDto, last_updated_on: new Date() };
     return this.subcategorySpecificationRepository.update(id, subcategorySpecificationDto);
   }
 
@@ -71,6 +72,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async updateSubcategorySubspecification(id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecification> {
+    subcategorySubspecificationDto = { ...subcategorySubspecificationDto, last_updated_on: new Date() };
     return this.subcategorySubspecificationRepository.update(id, subcategorySubspecificationDto);
   }
 

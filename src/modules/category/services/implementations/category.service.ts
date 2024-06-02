@@ -42,6 +42,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateCategory(id: string, categoryDto: CategoryDto): Promise<Category> {
+    categoryDto = { ...categoryDto, last_updated_on: new Date() };
     return this.categoryRepository.update(id, categoryDto);
   }
 
@@ -61,6 +62,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateSubcategory(id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
+    subcategoryDto = { ...subcategoryDto, last_updated_on: new Date() };
     return this.subcategoryRepository.update(id, subcategoryDto);
   }
 
@@ -85,13 +87,13 @@ export class CategoryService implements ICategoryService {
   }
 
   async findNameById(id: string): Promise<CategoryNameDto> {
-    if(id.includes(SequenceConstant.PRODUCT_SUBCATEGORY_PREFIX)) {
+    if (id.includes(SequenceConstant.PRODUCT_SUBCATEGORY_PREFIX)) {
       const subcat = await this.subcategoryRepository.findOneById(id);
       const cat = await this.categoryRepository.findOneById(subcat.cat_id);
-      return {cat_name: cat.cat_name, subcat_name: subcat.subcat_name}
+      return { cat_name: cat.cat_name, subcat_name: subcat.subcat_name };
     } else {
       const cat = await this.categoryRepository.findOneById(id);
-      return {cat_name: cat.cat_name, subcat_name: null}
+      return { cat_name: cat.cat_name, subcat_name: null };
     }
   }
 }
