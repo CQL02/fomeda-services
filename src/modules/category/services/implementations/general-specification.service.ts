@@ -50,6 +50,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async deleteGeneralSpecification(id: string): Promise<CategoryGeneralSpecification> {
+    await this.generalSubspecificationRepository.deleteGeneralSubspecificationBySpecId(id);
     return this.generalSpecificationRepository.delete(id);
   }
 

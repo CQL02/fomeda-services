@@ -57,6 +57,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async deleteBaseSpecification(id: string): Promise<CategoryBaseSpecification> {
+    await this.categoryBaseSubspecificationRepository.deleteCategoryBaseSubspecificationBySpecId(id);
     return this.categoryBaseSpecificationRepository.delete(id);
   }
 

@@ -19,4 +19,8 @@ export class CategoryBaseSubspecificationRepository extends AbstractRepository<C
       last_updated_on: new Date()
     }).exec();
   }
+
+  async deleteCategoryBaseSubspecificationBySpecId(subcat_spec_id: string) {
+    return this.categoryBaseSubspecificationModel.deleteMany({subcat_spec_id: subcat_spec_id}).exec();
+  }
 }
