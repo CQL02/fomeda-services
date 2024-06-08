@@ -132,7 +132,6 @@ export class CategoryController {
   /* base specification */
   @Post("create-base-specification")
   async createBaseSpecification(@Body() baseSpecificationDto: BaseSpecificationDto) {
-    console.log(baseSpecificationDto)
     return await this.baseSpecificationService.createBaseSpecification(baseSpecificationDto);
   }
 
