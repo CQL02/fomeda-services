@@ -61,6 +61,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async deleteSubcategorySpecification(id: string): Promise<SubcategorySpecification> {
+    await this.subcategorySubspecificationRepository.deleteSubcategorySubspecificationBySpecId(id);
     return this.subcategorySpecificationRepository.delete(id);
   }
 

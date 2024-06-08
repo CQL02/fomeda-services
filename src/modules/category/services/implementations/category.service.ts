@@ -51,6 +51,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async deleteCategory(id: string): Promise<Category> {
+    await this.subcategoryRepository.deleteSubcategoryByCatId(id);
     return this.categoryRepository.delete(id);
   }
 

@@ -20,4 +20,8 @@ export class SubcategoryRepository extends AbstractRepository<Subcategory> {
   async findSubcategoryByCatId(cat_id: string): Promise<Subcategory[]> {
     return this.subcategoryModel.find({ cat_id: cat_id }).exec();
   }
+
+  async deleteSubcategoryByCatId(cat_id: string){
+    return this.subcategoryModel.deleteMany({cat_id: cat_id}).exec();
+  }
 }
