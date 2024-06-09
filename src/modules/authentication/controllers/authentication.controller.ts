@@ -1,6 +1,19 @@
 // Authentication controller
 
-import { Body, Controller, Get, Param, Post, Put, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Patch,
+  Res,
+  HttpException,
+  HttpStatus,
+  UseGuards,
+  Request
+} from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { AdminDto } from '../dtos/admin.dto';
 import { SupplierDto } from '../dtos/supplier.dto';
@@ -8,10 +21,54 @@ import { SupplierDto } from '../dtos/supplier.dto';
 // import { Admin } from '../domain/schema/admin.schema';
 // import { Supplier } from '../domain/schema/supplier.schema'
 import { AuthenticationService } from '../services/implementations/authentication.service';
+import * as bcrypt from 'bcrypt';
+import { Response } from 'express'
+import { LocalAuthGuard } from '../passport/local-auth.guard';
+import { AuthenticationGuard } from '../passport/authentication.guard';
 
-@Controller('user')
+
+@Controller('auth')
 export class AuthenticationController {
-  constructor(private readonly userService: AuthenticationService) {}
+  constructor(
+    private readonly userService: AuthenticationService,
+  ) {
+  }
+
+  @Post('register')
+  async register(
+    @Body() userDto: UserDto,
+  ) {
+    const hashedPassword = await bcrypt.hash(userDto?.password, 14);
+
+    const response = await this.userService.createUser({ ...userDto, password: hashedPassword });
+
+    if (!response) {
+      throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    if (response?.type === 'supplier') {
+        const supplierDto = {
+          user_id: response?.user_id,
+          company_name: userDto.company_name,
+          company_no: userDto.company_no,
+          company_address: userDto.company_address,
+        }
+        return this.userService.createSupplier(supplierDto)
+    } else if (response?.type === 'admin') {
+        const adminDto = {
+          user_id: response?.user_id,
+        }
+      return this.userService.createAdmin(adminDto)
+    }
+  }
+
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  async login(
+    @Request() req
+  ) {
+    return req.user;
+  }
 
   @Patch('user_id')
   async updateUserStatus(
@@ -26,8 +83,10 @@ export class AuthenticationController {
     return this.userService.createSupplier(supplierDto);
   }
 
-  @Get()
-  async findAllSuppliers(){
+  @UseGuards(AuthenticationGuard)
+  @Get("suppliers")
+  async findAllSuppliers(
+  ) {
     return this.userService.findAllSuppliers();
   }
 

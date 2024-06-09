@@ -9,7 +9,9 @@ import { SupplierRepository } from './domain/repositories/supplier.repository';
 import { UserRepository } from './domain/repositories/user.repository';
 import { AuthenticationController } from './controllers/authentication.controller';
 import { AuthenticationService } from './services/implementations/authentication.service';
-
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './passport/local.strategy';
+import { SessionSerializer } from './passport/session.serializer';
 
 @Module({
   imports: [
@@ -18,8 +20,11 @@ import { AuthenticationService } from './services/implementations/authentication
       { name: Supplier.name, schema: SupplierSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    PassportModule.register({
+      session: true
+    }),
   ],
-  providers: [AuthenticationService, AdminRepository, SupplierRepository, UserRepository],
+  providers: [AuthenticationService, AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer],
   controllers: [AuthenticationController],
 })
 

@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SchemaAbstract } from '../../../../common/database/abstracts/schema.abstract';
+import { Document } from 'mongoose';
 
 @Schema({ versionKey: false, collection: 'supplier' })
-export class Supplier extends SchemaAbstract {
+export class Supplier extends Document {
   @Prop({
     required: true,
     type: String,
@@ -42,15 +42,12 @@ export class Supplier extends SchemaAbstract {
   last_updated_on: Date;
 
   @Prop({
-    required: true,
     type: String,
   })
   approved_by: string;
 
   @Prop({
-    required: true,
     type: Date,
-    default: Date.now,
   })
   approved_on: Date;
 }

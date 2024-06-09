@@ -2,6 +2,7 @@ import {
   IsString,
   IsNotEmpty,
   IsDate,
+  IsOptional,
 } from 'class-validator';
 
 export class SupplierDto {
@@ -22,15 +23,9 @@ export class SupplierDto {
   company_address: string;
 
   @IsString()
-  @IsNotEmpty()
-  review_status: string;
+  review_status?: string;
 
   @IsDate()
-  registered_on: Date;
-
-  @IsDate()
-  last_updated_on: Date;
-
-  @IsDate()
-  approved_on: Date;
+  @IsOptional()
+  approved_on?: Date;
 }

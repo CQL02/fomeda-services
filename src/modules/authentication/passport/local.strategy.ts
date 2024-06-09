@@ -1,5 +1,5 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { AuthenticationService } from './services/implementations/authentication.service';
+import { AuthenticationService } from '../services/implementations/authentication.service';
 import { Strategy } from 'passport-local';
 import { UnauthorizedException , HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';

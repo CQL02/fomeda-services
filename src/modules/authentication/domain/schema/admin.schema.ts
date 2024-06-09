@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SchemaAbstract } from '../../../../common/database/abstracts/schema.abstract';
+import { Document } from 'mongoose';
 
 @Schema({ versionKey: false, collection: 'admin' })
-export class Admin extends SchemaAbstract {
+export class Admin extends Document {
   @Prop({
     required: true,
     type: String,

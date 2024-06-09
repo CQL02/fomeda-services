@@ -22,8 +22,8 @@ export abstract class AbstractRepository<T extends Document> {
     return this.model.findById(id).exec();
   }
 
-  async findOneByFilter(filterDto): Promise<T> {
-    return this.model.findOne(filterDto).exec();
+  async findOneByFilter(filterDto, projection={}): Promise<T> {
+    return this.model.findOne(filterDto, projection).exec();
   }
 
   async update(id: string, updateDto: any): Promise<T> {

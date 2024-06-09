@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { IUserService } from '../interfaces/authentication.service.interface';
 import { UserDto } from '../../dtos/user.dto';
 import { User } from '../../domain/schema/user.schema';
@@ -9,6 +9,7 @@ import { SupplierRepository } from '../../domain/repositories/supplier.repositor
 import { AdminDto } from '../../dtos/admin.dto';
 import { Admin } from '../../domain/schema/admin.schema';
 import { AdminRepository } from '../../domain/repositories/admin.repository';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthenticationService implements IUserService {
@@ -17,6 +18,10 @@ export class AuthenticationService implements IUserService {
     private readonly supplierRepository: SupplierRepository,
     private readonly adminRepository: AdminRepository,
   ) {}
+
+  async findUser(filterDto): Promise<User> {
+    return this.userRepository.findOneByFilter(filterDto, { _id: 0});
+  }
 
   async createUser(userDto: UserDto): Promise<User> {
     return this.userRepository.create({ ...userDto});

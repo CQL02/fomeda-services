@@ -9,9 +9,4 @@ export class AdminDto {
   @IsNotEmpty()
   user_id: string;
 
-  @IsDate()
-  created_on: Date;
-
-  @IsDate()
-  last_updated_on: Date;
 }
