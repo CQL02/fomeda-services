@@ -13,7 +13,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   async validate(username: string, password: string) {
     const user = await this.authService.findUser({ username});
 
-    if (!user || await !bcrypt.compare(password, user.password))
+    if (!user || !(await bcrypt.compare(password, user.password)))
       throw new UnauthorizedException("Unauthorized access")
 
     // password was returned
