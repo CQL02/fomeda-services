@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { IBaseSpecificationService } from "../interfaces/base-specification.service.interface";
 import { BaseSpecificationDto } from "../../dtos/base-specification.dto";
 import { CategoryBaseSpecification } from "../../domain/schema/category-base-specification.schema";
@@ -12,15 +12,17 @@ import { SequenceService } from "../../../sequence/services/implementations/sequ
 import { SequenceConstant } from "../../../../common/constant/sequence.constant";
 import { GeneralSpecificationService } from "./general-specification.service";
 import { CategoryMapper } from "../mapper/category.mapper";
+import { IGeneralSpecificationService } from "../interfaces/general-specification.service.interface";
+import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
 
 @Injectable()
 export class BaseSpecificationService implements IBaseSpecificationService {
   constructor(
     private readonly categoryBaseSpecificationRepository: CategoryBaseSpecificationRepository,
     private readonly categoryBaseSubspecificationRepository: CategoryBaseSubspecificationRepository,
-    private readonly sequenceService: SequenceService,
     private readonly categoryMapper: CategoryMapper,
-    private readonly generalSpecificationService: GeneralSpecificationService
+    @Inject(SequenceService.name) private readonly sequenceService: ISequenceService,
+    @Inject(GeneralSpecificationService.name) private readonly generalSpecificationService: IGeneralSpecificationService
   ) {
   }
 

@@ -11,14 +11,15 @@ import { SequenceConstant } from "../../../../common/constant/sequence.constant"
 import { CategoryGeneralSpecification } from "../../domain/schema/category-general-specification.schema";
 import { CategoryGeneralSubspecification } from "../../domain/schema/category-general-subspecification.schema";
 import { SequenceService } from "../../../sequence/services/implementations/sequence.services";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
+import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
 
 @Injectable()
 export class GeneralSpecificationService implements IGeneralSpecificationService {
   constructor(
-    private readonly sequenceService: SequenceService,
     private readonly generalSubspecificationRepository: CategoryGeneralSubspecificationRepository,
-    private readonly generalSpecificationRepository: CategoryGeneralSpecificationRepository
+    private readonly generalSpecificationRepository: CategoryGeneralSpecificationRepository,
+  @Inject(SequenceService.name) private readonly sequenceService: ISequenceService
   ) {
   }
 

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ICategoryService } from "../interfaces/category.service.interface";
 import { CategoryDto } from "../../dtos/category.dto";
 import { Category } from "../../domain/schema/category.schema";
@@ -10,13 +10,14 @@ import { Subcategory } from "../../domain/schema/subcategory.schema";
 import { SubcategoryRepository } from "../../domain/repositories/subcategory.repository";
 import { CategoryNameDto } from "../../dtos/category-name.dto";
 import { Promise } from "mongoose";
+import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
 
 @Injectable()
 export class CategoryService implements ICategoryService {
   constructor(
     private readonly categoryRepository: CategoryRepository,
-    private readonly sequenceService: SequenceService,
-    private readonly subcategoryRepository: SubcategoryRepository
+    private readonly subcategoryRepository: SubcategoryRepository,
+    @Inject(SequenceService.name) private readonly sequenceService: ISequenceService
   ) {
   }
 

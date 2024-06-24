@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Post, Put, Query } from "@nestjs/common";
 import { CategoryDto } from "../dtos/category.dto";
 import { Category } from "../domain/schema/category.schema";
 import { CategoryService } from "../services/implementations/category.service";
@@ -12,13 +12,17 @@ import { SubcategorySpecificationService } from "../services/implementations/sub
 import { BaseSubspecificationDto } from "../dtos/base-subspecification.dto";
 import { SubcategorySpecificationDto } from "../dtos/subcategory-specification.dto";
 import { SubcategorySubspecificationDto } from "../dtos/subcategory-subspecification.dto";
+import { IGeneralSpecificationService } from "../services/interfaces/general-specification.service.interface";
+import { IBaseSpecificationService } from "../services/interfaces/base-specification.service.interface";
+import { ISubcategorySpecificationService } from "../services/interfaces/subcategory-specification.service.interface";
+import { ICategoryService } from "../services/interfaces/category.service.interface";
 
 @Controller("category")
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService,
-              private readonly generalSpecificationService: GeneralSpecificationService,
-              private readonly baseSpecificationService: BaseSpecificationService,
-              private readonly subcategorySpecificationService: SubcategorySpecificationService
+  constructor(@Inject(CategoryService.name) private readonly categoryService: ICategoryService,
+              @Inject(GeneralSpecificationService.name) private readonly generalSpecificationService: IGeneralSpecificationService,
+              @Inject(BaseSpecificationService.name) private readonly baseSpecificationService: IBaseSpecificationService,
+              @Inject(SubcategorySpecificationService.name) private readonly subcategorySpecificationService: ISubcategorySpecificationService,
   ) {
   }
 

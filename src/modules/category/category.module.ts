@@ -32,15 +32,10 @@ import {
   CategoryGeneralSubspecification,
   CategoryGeneralSubspecificationSchema,
 } from './domain/schema/category-general-subspecification.schema';
-import {
-  CategoryType,
-  CategoryTypeSchema,
-} from './domain/schema/category-type.schema';
 import { CategoryBaseSpecificationRepository } from './domain/repositories/category-base-specification.repository';
 import { CategoryGeneralSpecificationRepository } from './domain/repositories/category-general-specification.repository';
 import { CategoryGeneralSubspecificationRepository } from './domain/repositories/category-general-subspecification.repository';
 import { CategoryBaseSubspecificationRepository } from './domain/repositories/category-base-subspecification.repository';
-import { CategoryTypeRepository } from './domain/repositories/category-type.repository';
 import { SubcategorySubspecificationRepository } from './domain/repositories/subcategory-subspecification.repository';
 import { SubcategorySpecificationRepository } from './domain/repositories/subcategory-specification.repository';
 import { SubcategoryRepository } from './domain/repositories/subcategory.repository';
@@ -58,7 +53,6 @@ import { CategoryMapper } from "./services/mapper/category.mapper";
       { name: CategoryBaseSubspecification.name, schema: CategoryBaseSubspecificationSchema, },
       { name: CategoryGeneralSpecification.name, schema: CategoryGeneralSpecificationSchema, },
       { name: CategoryGeneralSubspecification.name, schema: CategoryGeneralSubspecificationSchema, },
-      { name: CategoryType.name, schema: CategoryTypeSchema },
       { name: Subcategory.name, schema: SubcategorySchema },
       { name: SubcategorySpecification.name, schema: SubcategorySpecificationSchema, },
       { name: SubcategorySubspecification.name, schema: SubcategorySubspecificationSchema, },
@@ -67,16 +61,15 @@ import { CategoryMapper } from "./services/mapper/category.mapper";
   ],
   controllers: [CategoryController],
   providers: [
-    CategoryService,
-    GeneralSpecificationService,
-    BaseSpecificationService,
-    SubcategorySpecificationService,
+    { provide: CategoryService.name, useClass: CategoryService },
+    { provide: GeneralSpecificationService.name, useClass: GeneralSpecificationService },
+    { provide: BaseSpecificationService.name, useClass: BaseSpecificationService },
+    { provide: SubcategorySpecificationService.name, useClass: SubcategorySpecificationService },
     CategoryRepository,
     CategoryBaseSpecificationRepository,
     CategoryBaseSubspecificationRepository,
     CategoryGeneralSpecificationRepository,
     CategoryGeneralSubspecificationRepository,
-    CategoryTypeRepository,
     SubcategoryRepository,
     SubcategorySpecificationRepository,
     SubcategorySubspecificationRepository,

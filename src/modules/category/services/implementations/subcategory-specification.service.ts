@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ISubcategorySpecificationService } from "../interfaces/subcategory-specification.service.interface";
 import { SubcategorySpecificationDto } from "../../dtos/subcategory-specification.dto";
 import { SubcategorySpecification } from "../../domain/schema/subcategory-specification.schema";
@@ -13,16 +13,19 @@ import { SequenceConstant } from "../../../../common/constant/sequence.constant"
 import { BaseSpecificationService } from "./base-specification.service";
 import { CategoryMapper } from "../mapper/category.mapper";
 import { CategoryService } from "./category.service";
+import { IBaseSpecificationService } from "../interfaces/base-specification.service.interface";
+import { ICategoryService } from "../interfaces/category.service.interface";
+import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
 
 @Injectable()
 export class SubcategorySpecificationService implements ISubcategorySpecificationService {
   constructor(
     private readonly subcategorySpecificationRepository: SubcategorySpecificationRepository,
     private readonly subcategorySubspecificationRepository: SubcategorySubspecificationRepository,
-    private readonly sequenceService: SequenceService,
-    private readonly categoryService: CategoryService,
-    private readonly baseSpecificationService: BaseSpecificationService,
-    private readonly categoryMapper: CategoryMapper
+    private readonly categoryMapper: CategoryMapper,
+    @Inject(SequenceService.name) private readonly sequenceService: ISequenceService,
+    @Inject(CategoryService.name) private readonly categoryService: ICategoryService,
+    @Inject(BaseSpecificationService.name) private readonly baseSpecificationService: IBaseSpecificationService
   ) {
   }
 
