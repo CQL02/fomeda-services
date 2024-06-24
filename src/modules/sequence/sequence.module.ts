@@ -11,8 +11,11 @@ import { SequenceController } from './controller/sequence.controller';
       { name: Sequence.name, schema: SequenceSchema },
     ]),
   ],
-  providers: [SequenceService, SequenceRepository],
+  providers: [
+    { provide: SequenceService.name, useClass: SequenceService },
+    SequenceRepository
+  ],
   controllers: [SequenceController],
-  exports: [SequenceService],
+  exports: [SequenceService.name],
 })
 export class SequenceModule {}
