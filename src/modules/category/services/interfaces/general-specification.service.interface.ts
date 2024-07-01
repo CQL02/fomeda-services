@@ -1,18 +1,16 @@
 import { GeneralSpecificationDto } from "../../dtos/general-specification.dto";
 import { GeneralSubspecificationDto } from "../../dtos/general-subspecification.dto";
-import { CategoryGeneralSpecification } from "../../domain/schema/category-general-specification.schema";
-import { CategoryGeneralSubspecification } from "../../domain/schema/category-general-subspecification.schema";
 
 export interface IGeneralSpecificationService {
-  createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification>;
-  updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<CategoryGeneralSpecification>;
+  createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto>;
+  updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto>;
   findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]>;
-  deactivateGeneralSpecification(id: string, is_active: boolean): Promise<CategoryGeneralSpecification>;
-  deleteGeneralSpecification(id: string): Promise<CategoryGeneralSpecification>;
+  deactivateGeneralSpecification(id: string, is_active: boolean): Promise<GeneralSpecificationDto>;
+  deleteGeneralSpecification(id: string): Promise<GeneralSpecificationDto>;
 
-  createGeneralSubspecification(generalSubspecificationDto: GeneralSubspecificationDto): Promise<CategoryGeneralSubspecification>;
-  updateGeneralSubspecification(id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<CategoryGeneralSubspecification>;
-  deleteGeneralSubspecification(id: string): Promise<CategoryGeneralSubspecification>;
-  deactivateGeneralSubspecification(id: string, is_active: boolean): Promise<CategoryGeneralSubspecification>;
-  findAllGeneralSubspecification(): Promise<CategoryGeneralSubspecification[]>;
+  createGeneralSubspecification(generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto>;
+  updateGeneralSubspecification(id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto>;
+  deleteGeneralSubspecification(id: string): Promise<GeneralSubspecificationDto>;
+  deactivateGeneralSubspecification(id: string, is_active: boolean): Promise<GeneralSubspecificationDto>;
+  findAllGeneralSubspecification(): Promise<GeneralSubspecificationDto[]>;
 }

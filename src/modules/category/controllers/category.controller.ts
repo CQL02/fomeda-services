@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Inject, Post, Put, Query } from "@nestjs/common";
 import { CategoryDto } from "../dtos/category.dto";
-import { Category } from "../domain/schema/category.schema";
 import { CategoryService } from "../services/implementations/category.service";
 import { GeneralSpecificationDto } from "../dtos/general-specification.dto";
 import { GeneralSpecificationService } from "../services/implementations/general-specification.service";
@@ -43,7 +42,7 @@ export class CategoryController {
   }
 
   @Get("get-category")
-  async findCategoryById(@Query("id") id: string): Promise<Category> {
+  async findCategoryById(@Query("id") id: string): Promise<CategoryDto> {
     return await this.categoryService.findCategoryById(id);
   }
 

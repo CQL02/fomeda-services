@@ -1,9 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { IBaseSpecificationService } from "../interfaces/base-specification.service.interface";
 import { BaseSpecificationDto } from "../../dtos/base-specification.dto";
-import { CategoryBaseSpecification } from "../../domain/schema/category-base-specification.schema";
 import { BaseSubspecificationDto } from "../../dtos/base-subspecification.dto";
-import { CategoryBaseSubspecification } from "../../domain/schema/category-base-subspecification.schema";
 import { CategoryBaseSpecificationRepository } from "../../domain/repositories/category-base-specification.repository";
 import {
   CategoryBaseSubspecificationRepository
@@ -26,11 +24,16 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   ) {
   }
 
-  async createBaseSpecification(baseSpecificationDto: BaseSpecificationDto): Promise<CategoryBaseSpecification> {
+  async createBaseSpecification(baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SPECIFICATION_PREFIX
     );
-    return this.categoryBaseSpecificationRepository.create({ ...baseSpecificationDto, _id });
+
+    const result = await this.categoryBaseSpecificationRepository.create({
+      ...baseSpecificationDto,
+      _id
+    });
+    return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
   async findBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]> {
@@ -49,38 +52,45 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     return [...generalSpecList, ...result];
   }
 
-  async updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<CategoryBaseSpecification> {
-    baseSpecificationDto = {...baseSpecificationDto, last_updated_on: new Date()};
-    return this.categoryBaseSpecificationRepository.update(id, baseSpecificationDto);
+  async updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
+    baseSpecificationDto = { ...baseSpecificationDto, last_updated_on: new Date() };
+    const result = await this.categoryBaseSpecificationRepository.update(id, baseSpecificationDto)
+    return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
-  async deactivateBaseSpecification(id: string, is_active: boolean): Promise<CategoryBaseSpecification> {
-    return this.categoryBaseSpecificationRepository.deactivateCategoryBaseSpecificationById(id, is_active);
+  async deactivateBaseSpecification(id: string, is_active: boolean): Promise<BaseSpecificationDto> {
+    const result = await this.categoryBaseSpecificationRepository.deactivateCategoryBaseSpecificationById(id, is_active)
+    return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
-  async deleteBaseSpecification(id: string): Promise<CategoryBaseSpecification> {
+  async deleteBaseSpecification(id: string): Promise<BaseSpecificationDto> {
     await this.categoryBaseSubspecificationRepository.deleteCategoryBaseSubspecificationBySpecId(id);
-    return this.categoryBaseSpecificationRepository.delete(id);
+    const result = await this.categoryBaseSpecificationRepository.delete(id);
+    return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
-  async createBaseSubspecification(baseSubspecificationDto: BaseSubspecificationDto): Promise<CategoryBaseSubspecification> {
+  async createBaseSubspecification(baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SUBSPECIFICATION_PREFIX
     );
-    return this.categoryBaseSubspecificationRepository.create({ ...baseSubspecificationDto, _id });
+    const result = await this.categoryBaseSubspecificationRepository.create({ ...baseSubspecificationDto, _id });
+    return this.categoryMapper.mapSchemaToModel(result, BaseSubspecificationDto);
   }
 
-  async updateBaseSubspecification(id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<CategoryBaseSubspecification> {
-    baseSubspecificationDto = {...baseSubspecificationDto, last_updated_on: new Date()};
-    return this.categoryBaseSubspecificationRepository.update(id, baseSubspecificationDto);
+  async updateBaseSubspecification(id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
+    baseSubspecificationDto = { ...baseSubspecificationDto, last_updated_on: new Date() };
+    const result = await this.categoryBaseSubspecificationRepository.update(id, baseSubspecificationDto)
+    return this.categoryMapper.mapSchemaToModel(result, BaseSubspecificationDto);
   }
 
-  async deactivateBaseSubspecification(id: string, is_active: boolean): Promise<CategoryBaseSubspecification> {
-    return this.categoryBaseSubspecificationRepository.deactivateCategoryBaseSubspecificationById(id, is_active);
+  async deactivateBaseSubspecification(id: string, is_active: boolean): Promise<BaseSubspecificationDto> {
+    const result = await this.categoryBaseSubspecificationRepository.deactivateCategoryBaseSubspecificationById(id, is_active);
+    return this.categoryMapper.mapSchemaToModel(result, BaseSubspecificationDto);
   }
 
-  async deleteBaseSubspecification(id: string): Promise<CategoryBaseSubspecification> {
-    return this.categoryBaseSubspecificationRepository.delete(id);
+  async deleteBaseSubspecification(id: string): Promise<BaseSubspecificationDto> {
+    const result = await this.categoryBaseSubspecificationRepository.delete(id);
+    return this.categoryMapper.mapSchemaToModel(result, BaseSubspecificationDto);
   }
 
 }

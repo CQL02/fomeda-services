@@ -1,23 +1,21 @@
-import { Category } from '../../domain/schema/category.schema';
 import { CategoryDto } from '../../dtos/category.dto';
 import { SubcategoryDto } from "../../dtos/subcategory.dto";
-import { Subcategory } from "../../domain/schema/subcategory.schema";
 import { CategoryNameDto } from "../../dtos/category-name.dto";
 
 export interface ICategoryService {
-  createCategory(categoryDto: CategoryDto): Promise<Category>;
-  updateCategory(id: string, categoryDto: CategoryDto): Promise<Category>;
+  createCategory(categoryDto: CategoryDto): Promise<CategoryDto>;
+  updateCategory(id: string, categoryDto: CategoryDto): Promise<CategoryDto>;
   findAllCategories(): Promise<CategoryDto[]>;
-  findCategoryById(id: string): Promise<Category>;
-  deactivateCategory(id: string, is_active: boolean): Promise<Category>;
-  deleteCategory(id: string): Promise<Category>;
+  findCategoryById(id: string): Promise<CategoryDto>;
+  deactivateCategory(id: string, is_active: boolean): Promise<CategoryDto>;
+  deleteCategory(id: string): Promise<CategoryDto>;
 
   createSubcategory(subcategoryDto: SubcategoryDto): Promise<SubcategoryDto>;
   updateSubcategory(id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto>;
   deleteSubcategory(id: string): Promise<SubcategoryDto>;
   deactivateSubcategory(id: string, is_active: boolean): Promise<SubcategoryDto>;
-  findAllSubcategory(): Promise<Subcategory[]>;
-  findAllSubcategoryByCatId(cat_id: string): Promise<Subcategory[]>;
-  findOneSubcategoryById(id: string): Promise<Subcategory>;
+  findAllSubcategory(): Promise<SubcategoryDto[]>;
+  findAllSubcategoryByCatId(cat_id: string): Promise<SubcategoryDto[]>;
+  findOneSubcategoryById(id: string): Promise<SubcategoryDto>;
   findNameById(id: string): Promise<CategoryNameDto>;
 }

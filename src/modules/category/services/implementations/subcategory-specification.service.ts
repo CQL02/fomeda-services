@@ -1,9 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ISubcategorySpecificationService } from "../interfaces/subcategory-specification.service.interface";
 import { SubcategorySpecificationDto } from "../../dtos/subcategory-specification.dto";
-import { SubcategorySpecification } from "../../domain/schema/subcategory-specification.schema";
 import { SubcategorySubspecificationDto } from "../../dtos/subcategory-subspecification.dto";
-import { SubcategorySubspecification } from "../../domain/schema/subcategory-subspecification.schema";
 import { SubcategorySpecificationRepository } from "../../domain/repositories/subcategory-specification.repository";
 import { SequenceService } from "../../../sequence/services/implementations/sequence.services";
 import {
@@ -29,14 +27,15 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   ) {
   }
 
-  async createSubcategorySpecification(subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecification> {
+  async createSubcategorySpecification(subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SPECIFICATION_PREFIX
     );
-    return this.subcategorySpecificationRepository.create({ ...subcategorySpecificationDto, _id });
+    const result = await this.subcategorySpecificationRepository.create({ ...subcategorySpecificationDto, _id });
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
-  async findSubcategorySpecificationById(id: string): Promise<SubcategorySpecification[]> {
+  async findSubcategorySpecificationById(id: string): Promise<SubcategorySpecificationDto[]> {
     const subcategory = await this.categoryService.findOneSubcategoryById(id);
     const baseSpecList = this.categoryMapper.mapBaseSpecificationDtoListToSubcategorySpecificationDtoList(
       await this.baseSpecificationService.findBaseSpecificationByCatId(subcategory.cat_id)
@@ -54,38 +53,45 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     return [...baseSpecList, ...result];
   }
 
-  async updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecification> {
+  async updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
     subcategorySpecificationDto = { ...subcategorySpecificationDto, last_updated_on: new Date() };
-    return this.subcategorySpecificationRepository.update(id, subcategorySpecificationDto);
+    const result = await this.subcategorySpecificationRepository.update(id, subcategorySpecificationDto);
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
-  async deactivateSubcategorySpecification(id: string, is_active: boolean): Promise<SubcategorySpecification> {
-    return this.subcategorySpecificationRepository.deactivateSubcategorySpecificationById(id, is_active);
+  async deactivateSubcategorySpecification(id: string, is_active: boolean): Promise<SubcategorySpecificationDto> {
+    const result = await this.subcategorySpecificationRepository.deactivateSubcategorySpecificationById(id, is_active);
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
-  async deleteSubcategorySpecification(id: string): Promise<SubcategorySpecification> {
+  async deleteSubcategorySpecification(id: string): Promise<SubcategorySpecificationDto> {
     await this.subcategorySubspecificationRepository.deleteSubcategorySubspecificationBySpecId(id);
-    return this.subcategorySpecificationRepository.delete(id);
+    const result = await this.subcategorySpecificationRepository.delete(id);
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
-  async createSubcategorySubspecification(subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecification> {
+  async createSubcategorySubspecification(subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SUBSPECIFICATION_PREFIX
     );
-    return this.subcategorySubspecificationRepository.create({ ...subcategorySubspecificationDto, _id });
+    const result = await this.subcategorySubspecificationRepository.create({ ...subcategorySubspecificationDto, _id });
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySubspecificationDto);
   }
 
-  async updateSubcategorySubspecification(id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecification> {
+  async updateSubcategorySubspecification(id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
     subcategorySubspecificationDto = { ...subcategorySubspecificationDto, last_updated_on: new Date() };
-    return this.subcategorySubspecificationRepository.update(id, subcategorySubspecificationDto);
+    const result = await this.subcategorySubspecificationRepository.update(id, subcategorySubspecificationDto);
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySubspecificationDto);
   }
 
-  async deactivateSubcategorySubspecification(id: string, is_active: boolean): Promise<SubcategorySubspecification> {
-    return this.subcategorySubspecificationRepository.deactivateSubcategorySubspecificationById(id, is_active);
+  async deactivateSubcategorySubspecification(id: string, is_active: boolean): Promise<SubcategorySubspecificationDto> {
+    const result = await this.subcategorySubspecificationRepository.deactivateSubcategorySubspecificationById(id, is_active);
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySubspecificationDto);
   }
 
-  async deleteSubcategorySubspecification(id: string): Promise<SubcategorySubspecification> {
-    return this.subcategorySubspecificationRepository.delete(id);
+  async deleteSubcategorySubspecification(id: string): Promise<SubcategorySubspecificationDto> {
+    const result = await this.subcategorySubspecificationRepository.delete(id);
+    return this.categoryMapper.mapSchemaToModel(result, SubcategorySubspecificationDto);
   }
 
 }

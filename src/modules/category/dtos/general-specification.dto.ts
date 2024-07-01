@@ -4,7 +4,7 @@ import {
   IsDate,
   IsNotEmpty, IsArray
 } from "class-validator";
-import { CategoryGeneralSubspecification } from "../domain/schema/category-general-subspecification.schema";
+import { GeneralSubspecificationDto } from "./general-subspecification.dto";
 
 export class GeneralSpecificationDto {
 
@@ -37,5 +37,5 @@ export class GeneralSpecificationDto {
   allow_input: boolean;
 
   @IsArray()
-  children: Array<CategoryGeneralSubspecification>;
+  children: Array<GeneralSubspecificationDto>;
 }
