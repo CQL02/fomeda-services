@@ -8,12 +8,11 @@ import { SubcategorySubspecificationDto } from "../../dtos/subcategory-subspecif
 
 @Injectable()
 export class CategoryMapper {
-  constructor(private readonly mapperUtils: MapperUtils) {}
 
   mapGeneralSpecificationDtoToBaseSpecificationDto(generalSpecificationDto: GeneralSpecificationDto): BaseSpecificationDto {
-    const mapperResult = this.mapperUtils.mapToDto(generalSpecificationDto, BaseSpecificationDto);
+    const mapperResult = MapperUtils.mapToDto(generalSpecificationDto, BaseSpecificationDto);
     if(mapperResult.children){
-      mapperResult.children.map(child => this.mapperUtils.mapToDto(child, BaseSubspecificationDto))
+      mapperResult.children.map(child => MapperUtils.mapToDto(child, BaseSubspecificationDto))
     }
     return {...mapperResult, is_origin: false};
   }
@@ -23,9 +22,9 @@ export class CategoryMapper {
   }
 
   mapBaseSpecificationDtoToSubcategorySpecificationDto(baseSpecificationDto: BaseSpecificationDto): SubcategorySpecificationDto {
-    const mapperResult = this.mapperUtils.mapToDto(baseSpecificationDto, SubcategorySpecificationDto);
+    const mapperResult =MapperUtils.mapToDto(baseSpecificationDto, SubcategorySpecificationDto);
     if(mapperResult.children){
-      mapperResult.children.map(child => this.mapperUtils.mapToDto(child, SubcategorySubspecificationDto))
+      mapperResult.children.map(child => MapperUtils.mapToDto(child, SubcategorySubspecificationDto))
     }
     return {...mapperResult, is_origin: false};
   }
@@ -35,7 +34,7 @@ export class CategoryMapper {
   }
 
   mapSchemaToModel(source: any, target: any): any {
-    return this.mapperUtils.mapToDto(source, target);
+    return MapperUtils.mapToDto(source, target);
   }
 
   mapSchemaListToDtoList(source: any[], target: any): any {

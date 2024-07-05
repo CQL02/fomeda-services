@@ -44,7 +44,6 @@ import { GeneralSpecificationService } from "./services/implementations/general-
 import { BaseSpecificationService } from "./services/implementations/base-specification.service";
 import { SubcategorySpecificationService } from "./services/implementations/subcategory-specification.service";
 import { CategoryMapper } from "./services/mapper/category.mapper";
-import { CommonModule } from "../../common/common.module";
 
 @Module({
   imports: [
@@ -59,7 +58,6 @@ import { CommonModule } from "../../common/common.module";
       { name: SubcategorySubspecification.name, schema: SubcategorySubspecificationSchema, },
     ]),
     SequenceModule,
-    CommonModule,
   ],
   controllers: [CategoryController],
   providers: [
