@@ -11,6 +11,7 @@ import { ISequenceService } from "../../../sequence/services/interfaces/sequence
 import { CategoryMapper } from "../mapper/category.mapper";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
 import { ObjectUtils } from "../../../../common/utils/object.utils";
+import { StringUtils } from "../../../../common/utils/string.utils";
 
 @Injectable()
 export class CategoryService implements ICategoryService {
@@ -23,7 +24,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async createCategory(categoryDto: CategoryDto): Promise<CategoryDto> {
-    if(ObjectUtils.isEmpty(categoryDto)) {
+    if(ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
       throw new CategoryException(CategoryErrorConstant.EMPTY_CATEGORY);
     }
 
@@ -55,7 +56,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateCategory(id: string, categoryDto: CategoryDto): Promise<CategoryDto> {
-    if(ObjectUtils.isEmpty(categoryDto)) {
+    if(ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
@@ -91,7 +92,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async createSubcategory(subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
-    if(ObjectUtils.isEmpty(subcategoryDto)){
+    if(ObjectUtils.isEmpty(subcategoryDto)  || StringUtils.isEmpty(subcategoryDto.subcat_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SUBCATEGORY);
     }
 
@@ -104,6 +105,10 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateSubcategory(id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
+    if(ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
+      throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
+    }
+
     subcategoryDto = { ...subcategoryDto, last_updated_on: new Date() };
     const result = await this.subcategoryRepository.update(id, subcategoryDto);
 

@@ -16,6 +16,7 @@ import { ICategoryService } from "../interfaces/category.service.interface";
 import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
+import { StringUtils } from "../../../../common/utils/string.utils";
 
 @Injectable()
 export class SubcategorySpecificationService implements ISubcategorySpecificationService {
@@ -30,7 +31,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async createSubcategorySpecification(subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
-    if(ObjectUtils.isEmpty(subcategorySpecificationDto)){
+    if(ObjectUtils.isEmpty(subcategorySpecificationDto) || StringUtils.isEmpty(subcategorySpecificationDto.subcat_spec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
@@ -60,6 +61,10 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
+    if(ObjectUtils.isEmpty(subcategorySpecificationDto) || StringUtils.isEmpty(subcategorySpecificationDto.subcat_spec_name)){
+      throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
     subcategorySpecificationDto = { ...subcategorySpecificationDto, last_updated_on: new Date() };
     const result = await this.subcategorySpecificationRepository.update(id, subcategorySpecificationDto);
 
@@ -92,7 +97,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async createSubcategorySubspecification(subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
-    if(ObjectUtils.isEmpty(subcategorySubspecificationDto)){
+    if(ObjectUtils.isEmpty(subcategorySubspecificationDto) || StringUtils.isEmpty(subcategorySubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
@@ -104,6 +109,10 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
   async updateSubcategorySubspecification(id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
+    if(ObjectUtils.isEmpty(subcategorySubspecificationDto) || StringUtils.isEmpty(subcategorySubspecificationDto.subcat_subspec_name)){
+      throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
     subcategorySubspecificationDto = { ...subcategorySubspecificationDto, last_updated_on: new Date() };
     const result = await this.subcategorySubspecificationRepository.update(id, subcategorySubspecificationDto);
 

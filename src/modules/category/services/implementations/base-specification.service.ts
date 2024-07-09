@@ -14,6 +14,7 @@ import { IGeneralSpecificationService } from "../interfaces/general-specificatio
 import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
+import { StringUtils } from "../../../../common/utils/string.utils";
 
 @Injectable()
 export class BaseSpecificationService implements IBaseSpecificationService {
@@ -27,7 +28,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async createBaseSpecification(baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
-    if(ObjectUtils.isEmpty(baseSpecificationDto)){
+    if(ObjectUtils.isEmpty(baseSpecificationDto) || StringUtils.isEmpty(baseSpecificationDto.subcat_spec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
@@ -59,6 +60,10 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
+    if(ObjectUtils.isEmpty(baseSpecificationDto) || StringUtils.isEmpty(baseSpecificationDto.subcat_spec_name)){
+      throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
     baseSpecificationDto = { ...baseSpecificationDto, last_updated_on: new Date() };
     const result = await this.categoryBaseSpecificationRepository.update(id, baseSpecificationDto);
 
@@ -91,7 +96,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async createBaseSubspecification(baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
-    if(ObjectUtils.isEmpty(baseSubspecificationDto)){
+    if(ObjectUtils.isEmpty(baseSubspecificationDto) || StringUtils.isEmpty(baseSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
@@ -104,7 +109,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
   async updateBaseSubspecification(id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
-    if(ObjectUtils.isEmpty(baseSubspecificationDto)){
+    if(ObjectUtils.isEmpty(baseSubspecificationDto) || StringUtils.isEmpty(baseSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 

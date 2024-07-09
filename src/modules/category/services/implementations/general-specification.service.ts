@@ -14,6 +14,7 @@ import { ISequenceService } from "../../../sequence/services/interfaces/sequence
 import { CategoryMapper } from "../mapper/category.mapper";
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
+import { StringUtils } from "../../../../common/utils/string.utils";
 
 @Injectable()
 export class GeneralSpecificationService implements IGeneralSpecificationService {
@@ -26,7 +27,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
-    if(ObjectUtils.isEmpty(generalSpecificationDto)){
+    if(ObjectUtils.isEmpty(generalSpecificationDto) || StringUtils.isEmpty(generalSpecificationDto.subcat_spec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
@@ -49,6 +50,10 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
+    if(ObjectUtils.isEmpty(generalSpecificationDto) || StringUtils.isEmpty(generalSpecificationDto.subcat_spec_name)){
+      throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
     generalSpecificationDto = { ...generalSpecificationDto, last_updated_on: new Date() };
     const result = await this.generalSpecificationRepository.update(id, generalSpecificationDto);
 
@@ -81,7 +86,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async createGeneralSubspecification(generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
-    if(ObjectUtils.isEmpty(generalSubspecificationDto)){
+    if(ObjectUtils.isEmpty(generalSubspecificationDto) || StringUtils.isEmpty(generalSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
@@ -98,6 +103,10 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   }
 
   async updateGeneralSubspecification(id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
+    if(ObjectUtils.isEmpty(generalSubspecificationDto) || StringUtils.isEmpty(generalSubspecificationDto.subcat_subspec_name)){
+      throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
     generalSubspecificationDto = { ...generalSubspecificationDto, last_updated_on: new Date() };
     const result = await this.generalSubspecificationRepository.update(id, generalSubspecificationDto);
 
