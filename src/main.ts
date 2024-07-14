@@ -4,6 +4,7 @@ import { ValidationPipe } from "@nestjs/common";
 import * as passport from 'passport'
 import * as session from 'express-session';
 import * as connectMongoDBSession from 'connect-mongodb-session';
+import * as bodyParser from 'body-parser';
 const MongoDBStore = connectMongoDBSession(session);
 
 const store = new MongoDBStore({
@@ -36,7 +37,8 @@ async function bootstrap() {
 
   app.use(passport.initialize())
   app.use(passport.session())
-
+  app.use(bodyParser.json({limit: '50mb'}));
+  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
   await app.listen(4000);
 }
 bootstrap();
