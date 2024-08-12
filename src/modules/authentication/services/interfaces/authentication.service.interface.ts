@@ -8,7 +8,7 @@ import { SupplierDto } from "../../dtos/supplier.dto";
 
 
 export interface IUserService {
-  createUser(userDto: UserDto): Promise<User>;
+  createUser(userDto: UserDto): Promise<Supplier | Admin>;
   findAllUsers(): Promise<User[]>;
   findUserById(user_id: string): Promise<User>;
   findAllUsersByFilter(filterDto);

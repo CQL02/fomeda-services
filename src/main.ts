@@ -5,6 +5,8 @@ import * as passport from 'passport'
 import * as session from 'express-session';
 import * as connectMongoDBSession from 'connect-mongodb-session';
 import * as bodyParser from 'body-parser';
+import * as crypto from 'crypto';
+
 const MongoDBStore = connectMongoDBSession(session);
 
 const store = new MongoDBStore({
@@ -30,8 +32,9 @@ async function bootstrap() {
     session({
       secret: "secret",
       resave: false,
-      cookie: { maxAge: 3600000},
-      store: store
+      cookie: { maxAge: 10 * 60 * 1000}, // 10 minutes
+      // store: store,
+      genid: () => crypto.randomBytes(16).toString('hex')
     })
   )
 

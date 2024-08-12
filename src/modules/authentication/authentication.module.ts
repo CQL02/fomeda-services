@@ -12,6 +12,10 @@ import { AuthenticationService } from './services/implementations/authentication
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './passport/local.strategy';
 import { SessionSerializer } from './passport/session.serializer';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SessionSchema } from './domain/schema/session.schema';
+import { SessionService } from './services/implementations/session.service';
+import { SessionCleanupService } from './services/implementations/session.cleanup.service';
 
 @Module({
   imports: [
@@ -20,11 +24,11 @@ import { SessionSerializer } from './passport/session.serializer';
       { name: Supplier.name, schema: SupplierSchema },
       { name: User.name, schema: UserSchema },
     ]),
-    PassportModule.register({
-      session: true
-    }),
+    MongooseModule.forFeature([{ name: 'Session', schema: SessionSchema }]),
+    PassportModule.register({ session: true }),
+    ScheduleModule.forRoot(),
   ],
-  providers: [AuthenticationService, AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer],
+  providers: [AuthenticationService, AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer, SessionService, SessionCleanupService],
   controllers: [AuthenticationController],
 })
 

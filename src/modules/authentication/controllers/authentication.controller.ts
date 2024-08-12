@@ -1,36 +1,27 @@
-// Authentication controller
-
 import {
   Body,
   Controller,
   Get,
   Param,
   Post,
-  Put,
   Patch,
-  Res,
-  HttpException,
-  HttpStatus,
   UseGuards,
-  Request
+  Request, Query,
 } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { AdminDto } from '../dtos/admin.dto';
 import { SupplierDto } from '../dtos/supplier.dto';
-// import { User } from '../domain/schema/user.schema';
-// import { Admin } from '../domain/schema/admin.schema';
-// import { Supplier } from '../domain/schema/supplier.schema'
+import { SessionDto } from '../dtos/session.dto';
 import { AuthenticationService } from '../services/implementations/authentication.service';
-import * as bcrypt from 'bcrypt';
-import { Response } from 'express'
 import { LocalAuthGuard } from '../passport/local-auth.guard';
 import { AuthenticationGuard } from '../passport/authentication.guard';
-
+import { SessionService } from '../services/implementations/session.service';
 
 @Controller('auth')
 export class AuthenticationController {
   constructor(
     private readonly userService: AuthenticationService,
+    private readonly sessionService: SessionService,
   ) {
   }
 
@@ -38,36 +29,37 @@ export class AuthenticationController {
   async register(
     @Body() userDto: UserDto,
   ) {
-    const hashedPassword = await bcrypt.hash(userDto?.password, 14);
-
-    const response = await this.userService.createUser({ ...userDto, password: hashedPassword });
-
-    if (!response) {
-      throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-    if (response?.type === 'supplier') {
-        const supplierDto = {
-          user_id: response?.user_id,
-          company_name: userDto.company_name,
-          company_no: userDto.company_no,
-          company_address: userDto.company_address,
-        }
-        return this.userService.createSupplier(supplierDto)
-    } else if (response?.type === 'admin') {
-        const adminDto = {
-          user_id: response?.user_id,
-        }
-      return this.userService.createAdmin(adminDto)
-    }
+    return this.userService.createUser(userDto);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(
-    @Request() req
+    @Request() req,
   ) {
-    return req.user;
+    const userId = req?.user?.user_id;
+    const sessionId = await this.sessionService.findSessionIdByUserId(userId);
+    if (sessionId)
+      return {
+        sessionId: sessionId,
+      };
+    return null;
+  }
+
+  @Post('logout')
+  async logout(
+    @Body() sessionDto: SessionDto,
+  ) {
+    const sessionId = sessionDto?.session_id;
+    await this.sessionService.deleteSession(sessionId as string);
+    return { message: 'Logout successful' };
+  }
+
+  @Get('get-details')
+  async getDetails(
+    @Query('sessionId') session_id: string,
+  ) {
+    return this.userService.getUserDetailBySessionId(session_id);
   }
 
   @Patch('user_id')
@@ -84,9 +76,8 @@ export class AuthenticationController {
   }
 
   @UseGuards(AuthenticationGuard)
-  @Get("suppliers")
-  async findAllSuppliers(
-  ) {
+  @Get('suppliers')
+  async findAllSuppliers() {
     return this.userService.findAllSuppliers();
   }
 
@@ -95,7 +86,7 @@ export class AuthenticationController {
     return this.userService.findSupplierById(user_id);
   }
 
-  @Patch('review/user_id')
+  @Patch('review/:user_id')
   async updateSupplierReviewStatus(
     @Param('user_id') user_id: string,
     @Body() supplierDto: SupplierDto,
