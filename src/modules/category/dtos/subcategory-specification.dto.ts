@@ -5,8 +5,12 @@ import {
   IsNotEmpty, IsArray
 } from "class-validator";
 import { SubcategorySubspecificationDto } from "./subcategory-subspecification.dto";
+import { RatingScoreDto } from "./rating-score.dto";
 
 export class SubcategorySpecificationDto {
+  @IsString()
+  _id: string;
+
   @IsString()
   @IsNotEmpty()
   subcat_id: string;
@@ -44,4 +48,22 @@ export class SubcategorySpecificationDto {
 
   @IsBoolean()
   is_origin: boolean;
+
+  @IsBoolean()
+  is_required: boolean;
+
+  @IsString()
+  prefix: string;
+
+  @IsString()
+  suffix: string;
+
+  @IsString()
+  field_type: string;
+
+  @IsBoolean()
+  is_score_contributed: boolean;
+
+  @IsArray()
+  rating_score: Array<RatingScoreDto>;
 }
