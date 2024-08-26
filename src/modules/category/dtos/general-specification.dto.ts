@@ -5,6 +5,7 @@ import {
   IsNotEmpty, IsArray
 } from "class-validator";
 import { GeneralSubspecificationDto } from "./general-subspecification.dto";
+import { RatingScoreDto } from "./rating-score.dto";
 
 export class GeneralSpecificationDto {
 
@@ -35,6 +36,24 @@ export class GeneralSpecificationDto {
 
   @IsBoolean()
   allow_input: boolean;
+
+  @IsBoolean()
+  is_required: boolean;
+
+  @IsString()
+  prefix: string;
+
+  @IsString()
+  suffix: string;
+
+  @IsString()
+  field_type: string;
+
+  @IsBoolean()
+  is_score_contributed: boolean;
+
+  @IsArray()
+  rating_score: Array<RatingScoreDto>;
 
   @IsArray()
   children: Array<GeneralSubspecificationDto>;

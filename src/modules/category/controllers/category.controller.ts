@@ -92,6 +92,11 @@ export class CategoryController {
     return await this.generalSpecificationService.findAllGeneralSpecification();
   }
 
+  @Get("find-general-specification-by-id")
+  async findGeneralSpecificationById(@Query("id") id: string) {
+    return await this.generalSpecificationService.findGeneralSpecificationById(id);
+  }
+
   @Put("update-general-specification")
   async updateGeneralSpecification(@Query("id") id: string, @Body() generalSpecificationDto: GeneralSpecificationDto) {
     return await this.generalSpecificationService.updateGeneralSpecification(id, generalSpecificationDto);
@@ -110,6 +115,11 @@ export class CategoryController {
   @Post("create-general-subspecification")
   async createGeneralSubspecification(@Body() generalSubspecificationDto: GeneralSubspecificationDto) {
     return await this.generalSpecificationService.createGeneralSubspecification(generalSubspecificationDto);
+  }
+
+  @Get("find-general-subspecification-by-id")
+  async findGeneralSubspecificationById(@Query("id") id: string) {
+    return await this.generalSpecificationService.findGeneralSubspecificationById(id);
   }
 
   @Get("find-all-general-subspecification")
@@ -139,8 +149,13 @@ export class CategoryController {
   }
 
   @Get("find-base-specification-by-cat-id")
-  async findBaseSpecificationById(@Query("id") id: string) {
+  async findBaseSpecificationByCatId(@Query("id") id: string) {
     return await this.baseSpecificationService.findBaseSpecificationByCatId(id);
+  }
+
+  @Get("find-base-specification-by-id")
+  async findBaseSpecificationById(@Query("id") id: string) {
+    return await this.baseSpecificationService.findBaseSpecificationById(id);
   }
 
   @Put("update-base-specification")
@@ -163,6 +178,11 @@ export class CategoryController {
     return await this.baseSpecificationService.createBaseSubspecification(baseSubspecificationDto);
   }
 
+  @Get("find-base-subspecification-by-id")
+  async findBaseSubspecificationById(@Query("id") id: string) {
+    return await this.baseSpecificationService.findBaseSubspecificationById(id);
+  }
+
   @Put("update-base-subspecification")
   async updateBaseSubspecification(@Query("id") id: string, @Body() baseSubspecificationDto: BaseSubspecificationDto) {
     return await this.baseSpecificationService.updateBaseSubspecification(id, baseSubspecificationDto);
@@ -182,6 +202,11 @@ export class CategoryController {
   @Post("create-subcategory-specification")
   async createSubcategorySpecification(@Body() subcategorySpecificationDto: SubcategorySpecificationDto) {
     return await this.subcategorySpecificationService.createSubcategorySpecification(subcategorySpecificationDto);
+  }
+
+  @Get("find-subcategory-specification-by-cat-id")
+  async findSubcategorySpecificationByCatId(@Query("id") id: string) {
+    return await this.subcategorySpecificationService.findSubcategorySpecificationByCatId(id);
   }
 
   @Get("find-subcategory-specification-by-id")
@@ -207,6 +232,11 @@ export class CategoryController {
   @Post("create-subcategory-subspecification")
   async createSubcategorySubspecification(@Body() subcategorySubspecificationDto: SubcategorySubspecificationDto) {
     return await this.subcategorySpecificationService.createSubcategorySubspecification(subcategorySubspecificationDto);
+  }
+
+  @Get("find-subcategory-subspecification-by-id")
+  async findSubcategorySubspecificationById(@Query("id") id: string) {
+    return await this.subcategorySpecificationService.findSubcategorySubspecificationById(id);
   }
 
   @Put("update-subcategory-subspecification")

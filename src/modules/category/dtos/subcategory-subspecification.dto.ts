@@ -2,8 +2,9 @@ import {
   IsString,
   IsBoolean,
   IsDate,
-  IsNotEmpty,
-} from 'class-validator';
+  IsNotEmpty, IsArray
+} from "class-validator";
+import { RatingScoreDto } from "./rating-score.dto";
 
 export class SubcategorySubspecificationDto {
   @IsString()
@@ -34,4 +35,25 @@ export class SubcategorySubspecificationDto {
 
   @IsBoolean()
   is_active: boolean;
+
+  @IsBoolean()
+  allow_input: boolean;
+
+  @IsBoolean()
+  is_required: boolean;
+
+  @IsString()
+  prefix: string;
+
+  @IsString()
+  suffix: string;
+
+  @IsString()
+  field_type: string;
+
+  @IsBoolean()
+  is_score_contributed: boolean;
+
+  @IsArray()
+  rating_score: Array<RatingScoreDto>;
 }

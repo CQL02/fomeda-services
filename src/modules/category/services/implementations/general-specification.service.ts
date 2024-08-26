@@ -32,7 +32,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     }
 
     const _id = await this.sequenceService.generateId(
-      SequenceConstant.PRODUCT_SPECIFICATION_PREFIX
+      SequenceConstant.PRODUCT_GENERAL_SPECIFICATION_PREFIX
     );
     const result = await this.generalSpecificationRepository.create({ ...generalSpecificationDto, _id });
     return this.categoryMapper.mapSchemaToModel(result, GeneralSpecificationDto);
@@ -47,6 +47,16 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
       return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
     });
     return result;
+  }
+
+  async findGeneralSpecificationById(id: string): Promise<GeneralSpecificationDto> {
+    const result = await this.generalSpecificationRepository.findOneById(id);
+
+    if(ObjectUtils.isEmpty(result)) {
+      throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND)
+    }
+
+    return this.categoryMapper.mapSchemaToModel(result.toObject(), GeneralSpecificationDto);
   }
 
   async updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
@@ -91,7 +101,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     }
 
     const _id = await this.sequenceService.generateId(
-      SequenceConstant.PRODUCT_SUBSPECIFICATION_PREFIX
+      SequenceConstant.PRODUCT_GENERAL_SUBSPECIFICATION_PREFIX
     );
     const result = await this.generalSubspecificationRepository.create({ ...generalSubspecificationDto, _id });
     return this.categoryMapper.mapSchemaToModel(result, GeneralSubspecificationDto);
@@ -100,6 +110,16 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   async findAllGeneralSubspecification(): Promise<GeneralSubspecificationDto[]> {
     const result = await this.generalSubspecificationRepository.findAll();
     return this.categoryMapper.mapSchemaListToDtoList(result, GeneralSubspecificationDto);
+  }
+
+  async findGeneralSubspecificationById(id: string): Promise<GeneralSubspecificationDto> {
+    const result = await this.generalSubspecificationRepository.findOneById(id);
+
+    if(ObjectUtils.isEmpty(result)) {
+      throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND)
+    }
+
+    return this.categoryMapper.mapSchemaToModel(result.toObject(), GeneralSubspecificationDto);
   }
 
   async updateGeneralSubspecification(id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
