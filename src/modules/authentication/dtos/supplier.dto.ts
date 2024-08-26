@@ -23,7 +23,8 @@ export class SupplierDto {
   company_address: string;
 
   @IsString()
-  review_status?: string;
+  @IsOptional()
+  approved_by?: string;
 
   @IsDate()
   @IsOptional()

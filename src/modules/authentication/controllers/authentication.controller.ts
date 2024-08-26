@@ -14,7 +14,6 @@ import { SupplierDto } from '../dtos/supplier.dto';
 import { SessionDto } from '../dtos/session.dto';
 import { AuthenticationService } from '../services/implementations/authentication.service';
 import { LocalAuthGuard } from '../passport/local-auth.guard';
-import { AuthenticationGuard } from '../passport/authentication.guard';
 import { SessionService } from '../services/implementations/session.service';
 
 @Controller('auth')
@@ -75,10 +74,14 @@ export class AuthenticationController {
     return this.userService.createSupplier(supplierDto);
   }
 
-  @UseGuards(AuthenticationGuard)
-  @Get('suppliers')
-  async findAllSuppliers() {
-    return this.userService.findAllSuppliers();
+  @Get('inactive-suppliers')
+  async findAllInactiveSuppliers() {
+    return this.userService.findAllInactiveSuppliers();
+  }
+
+  @Get('active-suppliers')
+  async findAllActiveSuppliers() {
+    return this.userService.findAllActiveSuppliers();
   }
 
   @Get('user_id')
@@ -86,12 +89,11 @@ export class AuthenticationController {
     return this.userService.findSupplierById(user_id);
   }
 
-  @Patch('review/:user_id')
+  @Patch('review')
   async updateSupplierReviewStatus(
-    @Param('user_id') user_id: string,
-    @Body() supplierDto: SupplierDto,
+    @Query('userId') user_id: string
   ) {
-    return this.userService.updateSupplierReviewStatus(user_id, supplierDto);
+    return this.userService.updateSupplierReviewStatus(user_id);
   }
 
   @Post()

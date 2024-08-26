@@ -50,6 +50,7 @@ export class Supplier extends Document {
     type: Date,
   })
   approved_on: Date;
+
 }
 
 export const SupplierSchema = SchemaFactory.createForClass(Supplier);

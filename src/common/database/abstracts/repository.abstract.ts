@@ -37,4 +37,8 @@ export abstract class AbstractRepository<T extends Document> {
   async delete(id: string): Promise<T> {
     return this.model.findByIdAndDelete(id).exec();
   }
+
+  async aggregate(pipeline: any): Promise<any> {
+    return this.model.aggregate(pipeline)
+  }
 }

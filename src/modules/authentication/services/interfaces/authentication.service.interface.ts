@@ -17,7 +17,7 @@ export interface IUserService {
   createSupplier(supplierDto: SupplierDto): Promise<Supplier>;
   findAllSuppliers(): Promise<Supplier[]>;
   findSupplierById(user_id: string): Promise<Supplier>;
-  updateSupplierReviewStatus(user_id: string, supplierDto: SupplierDto);
+  updateSupplierReviewStatus(user_id: string);
 
   createAdmin(adminDto: AdminDto): Promise<Admin>;
   findAllAdmins(): Promise<Admin[]>;

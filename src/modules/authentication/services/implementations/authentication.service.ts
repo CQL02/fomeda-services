@@ -9,7 +9,7 @@ import { SupplierRepository } from '../../domain/repositories/supplier.repositor
 import { AdminDto } from '../../dtos/admin.dto';
 import { Admin } from '../../domain/schema/admin.schema';
 import { AdminRepository } from '../../domain/repositories/admin.repository';
-import { SessionService } from './session.service'
+import { SessionService } from './session.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class AuthenticationService implements IUserService {
     private readonly userRepository: UserRepository,
     private readonly supplierRepository: SupplierRepository,
     private readonly adminRepository: AdminRepository,
-    private readonly sessionService: SessionService
+    private readonly sessionService: SessionService,
   ) {
   }
 
@@ -51,7 +51,7 @@ export class AuthenticationService implements IUserService {
 
   async getUserDetailBySessionId(sessionId: string): Promise<User> {
     const userId = await this.sessionService.validateSession(sessionId);
-    return this.userRepository.findOneByFilter({user_id: userId}, {_id: 0, password: 0});
+    return this.userRepository.findOneByFilter({ user_id: userId }, { _id: 0, password: 0 });
   }
 
   async findUser(filterDto): Promise<User> {
@@ -82,12 +82,77 @@ export class AuthenticationService implements IUserService {
     return this.supplierRepository.findAll();
   }
 
+  async findAllInactiveSuppliers(): Promise<Supplier[]> {
+    const pipeline = [
+      { $match: { type: 'supplier', is_active: false } },
+      {
+        $lookup: {
+          from: 'supplier',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          as: 'supplier_info',
+        },
+      },
+      { $unwind: '$supplier_info' },
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: '$supplier_info._id',
+            user_id: '$supplier_info.user_id',
+            fullname: '$fullname',
+            username: '$username',
+            email_address: '$email_address',
+            company_name: '$supplier_info.company_name',
+            company_no: '$supplier_info.company_no',
+            company_address: '$supplier_info.company_address',
+            registered_on: '$supplier_info.registered_on',
+          },
+        },
+      }
+    ];
+    return await this.userRepository.aggregate(pipeline);
+  }
+
+  async findAllActiveSuppliers(): Promise<Supplier[]> {
+    const pipeline = [
+      { $match: { type: 'supplier', is_active: true } },
+      {
+        $lookup: {
+          from: 'supplier',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          as: 'supplier_info',
+        },
+      },
+      { $unwind: '$supplier_info' },
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: '$supplier_info._id',
+            user_id: '$supplier_info.user_id',
+            fullname: '$fullname',
+            username: '$username',
+            email_address: '$email_address',
+            company_name: '$supplier_info.company_name',
+            company_no: '$supplier_info.company_no',
+            company_address: '$supplier_info.company_address',
+            registered_on: '$supplier_info.registered_on',
+            approved_by: '$supplier_info.approved_by',
+            approved_on: '$supplier_info.approved_on',
+          },
+        },
+      }
+    ];
+    return await this.userRepository.aggregate(pipeline);
+  }
+
   async findSupplierById(user_id: string): Promise<Supplier> {
     return this.supplierRepository.findOneByFilter({ user_id });
   }
 
-  async updateSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<Supplier> {
-    return this.supplierRepository.updateOneByFilter({ user_id }, { review_status: supplierDto.review_status });
+  async updateSupplierReviewStatus(user_id: string): Promise<Supplier> {
+    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
+    return this.supplierRepository.updateOneByFilter({ user_id }, {approved_by: 'admin', approved_on: new Date()})
   }
 
   async createAdmin(adminDto: AdminDto): Promise<Admin> {
