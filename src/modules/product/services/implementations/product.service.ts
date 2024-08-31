@@ -1,0 +1,110 @@
+import { Inject, Injectable } from "@nestjs/common";
+import { IProductService } from "../interfaces/product.service.interface";
+import { ProductRepository } from "../../domain/repositories/product.repository";
+import { ProductSpecificationRepository } from "../../domain/repositories/product-specification.repository";
+import { ProductDto } from "../../dtos/product.dto";
+import { ObjectUtils } from "../../../../common/utils/object.utils";
+import { ProductErrorConstant, ProductException } from "../../../../common/exception/product.exception";
+import { v4 as uuidv4 } from "uuid";
+import { StringUtils } from "../../../../common/utils/string.utils";
+import { ICategoryService } from "../../../category/services/interfaces/category.service.interface";
+import { CategoryService } from "../../../category/services/implementations/category.service";
+import { AuthenticationService } from "../../../authentication/services/implementations/authentication.service";
+import { ProductMapper } from "../mapper/product.mapper";
+import { ProductListFilterDto } from "../../dtos/product-list-filter.dto";
+
+@Injectable()
+export class ProductService implements IProductService {
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly productSpecificationRepository: ProductSpecificationRepository,
+    private readonly productMapper: ProductMapper,
+    @Inject(CategoryService.name) private readonly categoryService: ICategoryService,
+    private readonly authenticationService: AuthenticationService
+  ) {
+  }
+
+  async createProduct(productDto: ProductDto): Promise<boolean> {
+    if (ObjectUtils.isEmpty(productDto)) {
+      throw new ProductException(ProductErrorConstant.INVALID_PRODUCT);
+    }
+
+    const _id = uuidv4();
+    const product = await this.productRepository.create({ ...productDto, _id });
+
+    productDto.specification.forEach(spec => spec.pro_id = _id);
+    const pro_spec = await this.productSpecificationRepository.createList(productDto.specification);
+
+    return ObjectUtils.isNotEmpty(product) || ObjectUtils.isNotEmpty(pro_spec);
+  }
+
+  async getProductById(id: string): Promise<ProductDto> {
+    if (StringUtils.isEmpty(id)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
+    }
+
+    const product = await this.productRepository.findOneById(id);
+    if (ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
+    const cat_name = await this.categoryService.findOneSubcategoryById(product.cat_id).then((r) => r.subcat_name);
+    const username = await this.authenticationService.findUserById(product.owner_id).then((r) => r.username);
+    const pro_spec = await this.productSpecificationRepository.findAllByFilter({ pro_id: id });
+
+    //TODO: get Specification Name and Subspecification name (do this after done category refactor)
+
+    return { ...product.toObject(), specification: pro_spec, cat_name: cat_name, owner_username: username };
+  }
+
+  async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    const productList = await this.productRepository.getProductByFilter(productListFilterDto);
+    if (ObjectUtils.isEmpty(productList)) {
+      return [];
+    }
+
+    const cat_names = await this.categoryService.findAllSubcategoryNameByIds(productListFilterDto.cat_ids);
+    const catIdToNameMap = new Map<string, string>();
+    cat_names.forEach(cat => {
+      catIdToNameMap.set(cat.subcat_id, cat.subcat_name);
+    });
+
+    const result = productList.map(product => {
+      const catName = catIdToNameMap.get(product.cat_id);
+      return {
+        ...product.toObject(),
+        cat_name: catName || null
+      };
+    });
+
+    return this.productMapper.mapSchemaListToDtoList(result, ProductDto);
+  }
+
+  async updateProductById(id: string, productDto: ProductDto): Promise<boolean> {
+    const product = await this.productRepository.findOneById(id);
+    if (ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
+    const updateProduct = await this.productRepository.update(id, productDto);
+    const updateProductSpec = await this.productSpecificationRepository.updateOneByFilter({ pro_id: id }, productDto.specification);
+
+    return ObjectUtils.isNotEmpty(updateProduct) || ObjectUtils.isNotEmpty(updateProductSpec);
+  }
+
+  async updateProductIsActive(id: string): Promise<boolean> {
+    const product = await this.productRepository.findOneById(id);
+    if (ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
+    const updateProduct = await this.productRepository.updateOneByFilter({ _id: id }, { is_active: !product.is_active });
+    return ObjectUtils.isEmpty(updateProduct);
+  }
+
+  async deleteProductById(id: string): Promise<boolean> {
+    const productResult = await this.productRepository.delete(id);
+    const specResult = await this.productSpecificationRepository.delete(id);
+    return ObjectUtils.isNotEmpty(productResult) || ObjectUtils.isNotEmpty(specResult);
+  }
+}

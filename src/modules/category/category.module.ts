@@ -60,6 +60,7 @@ import { CategoryMapper } from "./services/mapper/category.mapper";
     SequenceModule,
   ],
   controllers: [CategoryController],
+  exports: [CategoryService.name],
   providers: [
     { provide: CategoryService.name, useClass: CategoryService },
     { provide: GeneralSpecificationService.name, useClass: GeneralSpecificationService },

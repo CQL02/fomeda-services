@@ -24,7 +24,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async createCategory(categoryDto: CategoryDto): Promise<CategoryDto> {
-    if(ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
+    if (ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
       throw new CategoryException(CategoryErrorConstant.EMPTY_CATEGORY);
     }
 
@@ -46,9 +46,9 @@ export class CategoryService implements ICategoryService {
   }
 
   async findCategoryById(id: string): Promise<CategoryDto> {
-    const result = await this.categoryRepository.findOneById(id)
+    const result = await this.categoryRepository.findOneById(id);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.CATEGORY_NOT_FOUND);
     }
 
@@ -56,14 +56,14 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateCategory(id: string, categoryDto: CategoryDto): Promise<CategoryDto> {
-    if(ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
+    if (ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
     categoryDto = { ...categoryDto, last_updated_on: new Date() };
     const result = await this.categoryRepository.update(id, categoryDto);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.CATEGORY_NOT_FOUND);
     }
 
@@ -73,7 +73,7 @@ export class CategoryService implements ICategoryService {
   async deactivateCategory(id: string, is_active: boolean): Promise<CategoryDto> {
     const result = await this.categoryRepository.deactivateCategoryById(id, is_active);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.CATEGORY_NOT_FOUND);
     }
 
@@ -82,9 +82,9 @@ export class CategoryService implements ICategoryService {
 
   async deleteCategory(id: string): Promise<CategoryDto> {
     await this.subcategoryRepository.deleteSubcategoryByCatId(id);
-    const result = await this.categoryRepository.delete(id)
+    const result = await this.categoryRepository.delete(id);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.CATEGORY_NOT_FOUND);
     }
 
@@ -92,7 +92,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async createSubcategory(subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
-    if(ObjectUtils.isEmpty(subcategoryDto)  || StringUtils.isEmpty(subcategoryDto.subcat_name)){
+    if (ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SUBCATEGORY);
     }
 
@@ -105,14 +105,14 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateSubcategory(id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
-    if(ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
+    if (ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
     subcategoryDto = { ...subcategoryDto, last_updated_on: new Date() };
     const result = await this.subcategoryRepository.update(id, subcategoryDto);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SUBCATEGORY_NOT_FOUND);
     }
 
@@ -122,7 +122,7 @@ export class CategoryService implements ICategoryService {
   async deactivateSubcategory(id: string, is_active: boolean): Promise<SubcategoryDto> {
     const result = await this.subcategoryRepository.deactivateSubcategoryById(id, is_active);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SUBCATEGORY_NOT_FOUND);
     }
 
@@ -132,7 +132,7 @@ export class CategoryService implements ICategoryService {
   async deleteSubcategory(id: string): Promise<SubcategoryDto> {
     const result = await this.subcategoryRepository.delete(id);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SUBCATEGORY_NOT_FOUND);
     }
 
@@ -147,7 +147,7 @@ export class CategoryService implements ICategoryService {
   async findAllSubcategoryByCatId(cat_id: string): Promise<SubcategoryDto[]> {
     const result = await this.subcategoryRepository.findSubcategoryByCatId(cat_id);
 
-    if(ObjectUtils.isEmpty(result)) {
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SUBCATEGORY_NOT_FOUND);
     }
 
@@ -157,7 +157,7 @@ export class CategoryService implements ICategoryService {
   async findOneSubcategoryById(id: string): Promise<SubcategoryDto> {
     const result = await this.subcategoryRepository.findOneById(id);
 
-    if(ObjectUtils.isEmpty(result)){
+    if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SUBCATEGORY_NOT_FOUND);
     }
 
@@ -173,5 +173,16 @@ export class CategoryService implements ICategoryService {
       const cat = await this.categoryRepository.findOneById(id);
       return { cat_name: cat.cat_name, subcat_name: null };
     }
+  }
+
+  async findAllSubcategoryNameByIds(ids: string[]): Promise<CategoryNameDto[]> {
+    let result: any[];
+    if (ids.length === 0) {
+      result = await this.subcategoryRepository.findAll();
+    } else {
+      result = await this.subcategoryRepository.findAllByFilter({ _id: { $in: ids } });
+    }
+    result = result.map(subcat => ({ ...subcat.toObject(), subcat_id: subcat._id }));
+    return this.categoryMapper.mapSchemaListToDtoList(result, CategoryNameDto);
   }
 }

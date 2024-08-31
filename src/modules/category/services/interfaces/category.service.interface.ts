@@ -18,4 +18,5 @@ export interface ICategoryService {
   findAllSubcategoryByCatId(cat_id: string): Promise<SubcategoryDto[]>;
   findOneSubcategoryById(id: string): Promise<SubcategoryDto>;
   findNameById(id: string): Promise<CategoryNameDto>;
+  findAllSubcategoryNameByIds(ids: string[]): Promise<CategoryNameDto[]>;
 }

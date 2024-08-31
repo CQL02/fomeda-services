@@ -30,6 +30,7 @@ import { SessionCleanupService } from './services/implementations/session.cleanu
   ],
   providers: [AuthenticationService, AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer, SessionService, SessionCleanupService],
   controllers: [AuthenticationController],
+  exports: [AuthenticationService],
 })
 
 export class AuthenticationModule {}
