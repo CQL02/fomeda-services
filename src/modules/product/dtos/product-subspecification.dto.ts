@@ -5,6 +5,9 @@ export class ProductSubspecificationDto {
   subspec_id: string;
 
   @IsString()
+  subspec_name: string;
+
+  @IsString()
   subspec_desc: string;
 
   @IsNumber()

@@ -12,6 +12,13 @@ import { CategoryService } from "../../../category/services/implementations/cate
 import { AuthenticationService } from "../../../authentication/services/implementations/authentication.service";
 import { ProductMapper } from "../mapper/product.mapper";
 import { ProductListFilterDto } from "../../dtos/product-list-filter.dto";
+import {
+  SubcategorySpecificationService
+} from "../../../category/services/implementations/subcategory-specification.service";
+import {
+  ISubcategorySpecificationService
+} from "../../../category/services/interfaces/subcategory-specification.service.interface";
+import { ProductSpecificationDto } from "../../dtos/product-specification.dto";
 
 @Injectable()
 export class ProductService implements IProductService {
@@ -20,6 +27,7 @@ export class ProductService implements IProductService {
     private readonly productSpecificationRepository: ProductSpecificationRepository,
     private readonly productMapper: ProductMapper,
     @Inject(CategoryService.name) private readonly categoryService: ICategoryService,
+    @Inject(SubcategorySpecificationService.name) private readonly subcategorySpecificationService: ISubcategorySpecificationService,
     private readonly authenticationService: AuthenticationService
   ) {
   }
@@ -50,11 +58,26 @@ export class ProductService implements IProductService {
 
     const cat_name = await this.categoryService.findOneSubcategoryById(product.cat_id).then((r) => r.subcat_name);
     const username = await this.authenticationService.findUserById(product.owner_id).then((r) => r.username);
+
     const pro_spec = await this.productSpecificationRepository.findAllByFilter({ pro_id: id });
+    const pro_spec_dto = this.productMapper.mapSchemaListToDtoList(pro_spec.map(spec => spec.toObject()), ProductSpecificationDto);
+    const specList = await this.subcategorySpecificationService.findSubcategorySpecificationByCatId(product.cat_id);
+    const specMap = new Map<string, string>;
+    const subspecMap = new Map<string, string>;
 
-    //TODO: get Specification Name and Subspecification name (do this after done category refactor)
+    specList.forEach(spec => {
+      specMap.set(spec._id, spec.subcat_spec_name);
+      spec.children?.forEach(child => {
+        subspecMap.set(child._id, child.subcat_subspec_name);
+      });
+    });
 
-    return { ...product.toObject(), specification: pro_spec, cat_name: cat_name, owner_username: username };
+    pro_spec_dto.map((spec: any) => {
+      spec.spec_name = specMap.get(spec.spec_id) || "";
+      spec.subspecification?.map((subspec: any) => subspec.subspec_name = subspecMap.get(subspec.subspec_id) || "");
+    });
+
+    return { ...product.toObject(), specification: pro_spec_dto, cat_name: cat_name, owner_username: username };
   }
 
   async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {

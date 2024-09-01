@@ -11,6 +11,9 @@ export class ProductSpecificationDto {
   spec_id: string;
 
   @IsString()
+  spec_name: string;
+
+  @IsString()
   spec_desc: string;
 
   @IsNumber()

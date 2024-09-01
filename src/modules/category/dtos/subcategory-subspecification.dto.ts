@@ -8,6 +8,9 @@ import { RatingScoreDto } from "./rating-score.dto";
 
 export class SubcategorySubspecificationDto {
   @IsString()
+  _id: string;
+
+  @IsString()
   @IsNotEmpty()
   subcat_id: string;
 
