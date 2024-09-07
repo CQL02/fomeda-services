@@ -38,10 +38,15 @@ export class ProductService implements IProductService {
     }
 
     const _id = uuidv4();
-    const product = await this.productRepository.create({ ...productDto, _id });
+    //TODO: get owner_id
+    const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+    const product = await this.productRepository.create({ ...productDto, _id, owner_id });
 
-    productDto.specification.forEach(spec => spec.pro_id = _id);
-    const pro_spec = await this.productSpecificationRepository.createList(productDto.specification);
+    const specifications = Object.values(productDto.specification).map(spec => ({
+      ...spec,
+      pro_id: _id,
+    }))
+    const pro_spec = await this.productSpecificationRepository.createList(specifications);
 
     return ObjectUtils.isNotEmpty(product) || ObjectUtils.isNotEmpty(pro_spec);
   }
@@ -56,12 +61,14 @@ export class ProductService implements IProductService {
       throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
     }
 
-    const cat_name = await this.categoryService.findOneSubcategoryById(product.cat_id).then((r) => r.subcat_name);
+    const names = await this.categoryService.findNameById(product.subcat_id)
+    const subcat_name = names.subcat_name;
+    const cat_name = names.cat_name;
     const username = await this.authenticationService.findUserById(product.owner_id).then((r) => r.username);
 
     const pro_spec = await this.productSpecificationRepository.findAllByFilter({ pro_id: id });
     const pro_spec_dto = this.productMapper.mapSchemaListToDtoList(pro_spec.map(spec => spec.toObject()), ProductSpecificationDto);
-    const specList = await this.subcategorySpecificationService.findSubcategorySpecificationByCatId(product.cat_id);
+    const specList = await this.subcategorySpecificationService.findSubcategorySpecificationByCatId(product.subcat_id);
     const specMap = new Map<string, string>;
     const subspecMap = new Map<string, string>;
 
@@ -77,7 +84,7 @@ export class ProductService implements IProductService {
       spec.subspecification?.map((subspec: any) => subspec.subspec_name = subspecMap.get(subspec.subspec_id) || "");
     });
 
-    return { ...product.toObject(), specification: pro_spec_dto, cat_name: cat_name, owner_username: username };
+    return { ...product.toObject(), specification: pro_spec_dto, subcat_name: subcat_name, owner_username: username, cat_name: cat_name };
   }
 
   async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
@@ -86,17 +93,23 @@ export class ProductService implements IProductService {
       return [];
     }
 
-    const cat_names = await this.categoryService.findAllSubcategoryNameByIds(productListFilterDto.cat_ids);
-    const catIdToNameMap = new Map<string, string>();
+    const cat_names = await this.categoryService.findAllSubcategoryNameByIds(productListFilterDto.cat_ids ?? []);
+    const subcatIdToNameMap = new Map<string, { subcat_name: string, cat_name: string }>();
     cat_names.forEach(cat => {
-      catIdToNameMap.set(cat.subcat_id, cat.subcat_name);
+      if (cat.subcat_id) {
+        subcatIdToNameMap.set(cat.subcat_id, {
+          subcat_name: cat.subcat_name,
+          cat_name: cat.cat_name
+        });
+      }
     });
 
     const result = productList.map(product => {
-      const catName = catIdToNameMap.get(product.cat_id);
+      const subcatData = subcatIdToNameMap.get(product.subcat_id);
       return {
         ...product.toObject(),
-        cat_name: catName || null
+        subcat_name: subcatData?.subcat_name || null,
+        cat_name: subcatData?.cat_name || null
       };
     });
 
@@ -110,7 +123,7 @@ export class ProductService implements IProductService {
     }
 
     const updateProduct = await this.productRepository.update(id, productDto);
-    const updateProductSpec = await this.productSpecificationRepository.updateOneByFilter({ pro_id: id }, productDto.specification);
+    const updateProductSpec = await this.productSpecificationRepository.updateProductSpecifications(id, productDto.specification);
 
     return ObjectUtils.isNotEmpty(updateProduct) || ObjectUtils.isNotEmpty(updateProductSpec);
   }

@@ -30,7 +30,7 @@ export class ProductRepository extends AbstractRepository<Product> {
       filters.cat_ids = { $in: cat_ids };
     }
 
-    return this.productModel.find(filters).exec();
+    return this.productModel.find(productListFilterDto).exec();
   }
 
 }

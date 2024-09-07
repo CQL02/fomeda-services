@@ -13,7 +13,13 @@ export class Product extends SchemaAbstract {
     required: true,
     type: String,
   })
-  cat_id: string;
+  model_no: string;
+
+  @Prop({
+    required: true,
+    type: String,
+  })
+  subcat_id: string;
 
   @Prop({
     required: true,
