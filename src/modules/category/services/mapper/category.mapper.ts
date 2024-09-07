@@ -5,6 +5,8 @@ import { MapperUtils } from "../../../../common/utils/mapper.utils";
 import { Injectable } from "@nestjs/common";
 import { BaseSubspecificationDto } from "../../dtos/base-subspecification.dto";
 import { SubcategorySubspecificationDto } from "../../dtos/subcategory-subspecification.dto";
+import { ProductFormSpecificationDto } from "../../dtos/product-form-specification.dto";
+import { ProductFormSubspecificationDto } from "../../dtos/product-form-subspecification.dto";
 
 @Injectable()
 export class CategoryMapper {
@@ -31,6 +33,18 @@ export class CategoryMapper {
 
   mapBaseSpecificationDtoListToSubcategorySpecificationDtoList(baseSpecificationDtoList: BaseSpecificationDto[]): SubcategorySpecificationDto[] {
     return baseSpecificationDtoList.map(spec => this.mapBaseSpecificationDtoToSubcategorySpecificationDto(spec));
+  }
+
+  mapSubcategorySpecificationToProducSpecificationtFormDto(source: any): any {
+    const mapperResult = MapperUtils.mapToDto(source, ProductFormSpecificationDto);
+    if(source.children){
+      mapperResult.subspecification = source.children.map(child => MapperUtils.mapToDto(child.toObject(), ProductFormSubspecificationDto))
+    }
+    return mapperResult;
+  }
+
+  mapSubcategorySpecificationListToProductSpecificationFormDtoList(source: any[]): any {
+    return source.map(spec => this.mapSubcategorySpecificationToProducSpecificationtFormDto(spec));
   }
 
   mapSchemaToModel(source: any, target: any): any {

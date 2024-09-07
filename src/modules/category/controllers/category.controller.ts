@@ -15,6 +15,7 @@ import { IGeneralSpecificationService } from "../services/interfaces/general-spe
 import { IBaseSpecificationService } from "../services/interfaces/base-specification.service.interface";
 import { ISubcategorySpecificationService } from "../services/interfaces/subcategory-specification.service.interface";
 import { ICategoryService } from "../services/interfaces/category.service.interface";
+import { ProductFormSpecificationDto } from "../dtos/product-form-specification.dto";
 
 @Controller("category")
 export class CategoryController {
@@ -39,6 +40,11 @@ export class CategoryController {
   @Get("find-all-category")
   async findAllCategories(): Promise<CategoryDto[]> {
     return await this.categoryService.findAllCategories();
+  }
+
+  @Get("find-all-active-categories")
+  async findAllActiveCategories(): Promise<CategoryDto[]> {
+    return await this.categoryService.findAllActiveCategories();
   }
 
   @Get("get-category")
@@ -237,6 +243,11 @@ export class CategoryController {
   @Get("find-subcategory-subspecification-by-id")
   async findSubcategorySubspecificationById(@Query("id") id: string) {
     return await this.subcategorySpecificationService.findSubcategorySubspecificationById(id);
+  }
+
+  @Get("get-product-specification-by-subcat-id")
+  async getProductSpecificationBySubcatId(@Query("id") id: string): Promise<ProductFormSpecificationDto[]> {
+    return await this.subcategorySpecificationService.getProductSpecificationBySubcatId(id);
   }
 
   @Put("update-subcategory-subspecification")

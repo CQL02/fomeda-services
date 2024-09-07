@@ -17,6 +17,7 @@ import { ISequenceService } from "../../../sequence/services/interfaces/sequence
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
 import { StringUtils } from "../../../../common/utils/string.utils";
+import { ProductFormSpecificationDto } from "../../dtos/product-form-specification.dto";
 
 @Injectable()
 export class SubcategorySpecificationService implements ISubcategorySpecificationService {
@@ -69,6 +70,18 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
 
     return this.categoryMapper.mapSchemaToModel(result.toObject(), SubcategorySpecificationDto);
   }
+
+  async getProductSpecificationBySubcatId(id: string): Promise<ProductFormSpecificationDto[]> {
+    const specifications = await this.findSubcategorySpecificationByCatId(id);
+    specifications
+      .filter(spec => spec.is_active)
+      .map(spec => ({
+        ...spec,
+        children: spec.children?.filter(subspec => subspec.is_active) || []
+      }));
+    return this.categoryMapper.mapSubcategorySpecificationListToProductSpecificationFormDtoList(specifications);
+  }
+
 
   async updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySpecificationDto) || StringUtils.isEmpty(subcategorySpecificationDto.subcat_spec_name)) {

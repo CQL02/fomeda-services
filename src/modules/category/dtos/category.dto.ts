@@ -4,9 +4,12 @@ import {
   IsDate,
   IsNotEmpty, IsArray
 } from "class-validator";
-import { Category } from "../domain/schema/category.schema";
+import { SubcategoryDto } from "./subcategory.dto";
 
 export class CategoryDto {
+  @IsString()
+  _id: string;
+
   @IsString()
   @IsNotEmpty()
   cat_name: string;
@@ -29,5 +32,5 @@ export class CategoryDto {
   is_active: boolean;
 
   @IsArray()
-  children: Array<Category>;
+  children: Array<SubcategoryDto>;
 }

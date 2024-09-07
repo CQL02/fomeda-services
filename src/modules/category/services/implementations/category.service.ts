@@ -45,6 +45,20 @@ export class CategoryService implements ICategoryService {
     return result;
   }
 
+  async findAllActiveCategories(): Promise<CategoryDto[]> {
+    const categories = await this.findAllCategories();
+    const result = categories.filter(cat => cat.is_active)
+      .map(cat => ({
+        _id: cat._id,
+        cat_name: cat.cat_name,
+        children: cat.children?.filter(subcat => subcat.is_active).map(subcat => ({
+          _id: subcat._id,
+          subcat_name: subcat.subcat_name,
+        }))
+      }))
+    return this.categoryMapper.mapSchemaListToDtoList(result, CategoryDto);
+  }
+
   async findCategoryById(id: string): Promise<CategoryDto> {
     const result = await this.categoryRepository.findOneById(id);
 
@@ -176,13 +190,37 @@ export class CategoryService implements ICategoryService {
   }
 
   async findAllSubcategoryNameByIds(ids: string[]): Promise<CategoryNameDto[]> {
-    let result: any[];
+    let subcategories = [];
+    let categories = [];
+
     if (ids.length === 0) {
-      result = await this.subcategoryRepository.findAll();
+      subcategories = await this.subcategoryRepository.findAll();
+      categories = await this.categoryRepository.findAll();
     } else {
-      result = await this.subcategoryRepository.findAllByFilter({ _id: { $in: ids } });
+      subcategories = await this.subcategoryRepository.findAllByFilter({ _id: { $in: ids } });
+      const categoryIds = subcategories.map(subcat => subcat.cat_id);
+      categories = await this.categoryRepository.findAllByFilter({ _id: { $in: categoryIds } });
     }
-    result = result.map(subcat => ({ ...subcat.toObject(), subcat_id: subcat._id }));
-    return this.categoryMapper.mapSchemaListToDtoList(result, CategoryNameDto);
+
+    const categoryMap = categories.reduce((acc, cat) => {
+      acc[cat._id] = cat.cat_name;
+      return acc;
+    }, {});
+
+    const combinedDtos = subcategories.map(subcat => ({
+      subcat_id: subcat._id,
+      subcat_name: subcat.subcat_name, // Assuming the field exists
+      cat_id: subcat.cat_id,
+      cat_name: categoryMap[subcat.cat_id], // Set the corresponding category name
+    }));
+
+    const categoryDtos = categories
+      .filter(cat => !subcategories.some(subcat => subcat.cat_id === cat._id))
+      .map(cat => ({
+        cat_id: cat._id,
+        cat_name: cat.cat_name,
+      }));
+
+    return this.categoryMapper.mapSchemaListToDtoList([...combinedDtos, ...categoryDtos], CategoryNameDto);
   }
 }
