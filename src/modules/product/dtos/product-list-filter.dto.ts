@@ -10,4 +10,7 @@ export class ProductListFilterDto {
 
   @IsArray()
   cat_ids: string[];
+
+  @IsString()
+  search: string;
 }

@@ -15,22 +15,28 @@ export class ProductRepository extends AbstractRepository<Product> {
   }
 
   async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<Product[]> {
-    const { owner_id, status, cat_ids } = productListFilterDto;
+    const { owner_id, status, cat_ids, search } = productListFilterDto;
 
-    const filters: any = {
-      owner_id: owner_id,
-      is_active: true,
-    };
+    const filters: any = {};
+
+    if (owner_id) {
+      filters.owner_id = owner_id;
+    }
+
+    if (search) {
+      filters.$or = [
+        { product_name: { $regex: search, $options: 'i' } },
+        { model_no: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     if (status) {
       filters.status = status;
     }
 
     if (cat_ids && cat_ids.length > 0) {
-      filters.cat_ids = { $in: cat_ids };
+      filters.subcat_id = { $in: cat_ids };
     }
-
-    return this.productModel.find(productListFilterDto).exec();
+    return this.productModel.find(filters).exec();
   }
-
 }

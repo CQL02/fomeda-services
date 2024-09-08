@@ -88,7 +88,12 @@ export class ProductService implements IProductService {
   }
 
   async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    //TODO: get owner_id
+    const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+    productListFilterDto.owner_id = owner_id;
+
     const productList = await this.productRepository.getProductByFilter(productListFilterDto);
+    console.log(productList)
     if (ObjectUtils.isEmpty(productList)) {
       return [];
     }
@@ -135,12 +140,16 @@ export class ProductService implements IProductService {
     }
 
     const updateProduct = await this.productRepository.updateOneByFilter({ _id: id }, { is_active: !product.is_active });
-    return ObjectUtils.isEmpty(updateProduct);
+    if(ObjectUtils.isEmpty(updateProduct)) {
+      throw new ProductException(ProductErrorConstant.FAILED_TO_ACTIVATE);
+    }
+
+    return true;
   }
 
   async deleteProductById(id: string): Promise<boolean> {
+    const specResult = await this.productSpecificationRepository.deleteProductSpecificationByProId(id);
     const productResult = await this.productRepository.delete(id);
-    const specResult = await this.productSpecificationRepository.delete(id);
     return ObjectUtils.isNotEmpty(productResult) || ObjectUtils.isNotEmpty(specResult);
   }
 }

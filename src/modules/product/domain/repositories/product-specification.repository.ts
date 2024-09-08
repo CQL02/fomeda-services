@@ -38,4 +38,7 @@ export class ProductSpecificationRepository extends AbstractRepository<ProductSp
     }
   }
 
+  async deleteProductSpecificationByProId(pro_id: string) {
+    return this.productSpecificationModel.deleteMany({pro_id: pro_id}).exec();
+  }
 }
