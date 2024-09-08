@@ -31,17 +31,17 @@ export class UserDto {
   @IsNotEmpty({ message: 'The type cannot be empty' })
   type: string;
 
-  @IsString()
-  @IsNotEmpty({ message: 'The company name cannot be empty' })
-  company_name: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'The company no cannot be empty' })
-  company_no: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'The company address cannot be empty' })
-  company_address: string;
+  // @IsString()
+  // @IsNotEmpty({ message: 'The company name cannot be empty' })
+  // company_name: string;
+  //
+  // @IsString()
+  // @IsNotEmpty({ message: 'The company no cannot be empty' })
+  // company_no: string;
+  //
+  // @IsString()
+  // @IsNotEmpty({ message: 'The company address cannot be empty' })
+  // company_address: string;
 
   @IsBoolean()
   @IsOptional()

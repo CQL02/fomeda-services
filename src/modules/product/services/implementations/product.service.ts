@@ -19,6 +19,7 @@ import {
   ISubcategorySpecificationService
 } from "../../../category/services/interfaces/subcategory-specification.service.interface";
 import { ProductSpecificationDto } from "../../dtos/product-specification.dto";
+import { IAuthenticationService } from '../../../authentication/services/interfaces/authentication.service.interface';
 
 @Injectable()
 export class ProductService implements IProductService {
@@ -28,7 +29,7 @@ export class ProductService implements IProductService {
     private readonly productMapper: ProductMapper,
     @Inject(CategoryService.name) private readonly categoryService: ICategoryService,
     @Inject(SubcategorySpecificationService.name) private readonly subcategorySpecificationService: ISubcategorySpecificationService,
-    private readonly authenticationService: AuthenticationService
+    @Inject(AuthenticationService.name) private readonly authenticationService: IAuthenticationService
   ) {
   }
 

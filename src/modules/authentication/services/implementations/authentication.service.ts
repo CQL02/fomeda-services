@@ -1,13 +1,10 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IAuthenticationService } from '../interfaces/authentication.service.interface';
 import { UserDto } from '../../dtos/user.dto';
-import { User } from '../../domain/schema/user.schema';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { SupplierDto } from '../../dtos/supplier.dto';
-import { Supplier } from '../../domain/schema/supplier.schema';
 import { SupplierRepository } from '../../domain/repositories/supplier.repository';
 import { AdminDto } from '../../dtos/admin.dto';
-import { Admin } from '../../domain/schema/admin.schema';
 import { AdminRepository } from '../../domain/repositories/admin.repository';
 import { SessionService } from './session.service';
 import * as bcrypt from 'bcrypt';
@@ -23,7 +20,7 @@ export class AuthenticationService implements IAuthenticationService {
   ) {
   }
 
-  async createUser(userDto): Promise<Supplier | Admin> {
+  async createUser(userDto): Promise<SupplierDto | AdminDto> {
     let hashedPassword: string;
 
     if (userDto?.type === 'supplier')
@@ -53,28 +50,28 @@ export class AuthenticationService implements IAuthenticationService {
     throw new Error('Internal error');
   }
 
-  async getUserDetailBySessionId(sessionId: string): Promise<User> {
+  async getUserDetailBySessionId(sessionId: string): Promise<UserDto> {
     const userId = await this.sessionService.validateSession(sessionId);
     return this.userRepository.findOneByFilter({ user_id: userId }, { _id: 0, password: 0 });
   }
 
-  async findUser(filterDto): Promise<User> {
+  async findUser(filterDto): Promise<UserDto> {
     return this.userRepository.findOneByFilter(filterDto, { _id: 0 });
   }
 
-  async findAllUsers(): Promise<User[]> {
+  async findAllUsers(): Promise<UserDto[]> {
     return this.userRepository.findAll();
   }
 
-  async findAllUsersByFilter(filterDto): Promise<User[]> {
+  async findAllUsersByFilter(filterDto): Promise<UserDto[]> {
     return this.userRepository.findAllByFilter(filterDto);
   }
 
-  async findUserById(user_id: string): Promise<User> {
+  async findUserById(user_id: string): Promise<UserDto> {
     return this.userRepository.findOneByFilter({ user_id });
   }
 
-  async updateUserStatus(user_id: string, userDto: UserDto): Promise<User> {
+  async updateUserStatus(user_id: string, userDto: UserDto): Promise<UserDto> {
     return this.userRepository.updateOneByFilter({ user_id }, { is_active: userDto.is_active });
   }
 
@@ -88,15 +85,15 @@ export class AuthenticationService implements IAuthenticationService {
     return !!user;
   }
 
-  async createSupplier(supplierDto: SupplierDto): Promise<Supplier> {
+  async createSupplier(supplierDto: SupplierDto): Promise<SupplierDto> {
     return this.supplierRepository.create({ ...supplierDto });
   }
 
-  async findAllSuppliers(): Promise<Supplier[]> {
+  async findAllSuppliers(): Promise<SupplierDto[]> {
     return this.supplierRepository.findAll();
   }
 
-  async findAllInactiveSuppliers(): Promise<Supplier[]> {
+  async findAllInactiveSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       { $match: { type: 'supplier', is_active: false } },
       {
@@ -127,7 +124,7 @@ export class AuthenticationService implements IAuthenticationService {
     return await this.userRepository.aggregate(pipeline);
   }
 
-  async findAllActiveSuppliers(): Promise<Supplier[]> {
+  async findAllActiveSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       { $match: { type: 'supplier', is_active: true } },
       {
@@ -160,17 +157,17 @@ export class AuthenticationService implements IAuthenticationService {
     return await this.userRepository.aggregate(pipeline);
   }
 
-  async findSupplierById(user_id: string): Promise<Supplier> {
+  async findSupplierById(user_id: string): Promise<SupplierDto> {
     return this.supplierRepository.findOneByFilter({ user_id });
   }
 
-  async approveSupplierReviewStatus(user_id: string): Promise<Supplier> {
+  async approveSupplierReviewStatus(user_id: string): Promise<SupplierDto> {
     await
     await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
     return this.supplierRepository.updateOneByFilter({ user_id }, {approved_by: 'admin', approved_on: new Date()})
   }
 
-  async rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<Supplier> {
+  async rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
     const rejection = {
       rejected_by: "reject_admin",
       rejected_on: new Date(),
@@ -179,15 +176,15 @@ export class AuthenticationService implements IAuthenticationService {
     return this.supplierRepository.updateOneByFilter({ user_id }, { $push: {rejection: rejection}})
   }
 
-  async createAdmin(adminDto: AdminDto): Promise<Admin> {
+  async createAdmin(adminDto: AdminDto): Promise<AdminDto> {
     return this.adminRepository.create({ ...adminDto });
   }
 
-  async findAllAdmins(): Promise<Admin[]> {
+  async findAllAdmins(): Promise<AdminDto[]> {
     return this.adminRepository.findAll();
   }
 
-  async findAdminById(user_id: string): Promise<Admin> {
+  async findAdminById(user_id: string): Promise<AdminDto> {
     return this.adminRepository.findOneByFilter({ user_id });
   }
 }
