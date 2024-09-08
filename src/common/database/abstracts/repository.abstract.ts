@@ -31,7 +31,7 @@ export abstract class AbstractRepository<T extends Document> {
   }
 
   async updateOneByFilter(filterDto, updateDto): Promise<T> {
-    return this.model.findOneAndUpdate(filterDto, updateDto).exec();
+    return this.model.findOneAndUpdate(filterDto, updateDto, { new: true }).exec();
   }
 
   async delete(id: string): Promise<T> {

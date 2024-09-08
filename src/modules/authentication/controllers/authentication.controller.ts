@@ -6,7 +6,7 @@ import {
   Post,
   Patch,
   UseGuards,
-  Request, Query,
+  Request, Query, Inject,
 } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { AdminDto } from '../dtos/admin.dto';
@@ -15,12 +15,14 @@ import { SessionDto } from '../dtos/session.dto';
 import { AuthenticationService } from '../services/implementations/authentication.service';
 import { LocalAuthGuard } from '../passport/local-auth.guard';
 import { SessionService } from '../services/implementations/session.service';
+import { IAuthenticationService } from '../services/interfaces/authentication.service.interface';
+import { ISessionService } from '../services/interfaces/session.service.interface';
 
 @Controller('auth')
 export class AuthenticationController {
-  constructor(
-    private readonly userService: AuthenticationService,
-    private readonly sessionService: SessionService,
+
+  constructor(@Inject(AuthenticationService.name) private readonly authenticationService: IAuthenticationService,
+              @Inject(SessionService.name) private readonly sessionService: ISessionService,
   ) {
   }
 
@@ -28,7 +30,7 @@ export class AuthenticationController {
   async register(
     @Body() userDto: UserDto,
   ) {
-    return this.userService.createUser(userDto);
+    return this.authenticationService.createUser(userDto);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -54,11 +56,25 @@ export class AuthenticationController {
     return { message: 'Logout successful' };
   }
 
+  @Get('check-email')
+  async checkEmailDuplicate(
+    @Query('email') email: string,
+  ) {
+    return this.authenticationService.checkEmailDuplicate(email);
+  }
+
+  @Get('check-username')
+  async checkUsernameDuplicate(
+    @Query('username') username: string,
+  ) {
+    return this.authenticationService.checkUsernameDuplicate(username);
+  }
+
   @Get('get-details')
   async getDetails(
     @Query('sessionId') session_id: string,
   ) {
-    return this.userService.getUserDetailBySessionId(session_id);
+    return this.authenticationService.getUserDetailBySessionId(session_id);
   }
 
   @Patch('user_id')
@@ -66,48 +82,46 @@ export class AuthenticationController {
     @Param('user_id') user_id: string,
     @Body() userDto: UserDto,
   ) {
-    return this.userService.updateUserStatus(user_id, userDto);
-  }
-
-  @Post()
-  async createSupplier(@Body() supplierDto: SupplierDto) {
-    return this.userService.createSupplier(supplierDto);
+    return this.authenticationService.updateUserStatus(user_id, userDto);
   }
 
   @Get('inactive-suppliers')
   async findAllInactiveSuppliers() {
-    return this.userService.findAllInactiveSuppliers();
+    return this.authenticationService.findAllInactiveSuppliers();
   }
 
   @Get('active-suppliers')
   async findAllActiveSuppliers() {
-    return this.userService.findAllActiveSuppliers();
+    return this.authenticationService.findAllActiveSuppliers();
   }
 
   @Get('user_id')
   async findSupplierById(@Param('user_id') user_id: string) {
-    return this.userService.findSupplierById(user_id);
+    return this.authenticationService.findSupplierById(user_id);
   }
 
-  @Patch('review')
-  async updateSupplierReviewStatus(
-    @Query('userId') user_id: string
+  @Patch('approve')
+  async approveSupplierReviewStatus(
+    @Query('userId') user_id: string,
   ) {
-    return this.userService.updateSupplierReviewStatus(user_id);
+    return this.authenticationService.approveSupplierReviewStatus(user_id);
   }
 
-  @Post()
-  async createAdmin(@Body() adminDto: AdminDto) {
-    return this.userService.createAdmin(adminDto);
+  @Patch('reject')
+  async rejectSupplierReviewStatus(
+    @Query('userId') user_id: string,
+    @Body() supplierDto: SupplierDto,
+  ) {
+    return this.authenticationService.rejectSupplierReviewStatus(user_id, supplierDto);
   }
 
-  @Get()
+  @Get('admins')
   async findAllAdmin() {
-    return this.userService.findAllAdmins();
+    return this.authenticationService.findAllAdmins();
   }
 
   @Get('user_id')
   async findAdminById(@Param('user_id') user_id: string) {
-    return this.userService.findAdminById(user_id);
+    return this.authenticationService.findAdminById(user_id);
   }
 }

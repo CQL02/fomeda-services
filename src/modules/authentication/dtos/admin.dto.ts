@@ -1,6 +1,5 @@
 import {
   IsNotEmpty,
-  IsDate,
   IsUUID
 } from 'class-validator';
 

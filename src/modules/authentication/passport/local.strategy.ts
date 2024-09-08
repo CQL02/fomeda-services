@@ -1,12 +1,14 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthenticationService } from '../services/implementations/authentication.service';
 import { Strategy } from 'passport-local';
-import { UnauthorizedException, Injectable } from '@nestjs/common';
+import { UnauthorizedException, Injectable, Inject } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { IAuthenticationService } from '../services/interfaces/authentication.service.interface';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor (private authService: AuthenticationService) {
+  constructor (
+    @Inject(AuthenticationService.name) private authService: IAuthenticationService) {
     super()
   }
 

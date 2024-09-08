@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { IUserService } from '../interfaces/authentication.service.interface';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { IAuthenticationService } from '../interfaces/authentication.service.interface';
 import { UserDto } from '../../dtos/user.dto';
 import { User } from '../../domain/schema/user.schema';
 import { UserRepository } from '../../domain/repositories/user.repository';
@@ -11,27 +11,31 @@ import { Admin } from '../../domain/schema/admin.schema';
 import { AdminRepository } from '../../domain/repositories/admin.repository';
 import { SessionService } from './session.service';
 import * as bcrypt from 'bcrypt';
+import { ISessionService } from '../interfaces/session.service.interface';
 
 @Injectable()
-export class AuthenticationService implements IUserService {
+export class AuthenticationService implements IAuthenticationService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly supplierRepository: SupplierRepository,
     private readonly adminRepository: AdminRepository,
-    private readonly sessionService: SessionService,
+    @Inject(SessionService.name) private readonly sessionService: ISessionService
   ) {
   }
 
   async createUser(userDto): Promise<Supplier | Admin> {
-    const hashedPassword = await bcrypt.hash(userDto?.password, 14);
+    let hashedPassword: string;
+
+    if (userDto?.type === 'supplier')
+      hashedPassword = await bcrypt.hash(userDto?.password, 14);
+    else if (userDto?.type === 'admin')
+      hashedPassword = await bcrypt.hash("123456@ABCdefg", 14);
 
     const response = await this.userRepository.create({ ...userDto, password: hashedPassword });
 
     if (!response) {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    if (response?.type === 'supplier') {
+    } else if (response?.type === 'supplier') {
       const supplierDto = {
         user_id: response?.user_id,
         company_name: userDto.company_name,
@@ -72,6 +76,16 @@ export class AuthenticationService implements IUserService {
 
   async updateUserStatus(user_id: string, userDto: UserDto): Promise<User> {
     return this.userRepository.updateOneByFilter({ user_id }, { is_active: userDto.is_active });
+  }
+
+  async checkEmailDuplicate(email: string): Promise<boolean> {
+    const user = await this.userRepository.findOneByFilter({ email_address: email });
+    return !!user;
+  }
+
+  async checkUsernameDuplicate(username: string): Promise<boolean> {
+    const user = await this.userRepository.findOneByFilter( { username });
+    return !!user;
   }
 
   async createSupplier(supplierDto: SupplierDto): Promise<Supplier> {
@@ -150,9 +164,19 @@ export class AuthenticationService implements IUserService {
     return this.supplierRepository.findOneByFilter({ user_id });
   }
 
-  async updateSupplierReviewStatus(user_id: string): Promise<Supplier> {
+  async approveSupplierReviewStatus(user_id: string): Promise<Supplier> {
+    await
     await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
     return this.supplierRepository.updateOneByFilter({ user_id }, {approved_by: 'admin', approved_on: new Date()})
+  }
+
+  async rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<Supplier> {
+    const rejection = {
+      rejected_by: "reject_admin",
+      rejected_on: new Date(),
+      reason: supplierDto?.reason,
+    };
+    return this.supplierRepository.updateOneByFilter({ user_id }, { $push: {rejection: rejection}})
   }
 
   async createAdmin(adminDto: AdminDto): Promise<Admin> {

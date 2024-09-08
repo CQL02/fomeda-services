@@ -29,4 +29,8 @@ export class SupplierDto {
   @IsDate()
   @IsOptional()
   approved_on?: Date;
+
+  @IsString()
+  @IsOptional()
+  reason?: string;
 }
