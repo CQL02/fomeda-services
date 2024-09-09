@@ -20,6 +20,12 @@ export class RoleController {
     return this.roleService.findAllRoles();
   }
 
+  @Get("get-active-roles")
+  async findAllActiveRoles(
+  ) {
+    return this.roleService.findAllActiveRoles();
+  }
+
   @Post('create-role')
   async createRole(
     @Body() roleDto: RoleDto,

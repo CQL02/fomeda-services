@@ -18,6 +18,10 @@ export class RoleService implements IRoleService {
     return this.roleRepository.findAll();
   }
 
+  async findAllActiveRoles(): Promise<RoleDto[]> {
+    return this.roleRepository.findAllByFilter({is_active: true});
+  }
+
   async updateRole(id: string, roleDto: RoleDto): Promise<RoleDto> {
     return this.roleRepository.update(id, { ...roleDto, last_updated_on: new Date()});
   }
