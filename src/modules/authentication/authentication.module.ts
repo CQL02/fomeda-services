@@ -15,6 +15,9 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './passport/local.strategy';
 import { SessionSerializer } from './passport/session.serializer';
 import { ScheduleModule } from '@nestjs/schedule';
+import { RoleModule } from '../role/role.module';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './passport/jwt.strategy';
 
 @Module({
   imports: [
@@ -22,18 +25,24 @@ import { ScheduleModule } from '@nestjs/schedule';
       { name: Admin.name, schema: AdminSchema },
       { name: Supplier.name, schema: SupplierSchema },
       { name: User.name, schema: UserSchema },
-      { name: 'Session', schema: SessionSchema }
+      { name: 'Session', schema: SessionSchema },
     ]),
+    RoleModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'jwt-secret-key',
+      signOptions: { expiresIn: '15m' },
+    }),
     PassportModule.register({ session: true }),
     ScheduleModule.forRoot(),
   ],
   controllers: [AuthenticationController],
-  exports: [ AuthenticationService.name, SessionService.name,],
+  exports: [AuthenticationService.name, SessionService.name],
   providers: [
     { provide: AuthenticationService.name, useClass: AuthenticationService },
-    { provide: SessionService.name, useClass: SessionService},
-    AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer,
+    { provide: SessionService.name, useClass: SessionService },
+    AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer, JwtStrategy
   ],
 })
 
-export class AuthenticationModule {}
+export class AuthenticationModule {
+}

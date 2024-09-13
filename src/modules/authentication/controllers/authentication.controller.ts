@@ -9,7 +9,6 @@ import {
   Request, Query, Inject,
 } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
-import { AdminDto } from '../dtos/admin.dto';
 import { SupplierDto } from '../dtos/supplier.dto';
 import { SessionDto } from '../dtos/session.dto';
 import { AuthenticationService } from '../services/implementations/authentication.service';
@@ -17,12 +16,17 @@ import { LocalAuthGuard } from '../passport/local-auth.guard';
 import { SessionService } from '../services/implementations/session.service';
 import { IAuthenticationService } from '../services/interfaces/authentication.service.interface';
 import { ISessionService } from '../services/interfaces/session.service.interface';
+import { RoleService } from '../../role/services/implementations/role.service';
+import { IRoleService } from '../../role/services/interfaces/role.service.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthenticationController {
 
   constructor(@Inject(AuthenticationService.name) private readonly authenticationService: IAuthenticationService,
               @Inject(SessionService.name) private readonly sessionService: ISessionService,
+              @Inject(RoleService.name) private readonly roleService: IRoleService,
+              private readonly jwtService: JwtService
   ) {
   }
 
@@ -38,13 +42,33 @@ export class AuthenticationController {
   async login(
     @Request() req,
   ) {
-    const userId = req?.user?.user_id;
+    const { fullname, username, type, email_address, user_id: userId, is_active: isUserActive, role_id: roleId } = req?.user || {};
+
+    if (!isUserActive) return null;
+
     const sessionId = await this.sessionService.findSessionIdByUserId(userId);
-    if (sessionId)
-      return {
-        sessionId: sessionId,
-      };
-    return null;
+    if (!sessionId) return null;
+
+    let payload: any = { fullname, username, email_address, sub: userId, role: type };
+
+    if (type === 'supplier') {
+
+      payload = { ...payload, sessionId, modules: ['product_management']};
+    } else if (type === 'admin') {
+      const { modules, is_active: isRoleActive } = await this.roleService.getModules(roleId) || {};
+
+      if (!isRoleActive) return null;
+
+      payload = { ...payload, sessionId, modules };
+    }
+
+    const jwtToken = this.jwtService.sign(payload);
+
+    return {
+      token: jwtToken,
+      sessionId,
+    };
+
   }
 
   @Post('logout')
@@ -56,6 +80,7 @@ export class AuthenticationController {
     return { message: 'Logout successful' };
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Get('check-email')
   async checkEmailDuplicate(
     @Query('email') email: string,

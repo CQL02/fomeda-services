@@ -41,9 +41,10 @@ export class RoleController {
     return this.roleService.updateRole(id, roleDto);
   }
 
-  // @Get("get-modules")
-  // async getModules(
-  // ) {
-  //   return this.roleService.createRole();
-  // }
+  @Get("get-modules")
+  async getModules(
+    @Query("id") id: string,
+  ) {
+    return this.roleService.getModules(id);
+  }
 }

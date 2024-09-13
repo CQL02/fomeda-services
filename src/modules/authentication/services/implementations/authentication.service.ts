@@ -9,6 +9,7 @@ import { AdminRepository } from '../../domain/repositories/admin.repository';
 import { SessionService } from './session.service';
 import * as bcrypt from 'bcrypt';
 import { ISessionService } from '../interfaces/session.service.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService implements IAuthenticationService {
@@ -16,6 +17,7 @@ export class AuthenticationService implements IAuthenticationService {
     private readonly userRepository: UserRepository,
     private readonly supplierRepository: SupplierRepository,
     private readonly adminRepository: AdminRepository,
+    private readonly jwtService: JwtService,
     @Inject(SessionService.name) private readonly sessionService: ISessionService
   ) {
   }
@@ -53,6 +55,11 @@ export class AuthenticationService implements IAuthenticationService {
   async getUserDetailBySessionId(sessionId: string): Promise<UserDto> {
     const userId = await this.sessionService.validateSession(sessionId);
     return this.userRepository.findOneByFilter({ user_id: userId }, { _id: 0, password: 0 });
+  }
+
+  async generateJwtToken(user: UserDto): Promise<string> {
+    const payload = { username: user.username, type: user.type };
+    return this.jwtService.sign(payload);
   }
 
   async findUser(filterDto): Promise<UserDto> {
@@ -215,8 +222,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async updateAdminById(user_id: string, userDto: UserDto): Promise<UserDto> {
-    console.log('hello', user_id, userDto)
     return await this.userRepository.updateOneByFilter( {user_id} , userDto);
-    // return this.adminRepository.updateOneByFilter({ user_id }, adminDto);
   }
+
 }

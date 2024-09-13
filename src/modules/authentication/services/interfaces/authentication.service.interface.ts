@@ -6,6 +6,7 @@ import { SupplierDto } from "../../dtos/supplier.dto";
 export interface IAuthenticationService {
   createUser(userDto: UserDto): Promise<UserDto | AdminDto>;
   getUserDetailBySessionId(sessionId: string): Promise<UserDto>;
+  generateJwtToken(user: UserDto): Promise<string>
   findUser(filterDto): Promise<UserDto>;
   findAllUsers(): Promise<UserDto[]>;
   findUserById(user_id: string): Promise<UserDto>;

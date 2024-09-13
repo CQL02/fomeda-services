@@ -5,4 +5,5 @@ export interface IRoleService {
   findAllRoles(): Promise<RoleDto[]>;
   findAllActiveRoles(): Promise<RoleDto[]>
   updateRole(user_id: string, roleDto: RoleDto): Promise<RoleDto>;
+  getModules(id: string): Promise<RoleDto>;
 }

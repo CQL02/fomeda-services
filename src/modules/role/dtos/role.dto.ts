@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsNotEmpty, IsOptional, IsString,
   IsUUID,
@@ -16,4 +17,8 @@ export class RoleDto {
   @IsOptional()
   @IsNotEmpty({ message: 'The is_active address cannot be empty' })
   is_active?: boolean
+
+  @IsArray()
+  @IsOptional()
+  modules?: string[];
 }

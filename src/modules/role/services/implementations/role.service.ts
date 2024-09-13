@@ -25,4 +25,8 @@ export class RoleService implements IRoleService {
   async updateRole(id: string, roleDto: RoleDto): Promise<RoleDto> {
     return this.roleRepository.update(id, { ...roleDto, last_updated_on: new Date()});
   }
+
+  async getModules(id: string): Promise<RoleDto> {
+    return this.roleRepository.findOneByFilter({_id: id},{_id: 0});
+  }
 }
