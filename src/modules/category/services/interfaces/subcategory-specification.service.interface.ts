@@ -5,6 +5,7 @@ import { ProductFormSpecificationDto } from "../../dtos/product-form-specificati
 export interface ISubcategorySpecificationService {
   createSubcategorySpecification(subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto>
   findSubcategorySpecificationByCatId(id: string): Promise<SubcategorySpecificationDto[]>
+  findActiveSubcategorySpecificationByCatId(id: string): Promise<SubcategorySpecificationDto[]>
   findSubcategorySpecificationById(id: string): Promise<SubcategorySpecificationDto>
   getProductSpecificationBySubcatId(id: string): Promise<ProductFormSpecificationDto[]>;
   updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto>

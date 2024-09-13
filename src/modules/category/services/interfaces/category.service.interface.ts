@@ -6,6 +6,7 @@ export interface ICategoryService {
   createCategory(categoryDto: CategoryDto): Promise<CategoryDto>;
   updateCategory(id: string, categoryDto: CategoryDto): Promise<CategoryDto>;
   findAllCategories(): Promise<CategoryDto[]>;
+  findAllCategories(): Promise<CategoryDto[]>;
   findCategoryById(id: string): Promise<CategoryDto>;
   findAllActiveCategories(): Promise<CategoryDto[]>;
   deactivateCategory(id: string, is_active: boolean): Promise<CategoryDto>;
