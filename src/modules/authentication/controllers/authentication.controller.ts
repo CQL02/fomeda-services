@@ -124,4 +124,12 @@ export class AuthenticationController {
   async findAdminById(@Param('user_id') user_id: string) {
     return this.authenticationService.findAdminById(user_id);
   }
+
+  @Patch('update-admin')
+  async updateAdmin(
+    @Query('userId') user_id: string,
+    @Body() userDto: UserDto,
+  ) {
+    return this.authenticationService.updateAdminById(user_id, userDto);
+  }
 }

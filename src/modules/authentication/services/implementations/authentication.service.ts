@@ -181,10 +181,42 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async findAllAdmins(): Promise<AdminDto[]> {
-    return this.adminRepository.findAll();
+    const pipeline = [
+      { $match: { type: 'admin'} },
+      {
+        $lookup: {
+          from: 'admin',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          as: 'admin_info',
+        },
+      },
+      { $unwind: '$admin_info' },
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: '$admin_info._id',
+            user_id: '$admin_info.user_id',
+            fullname: '$fullname',
+            username: '$username',
+            is_active: '$is_active',
+            role_id: '$role_id',
+            email_address: '$email_address',
+            created_on: '$admin_info.created_on',
+          },
+        },
+      }
+    ];
+    return await this.userRepository.aggregate(pipeline);
   }
 
   async findAdminById(user_id: string): Promise<AdminDto> {
     return this.adminRepository.findOneByFilter({ user_id });
+  }
+
+  async updateAdminById(user_id: string, userDto: UserDto): Promise<UserDto> {
+    console.log('hello', user_id, userDto)
+    return await this.userRepository.updateOneByFilter( {user_id} , userDto);
+    // return this.adminRepository.updateOneByFilter({ user_id }, adminDto);
   }
 }

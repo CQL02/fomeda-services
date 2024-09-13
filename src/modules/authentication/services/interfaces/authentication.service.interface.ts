@@ -25,4 +25,5 @@ export interface IAuthenticationService {
   createAdmin(adminDto: AdminDto): Promise<AdminDto>;
   findAllAdmins(): Promise<AdminDto[]>;
   findAdminById(user_id: string): Promise<AdminDto>;
+  updateAdminById(user_id: string, adminDto: UserDto): Promise<UserDto>
 }
