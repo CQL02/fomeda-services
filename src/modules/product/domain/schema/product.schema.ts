@@ -48,12 +48,12 @@ export class Product extends SchemaAbstract {
   @Prop({
     type: String,
   })
-  approved_by: string;
+  reviewed_by: string;
 
   @Prop({
     type: Date,
   })
-  approved_on: Date;
+  reviewed_on: Date;
 
   @Prop({
     required: true,
@@ -66,6 +66,16 @@ export class Product extends SchemaAbstract {
     type: Number,
   })
   rating: number;
+
+  @Prop({
+    type: Number,
+  })
+  total_score: number;
+
+  @Prop({
+    type: String,
+  })
+  rejected_reason: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
