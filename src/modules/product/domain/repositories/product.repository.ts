@@ -31,7 +31,7 @@ export class ProductRepository extends AbstractRepository<Product> {
     }
 
     if (status) {
-      filters.status = status;
+      filters.status = { $in: status};
     }
 
     if (cat_ids && cat_ids.length > 0) {
