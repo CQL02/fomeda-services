@@ -27,7 +27,7 @@ export class ContentService implements IContentService {
   }
 
   async updateCarousel(id: string, carouselDto: CarouselDto): Promise<Carousel> {
-    return this.carouselRepository.update(id, carouselDto);
+    return this.carouselRepository.update(id, {...carouselDto, last_updated_on: new Date()});
   }
 
   async deleteCarousel(id: string): Promise<Carousel> {
@@ -43,7 +43,7 @@ export class ContentService implements IContentService {
   }
 
   async updateContent(id: string, contentDto: ContentDto): Promise<Content> {
-    return this.contentRepository.update(id, contentDto);
+    return this.contentRepository.update(id, {...contentDto, last_updated_on: new Date()});
   }
 
   async deleteContent(id: string): Promise<Content> {
@@ -59,7 +59,7 @@ export class ContentService implements IContentService {
   }
 
   async updateHistoryTimeline(id: string, historyTimelineDto: HistoryTimelineDto): Promise<HistoryTimeline> {
-    return this.historyTimelineRepository.update(id, historyTimelineDto);
+    return this.historyTimelineRepository.update(id, {...historyTimelineDto, last_updated_on: new Date()});
   }
 
   async deleteHistoryTimeline(id: string): Promise<HistoryTimeline> {
