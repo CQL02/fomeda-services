@@ -20,7 +20,7 @@ export interface IAuthenticationService {
   findAllInactiveSuppliers(): Promise<SupplierDto[]>;
   findAllActiveSuppliers(): Promise<SupplierDto[]>;
   findSupplierById(user_id: string): Promise<SupplierDto>;
-  approveSupplierReviewStatus(user_id: string);
+  approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto);
   rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto);
 
   createAdmin(adminDto: AdminDto): Promise<AdminDto>;

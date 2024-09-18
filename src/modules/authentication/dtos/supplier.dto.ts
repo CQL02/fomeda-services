@@ -32,5 +32,9 @@ export class SupplierDto {
 
   @IsString()
   @IsOptional()
+  rejected_by?: string;
+
+  @IsString()
+  @IsOptional()
   reason?: string;
 }

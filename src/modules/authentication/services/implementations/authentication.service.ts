@@ -168,19 +168,19 @@ export class AuthenticationService implements IAuthenticationService {
     return this.supplierRepository.findOneByFilter({ user_id });
   }
 
-  async approveSupplierReviewStatus(user_id: string): Promise<SupplierDto> {
+  async approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
     await
     await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
-    return this.supplierRepository.updateOneByFilter({ user_id }, {approved_by: 'admin', approved_on: new Date()})
+    return this.supplierRepository.updateOneByFilter({ user_id }, {...supplierDto, last_updated_on: new Date(), approved_on: new Date()})
   }
 
   async rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
     const rejection = {
-      rejected_by: "reject_admin",
+      rejected_by: supplierDto?.rejected_by,
       rejected_on: new Date(),
       reason: supplierDto?.reason,
     };
-    return this.supplierRepository.updateOneByFilter({ user_id }, { $push: {rejection: rejection}})
+    return this.supplierRepository.updateOneByFilter({ user_id }, {$push: {rejection: rejection}, last_updated_on: new Date()})
   }
 
   async createAdmin(adminDto: AdminDto): Promise<AdminDto> {

@@ -128,8 +128,9 @@ export class AuthenticationController {
   @Patch('approve')
   async approveSupplierReviewStatus(
     @Query('userId') user_id: string,
+    @Body() supplierDto: SupplierDto,
   ) {
-    return this.authenticationService.approveSupplierReviewStatus(user_id);
+    return this.authenticationService.approveSupplierReviewStatus(user_id, supplierDto);
   }
 
   @Patch('reject')
