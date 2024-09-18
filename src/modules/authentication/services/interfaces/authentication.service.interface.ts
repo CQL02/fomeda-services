@@ -2,7 +2,6 @@ import { UserDto } from '../../dtos/user.dto';
 import { AdminDto } from "../../dtos/admin.dto";
 import { SupplierDto } from "../../dtos/supplier.dto";
 
-
 export interface IAuthenticationService {
   createUser(userDto: UserDto): Promise<UserDto | AdminDto>;
   getUserDetailBySessionId(sessionId: string): Promise<UserDto>;
@@ -26,5 +25,5 @@ export interface IAuthenticationService {
   createAdmin(adminDto: AdminDto): Promise<AdminDto>;
   findAllAdmins(): Promise<AdminDto[]>;
   findAdminById(user_id: string): Promise<AdminDto>;
-  updateAdminById(user_id: string, adminDto: UserDto): Promise<UserDto>
+  updateAdminById(user_id: string, adminDto: AdminDto): Promise<AdminDto>
 }

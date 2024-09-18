@@ -12,8 +12,4 @@ export class AdminRepository extends AbstractRepository<Admin> {
   ) {
     super(adminModel);
   }
-  
-  // async deactivateAdminById(id: string, is_active: boolean): Promise<Admin> {
-  //   return this.adminModel.findByIdAndUpdate(id, {is_active}).exec();
-  // }
 }

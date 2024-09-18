@@ -19,6 +19,7 @@ import { ISessionService } from '../services/interfaces/session.service.interfac
 import { RoleService } from '../../role/services/implementations/role.service';
 import { IRoleService } from '../../role/services/interfaces/role.service.interface';
 import { JwtService } from '@nestjs/jwt';
+import { AdminDto } from '../dtos/admin.dto';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -154,8 +155,8 @@ export class AuthenticationController {
   @Patch('update-admin')
   async updateAdmin(
     @Query('userId') user_id: string,
-    @Body() userDto: UserDto,
+    @Body() adminDto: AdminDto,
   ) {
-    return this.authenticationService.updateAdminById(user_id, userDto);
+    return this.authenticationService.updateAdminById(user_id, adminDto);
   }
 }

@@ -10,11 +10,21 @@ export class Admin extends Document {
   user_id: string;
 
   @Prop({
+    type: String,
+  })
+  created_by: string;
+
+  @Prop({
     required: true,
     type: Date,
     default: Date.now,
   })
   created_on: Date;
+
+  @Prop({
+    type: String,
+  })
+  last_updated_by: string;
 
   @Prop({
     required: true,

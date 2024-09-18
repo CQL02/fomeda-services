@@ -45,6 +45,8 @@ export class AuthenticationService implements IAuthenticationService {
     } else if (response?.type === 'admin') {
       const adminDto = {
         user_id: response?.user_id,
+        created_by: userDto?.created_by,
+        last_updated_by: userDto?.last_updated_by
       };
       return this.createAdmin(adminDto);
     }
@@ -169,7 +171,6 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
-    await
     await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
     return this.supplierRepository.updateOneByFilter({ user_id }, {...supplierDto, last_updated_on: new Date(), approved_on: new Date()})
   }
@@ -210,6 +211,9 @@ export class AuthenticationService implements IAuthenticationService {
             role_id: '$role_id',
             email_address: '$email_address',
             created_on: '$admin_info.created_on',
+            created_by: '$admin_info.created_by',
+            last_updated_on: '$admin_info.last_updated_on',
+            last_updated_by: '$admin_info.last_updated_by'
           },
         },
       }
@@ -221,8 +225,9 @@ export class AuthenticationService implements IAuthenticationService {
     return this.adminRepository.findOneByFilter({ user_id });
   }
 
-  async updateAdminById(user_id: string, userDto: UserDto): Promise<UserDto> {
-    return await this.userRepository.updateOneByFilter( {user_id} , userDto);
+  async updateAdminById(user_id: string, adminDto: AdminDto): Promise<AdminDto> {
+    await this.userRepository.updateOneByFilter({user_id}, {...adminDto})
+    return await this.adminRepository.updateOneByFilter( {user_id} , {...adminDto, last_updated_on: new Date()});
   }
 
 }
