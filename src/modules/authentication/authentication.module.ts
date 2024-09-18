@@ -30,7 +30,7 @@ import { JwtStrategy } from './passport/jwt.strategy';
     RoleModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'jwt-secret-key',
-      signOptions: { expiresIn: '15m' },
+      signOptions: { expiresIn: '2h' },
     }),
     PassportModule.register({ session: true }),
     ScheduleModule.forRoot(),
