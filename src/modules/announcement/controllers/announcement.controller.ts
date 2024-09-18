@@ -1,6 +1,6 @@
 // Authentication controller
 
-import { Body, Controller, Get, Param, Post, Put, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Patch, Query } from '@nestjs/common';
 import { AnnouncementDto } from '../dtos/announcement.dto';
 import { AnnouncementService } from '../services/implementations/announcement.service';
 

@@ -15,7 +15,7 @@ export class AnnouncementService implements IAnnouncementService {
   }
 
   async editAnnouncement(id: string, announcementDto: AnnouncementDto): Promise<Announcement> {
-    return this.announcementRepository.update(id, announcementDto);
+    return this.announcementRepository.update(id, {...announcementDto, updated_on: new Date()});
   }
 
   async findAllAnnouncements(): Promise<Announcement[]> {
