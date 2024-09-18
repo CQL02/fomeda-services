@@ -57,6 +57,11 @@ export class CategoryController {
     return await this.categoryService.createSubcategory(subcategoryDto);
   }
 
+  @Get("find-one-subcategory-by-id")
+  async findOneSubcategoryById(@Query("id") id: string) {
+    return await this.categoryService.findOneSubcategoryById(id);
+  }
+
   @Put("update-subcategory")
   async updateSubcategory(@Query("id") id: string, @Body() subcategoryDto: SubcategoryDto) {
     return await this.categoryService.updateSubcategory(id, subcategoryDto);

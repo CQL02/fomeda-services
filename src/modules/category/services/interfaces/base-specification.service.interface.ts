@@ -5,6 +5,7 @@ export interface IBaseSpecificationService {
   createBaseSpecification(baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto>
   findBaseSpecificationById(id: string): Promise<BaseSpecificationDto>
   findBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]>
+  findActiveBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]>
   updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto>
   deactivateBaseSpecification(id: string, is_active: boolean): Promise<BaseSpecificationDto>
   deleteBaseSpecification(id: string): Promise<BaseSpecificationDto>

@@ -5,6 +5,7 @@ export interface IGeneralSpecificationService {
   createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto>;
   updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto>;
   findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]>;
+  findAllActiveGeneralSpecification(): Promise<GeneralSpecificationDto[]>;
   findGeneralSpecificationById(id: string): Promise<GeneralSpecificationDto>;
   deactivateGeneralSpecification(id: string, is_active: boolean): Promise<GeneralSpecificationDto>;
   deleteGeneralSpecification(id: string): Promise<GeneralSpecificationDto>;

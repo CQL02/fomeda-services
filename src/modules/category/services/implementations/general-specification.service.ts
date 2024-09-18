@@ -49,6 +49,17 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     return result;
   }
 
+  async findAllActiveGeneralSpecification(): Promise<GeneralSpecificationDto[]> {
+    const generalSpecificationList = await this.generalSpecificationRepository.findAllByFilter({ is_active: true });
+    const generalSubspecificationList = await this.generalSubspecificationRepository.findAllByFilter({ is_active: true });
+
+    const result = generalSpecificationList.map(spec => {
+      const filteredSubspec = generalSubspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
+      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+    });
+    return result;
+  }
+
   async findGeneralSpecificationById(id: string): Promise<GeneralSpecificationDto> {
     const result = await this.generalSpecificationRepository.findOneById(id);
 

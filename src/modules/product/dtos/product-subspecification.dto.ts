@@ -1,6 +1,10 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsArray, IsNumber, IsString } from "class-validator";
+import { RatingScoreDto } from "../../category/dtos/rating-score.dto";
 
 export class ProductSubspecificationDto {
+  @IsString()
+  spec_id: string;
+
   @IsString()
   subspec_id: string;
 
@@ -10,6 +14,15 @@ export class ProductSubspecificationDto {
   @IsString()
   subspec_desc: string;
 
+  @IsString()
+  prefix: string;
+
+  @IsString()
+  suffix: string;
+
   @IsNumber()
   score: number;
+
+  @IsArray()
+  rating_score: Array<RatingScoreDto>;
 }

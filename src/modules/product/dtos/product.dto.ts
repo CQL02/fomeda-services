@@ -1,19 +1,18 @@
-import { IsArray, IsBoolean, IsDate, IsNotEmpty, IsNumber, IsObject, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsNumber, IsObject, IsString } from "class-validator";
 import { ProductSpecificationDto } from "./product-specification.dto";
+import { SubcategoryRatingScoreDto } from "../../category/dtos/subcategory-rating-score.dto";
 
 export class ProductDto {
   @IsString()
   _id: string;
 
   @IsString()
-  @IsNotEmpty()
   product_name: string;
 
   @IsString()
   model_no: string;
 
   @IsString()
-  @IsNotEmpty()
   cat_id: string;
 
   @IsString()
@@ -26,7 +25,6 @@ export class ProductDto {
   subcat_name: string;
 
   @IsString()
-  @IsNotEmpty()
   owner_id: string;
 
   @IsString()
@@ -36,17 +34,19 @@ export class ProductDto {
   product_img: object;
 
   @IsString()
-  @IsNotEmpty()
   status: string;
 
   @IsDate()
   last_updated_on: Date;
 
   @IsString()
-  approved_by: string;
+  reviewed_by: string;
+
+  @IsString()
+  admin_username: string;
 
   @IsDate()
-  approved_on: Date;
+  reviewed_on: Date;
 
   @IsBoolean()
   is_active: boolean;
@@ -54,6 +54,15 @@ export class ProductDto {
   @IsNumber()
   rating: number;
 
+  @IsNumber()
+  total_score: number;
+
   @IsArray()
   specification: Array<ProductSpecificationDto>;
+
+  @IsArray()
+  rating_score: Array<SubcategoryRatingScoreDto>;
+
+  @IsString()
+  rejected_reason: string;
 }

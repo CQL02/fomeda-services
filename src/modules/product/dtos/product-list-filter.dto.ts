@@ -12,5 +12,5 @@ export class ProductListFilterDto {
   cat_ids: string[];
 
   @IsString()
-  search: string;
+  search: string[];
 }

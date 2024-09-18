@@ -119,7 +119,7 @@ export class CategoryService implements ICategoryService {
   }
 
   async updateSubcategory(id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
-    if (ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
+    if (ObjectUtils.isEmpty(subcategoryDto)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 

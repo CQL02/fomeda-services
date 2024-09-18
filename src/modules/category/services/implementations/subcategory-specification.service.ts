@@ -61,6 +61,24 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     return [...baseSpecList, ...result];
   }
 
+  async findActiveSubcategorySpecificationByCatId(id: string): Promise<SubcategorySpecificationDto[]> {
+    const subcategory = await this.categoryService.findOneSubcategoryById(id);
+    const baseSpecList = this.categoryMapper.mapBaseSpecificationDtoListToSubcategorySpecificationDtoList(
+      await this.baseSpecificationService.findActiveBaseSpecificationByCatId(subcategory.cat_id)
+    );
+
+    const specificationList = await this.subcategorySpecificationRepository.findAllByFilter({ subcat_id: id, is_active: true });
+    const specificationIdList = specificationList.map(spec => spec._id);
+    const subspecificationList = await this.subcategorySubspecificationRepository.findAllByFilter({ subcat_spec_id: { $in: specificationIdList}, is_active: true });
+
+    const result = specificationList.map(spec => {
+      const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
+      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+    });
+
+    return [...baseSpecList, ...result];
+  }
+
   async findSubcategorySpecificationById(id: string): Promise<SubcategorySpecificationDto> {
     const result = await this.subcategorySpecificationRepository.findOneById(id);
 
