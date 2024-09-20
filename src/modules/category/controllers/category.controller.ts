@@ -220,6 +220,11 @@ export class CategoryController {
     return await this.subcategorySpecificationService.findSubcategorySpecificationByCatId(id);
   }
 
+  @Get("find-active-subcategory-specification-by-cat-id")
+  async findActiveSubcategorySpecificationByCatId(@Query("id") id: string) {
+    return await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(id);
+  }
+
   @Get("find-subcategory-specification-by-id")
   async findSubcategorySpecificationById(@Query("id") id: string) {
     return await this.subcategorySpecificationService.findSubcategorySpecificationById(id);

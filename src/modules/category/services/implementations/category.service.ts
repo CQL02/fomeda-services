@@ -114,7 +114,13 @@ export class CategoryService implements ICategoryService {
       SequenceConstant.PRODUCT_SUBCATEGORY_PREFIX
     );
 
-    const result = await this.subcategoryRepository.create({ ...subcategoryDto, _id });
+    const rating_score = Array.from({length: 5}, (_, index) => ({
+      rating: index+1,
+      min_value: 0,
+      max_value: 0,
+    }))
+
+    const result = await this.subcategoryRepository.create({ ...subcategoryDto, _id, rating_score });
     return this.categoryMapper.mapSchemaToModel(result, SubcategoryDto);
   }
 

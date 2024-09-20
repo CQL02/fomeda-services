@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {IsNotEmpty, IsNumber } from "class-validator";
 
 export class SubcategoryRatingScoreDto {
   @IsNumber()
@@ -10,10 +10,4 @@ export class SubcategoryRatingScoreDto {
 
   @IsNumber()
   min_value: number;
-
-  @IsDate()
-  last_updated_on: Date;
-
-  @IsString()
-  last_updated_by: string;
 }
