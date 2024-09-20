@@ -21,19 +21,34 @@ export class ProductSpecificationRepository extends AbstractRepository<ProductSp
   async updateProductSpecifications(productId: string, specification: any[]) {
     try {
       const operations = specification.map(spec => {
-        const {spec_id, spec_desc, subspecification } = spec;
-        return {
+        const { spec_id, spec_desc, subspecification } = spec;
+
+        const subspecUpdates = subspecification ? subspecification.map(subspec => {
+          return {
+            updateOne: {
+              filter: { pro_id: productId, spec_id: spec_id, 'subspecification.subspec_id': subspec.subspec_id },
+              update: { $set: { 'subspecification.$.subspec_desc': subspec.subspec_desc } },
+              upsert: false
+            }
+          };
+        }) : [];
+
+        const mainSpecUpdate = {
           updateOne: {
-            filter: {pro_id: productId, spec_id: spec_id},
-            update: {$set: {spec_desc, subspecification}},
+            filter: { pro_id: productId, spec_id: spec_id },
+            update: { $set: { spec_desc } },
             upsert: true,
           }
-        }
-      })
+        };
 
-      const result = await this.productSpecificationModel.bulkWrite(operations);
+        return [mainSpecUpdate, ...subspecUpdates];
+      });
+
+      const flattenedOperations = operations.flat();
+      const result = await this.productSpecificationModel.bulkWrite(flattenedOperations);
       return result.modifiedCount > 0;
     } catch (error) {
+      console.error(error);
       return false;
     }
   }

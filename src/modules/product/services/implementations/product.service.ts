@@ -28,6 +28,8 @@ import { ProductVerificationRepository } from "../../domain/repositories/product
 import {
   ProductVerificationSpecificationRepository
 } from "../../domain/repositories/product-verification-specification.repository";
+import { SubcategorySpecificationDto } from "../../../category/dtos/subcategory-specification.dto";
+import { SubcategorySubspecificationDto } from "../../../category/dtos/subcategory-subspecification.dto";
 
 @Injectable()
 export class ProductService implements IProductService {
@@ -211,8 +213,8 @@ export class ProductService implements IProductService {
     const subcategory = await this.categoryService.findOneSubcategoryById(productVerification.subcat_id);
     const rating_score = subcategory.rating_score ?? [];
 
-    const specMaps = await this.getSpecMaps(productVerification.subcat_id);
-    const specification = await this.populateSpecDetails(id, specMaps, productVerification.status);
+    const specList = await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(productVerification.subcat_id);
+    const specification = await this.populateSpecDetails(id, specList, productVerification.status);
 
     const productVerificationObject = productVerification.toObject()
     return {
@@ -225,71 +227,58 @@ export class ProductService implements IProductService {
     };
   }
 
-  private async getSpecMaps(subcatId: string) {
-    const specList = await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(subcatId);
-
-    const specMap = new Map<string, any>();
-    const subspecMap = new Map<string, any>();
-
-    specList.forEach(spec => {
-      specMap.set(spec._id, {
-        name: spec.subcat_spec_name,
-        rating_score: spec.rating_score,
-        spec_type: spec.cat_type,
-        prefix: spec.prefix,
-        suffix: spec.suffix
-      });
-
-      spec.children?.forEach(child => {
-        subspecMap.set(child._id, {
-          name: child.subcat_subspec_name,
-          rating_score: child.rating_score,
-          prefix: child.prefix,
-          suffix: child.suffix
-        });
-      });
-    });
-
-    return { specMap, subspecMap };
-  }
-
-  private async populateSpecDetails(id: string, specMaps: any, status: string) {
+  private async populateSpecDetails(id: string, specList: SubcategorySpecificationDto[], status: string) {
     const proSpec = await this.productVerificationSpecificationRepository.findAllByFilter({ verification_id: id });
     const proSpecDto = this.productMapper.mapSchemaListToDtoList(proSpec.map(spec => spec.toObject()), ProductSpecificationDto);
 
-    proSpecDto.forEach((spec: any) => {
-      const { specMap, subspecMap } = specMaps;
-      const specData = specMap.get(spec.spec_id) || {};
+    const finalSpecDetails = [];
 
-      Object.assign(spec, {
-        spec_name: specData.name || "",
-        rating_score: specData.rating_score || [],
-        spec_type: specData.spec_type,
-        prefix: specData.prefix || "",
-        suffix: specData.suffix || ""
+    specList.forEach(spec => {
+      const specId = spec._id;
+      const matchingProSpec = proSpecDto.find((proSpec: any) => proSpec.spec_id === specId) || {};
+
+      const mergedSpec: any = {
+        spec_id: specId,
+        spec_name: spec.subcat_spec_name || "",
+        spec_desc: matchingProSpec.spec_desc || "",
+        rating_score: spec.rating_score || [],
+        spec_type: spec.cat_type || "",
+        prefix: spec.prefix || "",
+        suffix: spec.suffix || "",
+        score: matchingProSpec.score ?? (spec.rating_score.length && status !== ProductConstant.REJECTED
+          ? this.calculateRecommendScore(matchingProSpec.spec_desc || "", spec.rating_score)
+          : null),
+        subspecification: []
+      };
+
+      const finalSubspecifications = [];
+      const subspecDetails = matchingProSpec.subspecification || [];
+
+      spec.children?.forEach(child => {
+        const subspecId = child._id;
+        const matchingSubspec = subspecDetails.find((subspec: any) => subspec.subspec_id === subspecId) || {};
+
+        const mergedSubspec = {
+          subspec_id: subspecId,
+          subspec_name: child.subcat_subspec_name || "",
+          subspec_desc: matchingSubspec.subspec_desc || "",
+          rating_score: child.rating_score || [],
+          prefix: child.prefix || "",
+          suffix: child.suffix || "",
+          spec_id: specId,
+          score: matchingSubspec.score ?? (child.rating_score.length && status !== ProductConstant.REJECTED
+            ? this.calculateRecommendScore(matchingSubspec.subspec_desc || "", child.rating_score)
+            : null),
+        };
+
+        finalSubspecifications.push(mergedSubspec);
       });
 
-      if (spec.rating_score.length && status !== ProductConstant.REJECTED) {
-        spec.score = spec.score ?? this.calculateRecommendScore(spec.spec_desc, spec.rating_score);
-      }
-
-      spec.subspecification?.forEach((subspec: any) => {
-        const subspecData = subspecMap.get(subspec.subspec_id) || {};
-
-        Object.assign(subspec, {
-          subspec_name: subspecData.name || "",
-          rating_score: subspecData.rating_score || [],
-          prefix: subspecData.prefix || "",
-          suffix: subspecData.suffix || "",
-          spec_id: spec.spec_id
-        });
-
-        if (subspec.rating_score.length && status !== ProductConstant.REJECTED) {
-          subspec.score = subspec.score ?? this.calculateRecommendScore(subspec.subspec_desc, subspec.rating_score);
-        }
-      });
+      mergedSpec.subspecification = finalSubspecifications;
+      finalSpecDetails.push(mergedSpec);
     });
-    return proSpecDto;
+
+    return finalSpecDetails;
   }
 
   private calculateRecommendScore(value: string, ratingScore: any[]): number {

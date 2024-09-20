@@ -21,19 +21,34 @@ export class ProductVerificationSpecificationRepository extends AbstractReposito
   async updateProductSpecifications(verificationId: string, specification: any[]) {
     try {
       const operations = specification.map(spec => {
-        const {spec_id, spec_desc, subspecification } = spec;
-        return {
+        const { spec_id, spec_desc, subspecification } = spec;
+
+        const subspecUpdates = subspecification ? subspecification.map(subspec => {
+          return {
+            updateOne: {
+              filter: { verification_id: verificationId, spec_id: spec_id, 'subspecification.subspec_id': subspec.subspec_id },
+              update: { $set: { 'subspecification.$.subspec_desc': subspec.subspec_desc } }, // Update only spec_desc of the matching subspec_id
+              upsert: false
+            }
+          };
+        }) : [];
+
+        const mainSpecUpdate = {
           updateOne: {
-            filter: {verification_id: verificationId, spec_id: spec_id},
-            update: {$set: {spec_desc, subspecification}},
+            filter: { verification_id: verificationId, spec_id: spec_id },
+            update: { $set: { spec_desc } },
             upsert: true,
           }
-        }
-      })
+        };
 
-      const result = await this.productVerificationSpecificationModel.bulkWrite(operations);
+        return [mainSpecUpdate, ...subspecUpdates];
+      });
+
+      const flattenedOperations = operations.flat();
+      const result = await this.productVerificationSpecificationModel.bulkWrite(flattenedOperations);
       return result.modifiedCount > 0;
     } catch (error) {
+      console.error(error);
       return false;
     }
   }
@@ -50,7 +65,7 @@ export class ProductVerificationSpecificationRepository extends AbstractReposito
             return {
               updateOne: {
                 filter: { verification_id: verificationId, spec_id, 'subspecification.subspec_id': subspec_id },
-                update: { $set: { 'subspecification.$.score': subspecScore } }, // Use $set for atomic update
+                update: { $set: { 'subspecification.$.score': subspecScore } },
                 upsert: false,
               }
             };
@@ -59,7 +74,7 @@ export class ProductVerificationSpecificationRepository extends AbstractReposito
           const pushSubspecification = {
             updateOne: {
               filter: { verification_id: verificationId, spec_id, 'subspecification.subspec_id': { $exists: false } },
-              update: { $push: { subspecification: { $each: subspecification } } }, // Use $push to add subspecifications
+              update: { $push: { subspecification: { $each: subspecification } } },
               upsert: false,
             }
           };
@@ -70,7 +85,7 @@ export class ProductVerificationSpecificationRepository extends AbstractReposito
         return {
           updateOne: {
             filter: { verification_id: verificationId, spec_id },
-            update: { $set: { score: specScore } }, // Use $set for atomic update
+            update: { $set: { score: specScore } },
             upsert: false,
           }
         };
