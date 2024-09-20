@@ -4,8 +4,10 @@ import { RatingScoreDto } from "../../category/dtos/rating-score.dto";
 
 export class ProductSpecificationDto {
   @IsString()
-  @IsNotEmpty()
   pro_id: string;
+
+  @IsString()
+  verification_id: string;
 
   @IsString()
   @IsNotEmpty()

@@ -7,6 +7,12 @@ export class ProductDto {
   _id: string;
 
   @IsString()
+  verification_id: string;
+
+  @IsString()
+  pro_id: string;
+
+  @IsString()
   product_name: string;
 
   @IsString()

@@ -1,8 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { SchemaAbstract } from "../../../../common/database/abstracts/schema.abstract";
 
-@Schema({versionKey: false, collection: 'product'})
-export class Product extends SchemaAbstract {
+@Schema({versionKey: false, collection: 'product_verification'})
+export class ProductVerification extends SchemaAbstract {
+  @Prop({
+    required: true,
+    type: String,
+  })
+  pro_id: string;
+
   @Prop({
     required: true,
     type: String,
@@ -34,17 +40,21 @@ export class Product extends SchemaAbstract {
 
   @Prop({
     required: true,
+    type: String,
+  })
+  status: string;
+
+  @Prop({
+    required: true,
     type: Date,
     default: Date.now,
   })
   last_updated_on: Date;
 
   @Prop({
-    required: true,
-    type: Boolean,
-    default: false,
+    type: String,
   })
-  is_active: boolean;
+  last_updated_by: string;
 
   @Prop({
     type: Number,
@@ -55,6 +65,21 @@ export class Product extends SchemaAbstract {
     type: Number,
   })
   total_score: number;
+
+  @Prop({
+    type: String,
+  })
+  reviewed_by: string;
+
+  @Prop({
+    type: Date,
+  })
+  reviewed_on: Date;
+
+  @Prop({
+    type: String,
+  })
+  rejected_reason: string;
 }
 
-export const ProductSchema = SchemaFactory.createForClass(Product);
+export const ProductVerificationSchema = SchemaFactory.createForClass(ProductVerification);

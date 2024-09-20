@@ -24,38 +24,46 @@ import {
 import { ProductSpecificationDto } from "../../dtos/product-specification.dto";
 import { CategoryConstant } from "../../../../common/constant/category.constant";
 import { ProductConstant } from "../../../../common/constant/product.constant";
+import { ProductVerificationRepository } from "../../domain/repositories/product-verification.respository";
+import {
+  ProductVerificationSpecificationRepository
+} from "../../domain/repositories/product-verification-specification.repository";
 
 @Injectable()
 export class ProductService implements IProductService {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly productSpecificationRepository: ProductSpecificationRepository,
+    private readonly productVerificationRepository: ProductVerificationRepository,
+    private readonly productVerificationSpecificationRepository: ProductVerificationSpecificationRepository,
     private readonly productMapper: ProductMapper,
     @Inject(CategoryService.name) private readonly categoryService: ICategoryService,
     @Inject(SubcategorySpecificationService.name) private readonly subcategorySpecificationService: ISubcategorySpecificationService,
     @Inject(AuthenticationService.name) private readonly authenticationService: IAuthenticationService  ) {
   }
 
+  // Product
   async createProduct(productDto: ProductDto): Promise<boolean> {
     if (ObjectUtils.isEmpty(productDto)) {
       throw new ProductException(ProductErrorConstant.INVALID_PRODUCT);
     }
 
-    const _id = uuidv4();
-    //TODO: get owner_id
-    const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
-    const product = await this.productRepository.create({ ...productDto, _id, owner_id });
+    const productSearch = await this.productRepository.findOneById(productDto.pro_id);
+    if (ObjectUtils.isNotEmpty(productSearch)) {
+      return await this.updateProductDetailsById(productDto.pro_id, productDto);
+    }
 
+    const product = await this.productRepository.create({ ...productDto, _id: productDto.pro_id });
     const specifications = Object.values(productDto.specification).map(spec => ({
       ...spec,
-      pro_id: _id,
-    }))
+      pro_id: productDto.pro_id
+    }));
     const pro_spec = await this.productSpecificationRepository.createList(specifications);
 
     return ObjectUtils.isNotEmpty(product) || ObjectUtils.isNotEmpty(pro_spec);
   }
 
-  async getProductById(id: string): Promise<ProductDto> {
+  async getProductDetailsById(id: string): Promise<ProductDto> {
     if (StringUtils.isEmpty(id)) {
       throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
     }
@@ -65,80 +73,26 @@ export class ProductService implements IProductService {
       throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
     }
 
-    const names = await this.categoryService.findNameById(product.subcat_id)
-    const subcat_name = names.subcat_name;
-    const cat_name = names.cat_name;
-    const username = await this.authenticationService.findUserById(product.owner_id).then((r) => r.username);
+    const { subcat_name, cat_name } = await this.categoryService.findNameById(product.subcat_id);
+    const owner_username = await this.authenticationService
+      .findUserById(product.owner_id)
+      .then(user => user.username);
 
-    const pro_spec = await this.productSpecificationRepository.findAllByFilter({ pro_id: id });
-    const pro_spec_dto = this.productMapper.mapSchemaListToDtoList(pro_spec.map(spec => spec.toObject()), ProductSpecificationDto);
+    const proSpec = await this.productSpecificationRepository.findAllByFilter({ pro_id: id });
+    const proSpecDto = this.productMapper.mapSchemaListToDtoList(proSpec.map(spec => spec.toObject()), ProductSpecificationDto);
 
-    return { ...product.toObject(), specification: pro_spec_dto, subcat_name: subcat_name, owner_username: username, cat_name: cat_name };
+    const productObject = product.toObject();
+    return {
+      ...productObject,
+      specification: proSpecDto,
+      subcat_name,
+      owner_username,
+      cat_name
+    };
   }
 
-  async getProductVerificationDetailsById(id:string): Promise<ProductDto> {
-    const product = await this.getProductById(id);
 
-    const subcategory = await this.categoryService.findOneSubcategoryById(product.subcat_id);
-    product.rating_score = subcategory.rating_score ?? [];
-
-    const specList = await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(product.subcat_id);
-    const specMap = new Map<string, {name: string, rating_score: any[], spec_type: string, prefix: string, suffix: string}>;
-    const subspecMap = new Map<string, {name: string, rating_score: any[],  prefix: string, suffix: string}>;
-
-    specList.forEach(spec => {
-      specMap.set(spec._id, { name: spec.subcat_spec_name, rating_score: spec.rating_score, spec_type: spec.cat_type, prefix: spec.prefix, suffix: spec.suffix });
-      spec.children?.forEach(child => {
-        subspecMap.set(child._id, { name: child.subcat_subspec_name, rating_score: child.rating_score, prefix: child.prefix, suffix: child.suffix });
-      });
-    });
-
-    product.specification.map((spec: any) => {
-      spec.spec_name = specMap.get(spec.spec_id).name || "";
-      spec.rating_score = specMap.get(spec.spec_id).rating_score || [];
-      spec.spec_type = specMap.get(spec.spec_id).spec_type;
-      spec.prefix = specMap.get(spec.spec_id).prefix || "";
-      spec.suffix = specMap.get(spec.spec_id).suffix || "";
-      if(spec.rating_score.length !== 0 && product.status !== ProductConstant.REJECTED){
-        spec.score = spec.score ?? this.calculateRecommendScore(spec.spec_desc, spec.rating_score);
-      }
-      spec.subspecification?.map((subspec: any) => {
-        subspec.subspec_name = subspecMap.get(subspec.subspec_id).name || "";
-        subspec.rating_score = subspecMap.get(subspec.subspec_id).rating_score || [];
-        subspec.prefix = subspecMap.get(subspec.subspec_id).prefix || "";
-        subspec.suffix = subspecMap.get(subspec.subspec_id).suffix || "";
-        subspec.spec_id = spec.spec_id;
-        if(subspec.rating_score.length !== 0 && product.status !== ProductConstant.REJECTED){
-          subspec.score = subspec.score ?? this.calculateRecommendScore(subspec.subspec_desc, subspec.rating_score);
-        }
-      });
-    });
-
-    return product;
-  }
-
-  private calculateRecommendScore(value: string, ratingScore: any[]): number {
-    let maxScore = 0;
-    ratingScore.forEach(rating => {
-      let score = 0;
-      if(rating.action === CategoryConstant.RATING_HAVE_VALUE) {
-        score = rating.score;
-      } else if(rating.action === CategoryConstant.RATING_CONTAINS){
-        score = value.includes(rating.value) ? rating.score : 0;
-      } else if(rating.action === CategoryConstant.RATING_EQUAL_TO){
-        score = parseInt(value) === parseInt(rating.value) ? rating.score : 0
-      } else if (rating.action === CategoryConstant.RATING_MORE_THAN) {
-        score = parseInt(value) >= parseInt(rating.value) ? rating.score : 0;
-      } else if (rating.action === CategoryConstant.RATING_LESS_THAN) {
-        score = parseInt(value) <= parseInt(rating.value) ? rating.score : 0;
-      }
-      if(score > maxScore) maxScore = score;
-    })
-
-    return maxScore;
-  }
-
-  async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+  async getProductListByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
     //TODO: get owner_id
     const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
     productListFilterDto.owner_id = owner_id;
@@ -148,16 +102,7 @@ export class ProductService implements IProductService {
       return [];
     }
 
-    const cat_names = await this.categoryService.findAllSubcategoryNameByIds(productListFilterDto.cat_ids ?? []);
-    const subcatIdToNameMap = new Map<string, { subcat_name: string, cat_name: string }>();
-    cat_names.forEach(cat => {
-      if (cat.subcat_id) {
-        subcatIdToNameMap.set(cat.subcat_id, {
-          subcat_name: cat.subcat_name,
-          cat_name: cat.cat_name
-        });
-      }
-    });
+    const subcatIdToNameMap = await this.getCategoryAndSubcategoryMapByCatIds(productListFilterDto.cat_ids ?? []);
 
     const result = productList.map(product => {
       const subcatData = subcatIdToNameMap.get(product.subcat_id);
@@ -171,29 +116,221 @@ export class ProductService implements IProductService {
     return this.productMapper.mapSchemaListToDtoList(result, ProductDto);
   }
 
-  async getProductVerificationDetailsByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
-    const productList = await this.productRepository.getProductByFilter(productListFilterDto);
+
+  async updateProductDetailsById(id: string, productDto: ProductDto): Promise<boolean> {
+    const updateProduct = await this.productRepository.update(id, { ...productDto, _id: productDto.pro_id });
+    const updateProductSpec = await this.productSpecificationRepository.updateProductSpecifications(id, productDto.specification);
+
+    return ObjectUtils.isNotEmpty(updateProduct) && ObjectUtils.isNotEmpty(updateProductSpec);
+  }
+
+  async updateProductIsActive(id: string): Promise<boolean> {
+    const product = await this.productRepository.findOneById(id);
+    if (ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
+    const updateProduct = await this.productRepository.updateOneByFilter({ _id: id }, { is_active: !product.is_active });
+    if (ObjectUtils.isEmpty(updateProduct)) {
+      throw new ProductException(ProductErrorConstant.FAILED_TO_ACTIVATE);
+    }
+
+    return true;
+  }
+
+  async deleteProductById(id: string): Promise<boolean> {
+    const specResult = await this.productSpecificationRepository.deleteProductSpecificationByProId(id);
+    const productResult = await this.productRepository.delete(id);
+    return ObjectUtils.isNotEmpty(productResult) && ObjectUtils.isNotEmpty(specResult);
+  }
+
+  // Product Verification
+  async createProductVerification(productDto: ProductDto): Promise<boolean> {
+    if (ObjectUtils.isEmpty(productDto)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
+    }
+
+    const verificationId = productDto.verification_id ?? null;
+    const pro_id = productDto.pro_id ?? uuidv4();
+    const _id = uuidv4();
+
+    const searchVerification = await this.productVerificationRepository.findOneById(verificationId);
+
+    //If there is existed PENDING application
+    if (ObjectUtils.isNotEmpty(searchVerification) && searchVerification.status === ProductConstant.PENDING) {
+      return await this.updateProductVerificationDetailsById(verificationId, productDto);
+    }
+
+    //If resubmit Approved or Rejected application
+    if (ObjectUtils.isNotEmpty(searchVerification)) {
+      const proDetails = await this.getProductVerificationDetailsById(productDto.verification_id);
+      proDetails.status = ProductConstant.PENDING;
+      const resubmitApplication = await this.productVerificationRepository.create({ ...proDetails, _id });
+      const specifications = this.mapSpecificationsWithVerificationId(proDetails.specification, _id)
+      const resubmitSpecification = await this.productVerificationSpecificationRepository.createList(specifications);
+      return ObjectUtils.isNotEmpty(resubmitSpecification) || ObjectUtils.isNotEmpty(resubmitApplication);
+    }
+
+    //new application
+    const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+    const productVerification = await this.productVerificationRepository.create({
+      ...productDto,
+      _id,
+      pro_id,
+      owner_id
+    });
+
+    const specifications = this.mapSpecificationsWithVerificationId(productDto.specification, _id);
+    const proSpec = await this.productVerificationSpecificationRepository.createList(specifications);
+
+    return ObjectUtils.isNotEmpty(productVerification) || ObjectUtils.isNotEmpty(proSpec);
+  }
+
+  private mapSpecificationsWithVerificationId(specification: any, verificationId: string) {
+    return Object.values(specification).map((spec: any) => ({
+      ...spec,
+      verification_id: verificationId
+    }));
+  }
+
+  async getProductVerificationDetailsById(id: string): Promise<ProductDto> {
+    if (StringUtils.isEmpty(id)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
+    }
+
+    const productVerification = await this.productVerificationRepository.findOneById(id);
+    if (ObjectUtils.isEmpty(productVerification)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
+    const { subcat_name, cat_name } = await this.categoryService.findNameById(productVerification.subcat_id);
+    const owner_username = await this.authenticationService
+      .findUserById(productVerification.owner_id)
+      .then(user => user.username);
+
+    const subcategory = await this.categoryService.findOneSubcategoryById(productVerification.subcat_id);
+    const rating_score = subcategory.rating_score ?? [];
+
+    const specMaps = await this.getSpecMaps(productVerification.subcat_id);
+    const specification = await this.populateSpecDetails(id, specMaps, productVerification.status);
+
+    const productVerificationObject = productVerification.toObject()
+    return {
+      ...productVerificationObject,
+      cat_name,
+      subcat_name,
+      owner_username,
+      specification,
+      rating_score
+    };
+  }
+
+  private async getSpecMaps(subcatId: string) {
+    const specList = await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(subcatId);
+
+    const specMap = new Map<string, any>();
+    const subspecMap = new Map<string, any>();
+
+    specList.forEach(spec => {
+      specMap.set(spec._id, {
+        name: spec.subcat_spec_name,
+        rating_score: spec.rating_score,
+        spec_type: spec.cat_type,
+        prefix: spec.prefix,
+        suffix: spec.suffix
+      });
+
+      spec.children?.forEach(child => {
+        subspecMap.set(child._id, {
+          name: child.subcat_subspec_name,
+          rating_score: child.rating_score,
+          prefix: child.prefix,
+          suffix: child.suffix
+        });
+      });
+    });
+
+    return { specMap, subspecMap };
+  }
+
+  private async populateSpecDetails(id: string, specMaps: any, status: string) {
+    const proSpec = await this.productVerificationSpecificationRepository.findAllByFilter({ verification_id: id });
+    const proSpecDto = this.productMapper.mapSchemaListToDtoList(proSpec.map(spec => spec.toObject()), ProductSpecificationDto);
+
+    proSpecDto.forEach((spec: any) => {
+      const { specMap, subspecMap } = specMaps;
+      const specData = specMap.get(spec.spec_id) || {};
+
+      Object.assign(spec, {
+        spec_name: specData.name || "",
+        rating_score: specData.rating_score || [],
+        spec_type: specData.spec_type,
+        prefix: specData.prefix || "",
+        suffix: specData.suffix || ""
+      });
+
+      if (spec.rating_score.length && status !== ProductConstant.REJECTED) {
+        spec.score = spec.score ?? this.calculateRecommendScore(spec.spec_desc, spec.rating_score);
+      }
+
+      spec.subspecification?.forEach((subspec: any) => {
+        const subspecData = subspecMap.get(subspec.subspec_id) || {};
+
+        Object.assign(subspec, {
+          subspec_name: subspecData.name || "",
+          rating_score: subspecData.rating_score || [],
+          prefix: subspecData.prefix || "",
+          suffix: subspecData.suffix || "",
+          spec_id: spec.spec_id
+        });
+
+        if (subspec.rating_score.length && status !== ProductConstant.REJECTED) {
+          subspec.score = subspec.score ?? this.calculateRecommendScore(subspec.subspec_desc, subspec.rating_score);
+        }
+      });
+    });
+    return proSpecDto;
+  }
+
+  private calculateRecommendScore(value: string, ratingScore: any[]): number {
+    let maxScore = 0;
+    ratingScore.forEach(rating => {
+      let score = 0;
+      switch (rating.action) {
+        case CategoryConstant.RATING_HAVE_VALUE:
+          score = rating.score;
+          break;
+        case CategoryConstant.RATING_CONTAINS:
+          score = value.includes(rating.value) ? rating.score : 0;
+          break;
+        case CategoryConstant.RATING_EQUAL_TO:
+          score = parseInt(value) === parseInt(rating.value) ? rating.score : 0;
+          break;
+        case CategoryConstant.RATING_MORE_THAN:
+          score = parseInt(value) >= parseInt(rating.value) ? rating.score : 0;
+          break;
+        case CategoryConstant.RATING_LESS_THAN:
+          score = parseInt(value) <= parseInt(rating.value) ? rating.score : 0;
+          break;
+      }
+      maxScore = Math.max(maxScore, score);
+    });
+
+    return maxScore;
+  }
+
+  async getProductVerificationListByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    const productList = await this.productVerificationRepository.getProductByFilter(productListFilterDto);
     if (ObjectUtils.isEmpty(productList)) {
       return [];
     }
 
-    const cat_names = await this.categoryService.findAllSubcategoryNameByIds(productListFilterDto.cat_ids ?? []);
-    const subcatIdToNameMap = new Map<string, { subcat_name: string, cat_name: string }>();
-    cat_names.forEach(cat => {
-      if (cat.subcat_id) {
-        subcatIdToNameMap.set(cat.subcat_id, {
-          subcat_name: cat.subcat_name,
-          cat_name: cat.cat_name
-        });
-      }
-    });
-
-    const adminIds = productList.flatMap(product =>
-      product.reviewed_by ? [product.owner_id, product.reviewed_by] : [product.owner_id]
-    );
-    const userList = await this.authenticationService.findAllUsersByFilter({user_id: {$in: adminIds}});
-    const usernameMap = new Map<string, string>();
-    userList.forEach(user => usernameMap.set(user.user_id, user.username))
+    const [subcatIdToNameMap, usernameMap] = await Promise.all([
+      this.getCategoryAndSubcategoryMapByCatIds(productListFilterDto.cat_ids ?? []),
+      this.getUsernameMapByUserIds(
+        productList.flatMap(product => product.reviewed_by ? [product.owner_id, product.reviewed_by] : [product.owner_id])
+      )
+    ]);
 
     const result = productList.map(product => {
       const subcatData = subcatIdToNameMap.get(product.subcat_id);
@@ -209,64 +346,72 @@ export class ProductService implements IProductService {
     return this.productMapper.mapSchemaListToDtoList(result, ProductDto);
   }
 
-  async updateProductById(id: string, productDto: ProductDto): Promise<boolean> {
-    const product = await this.productRepository.findOneById(id);
-    if (ObjectUtils.isEmpty(product)) {
-      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
-    }
-
-    const updateProduct = await this.productRepository.update(id, productDto);
-    const updateProductSpec = await this.productSpecificationRepository.updateProductSpecifications(id, productDto.specification);
-
-    return ObjectUtils.isNotEmpty(updateProduct) && ObjectUtils.isNotEmpty(updateProductSpec);
+  private async getCategoryAndSubcategoryMapByCatIds(catIds: string[]) {
+    const catNames = await this.categoryService.findAllSubcategoryNameByIds(catIds);
+    return catNames.reduce((map, cat) => {
+      if (cat.subcat_id) {
+        map.set(cat.subcat_id, { subcat_name: cat.subcat_name, cat_name: cat.cat_name });
+      }
+      return map;
+    }, new Map<string, { subcat_name: string, cat_name: string }>());
   }
 
-  async updateProductIsActive(id: string): Promise<boolean> {
-    const product = await this.productRepository.findOneById(id);
-    if (ObjectUtils.isEmpty(product)) {
-      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
-    }
-
-    const updateProduct = await this.productRepository.updateOneByFilter({ _id: id }, { is_active: !product.is_active });
-    if(ObjectUtils.isEmpty(updateProduct)) {
-      throw new ProductException(ProductErrorConstant.FAILED_TO_ACTIVATE);
-    }
-
-    return true;
+  private async getUsernameMapByUserIds(userIds: string[]) {
+    const userList = await this.authenticationService.findAllUsersByFilter({ user_id: { $in: userIds } });
+    return userList.reduce((map, user) => {
+      map.set(user.user_id, user.username);
+      return map;
+    }, new Map<string, string>());
   }
 
-  async updateProductVerificationDetailsById(id:string, productDto:ProductDto): Promise<boolean> {
-    console.log(productDto)
-    //TODO: get owner_id
+  async updateProductVerificationDetailsById(id: string, productDto: ProductDto): Promise<boolean> {
+    //TODO: get logged in Id
     const username = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
 
-    let updateProductData: any = {
-      reviewed_on: new Date(),
-      reviewed_by: username,
-      status: ProductConstant.REJECTED,
-      rejected_reason: productDto.rejected_reason ?? null,
-    }
+    const updateProductSpec = await this.productVerificationSpecificationRepository.updateProductSpecifications(id, productDto.specification);
 
-    let updateProductSpec = true;
-    if(productDto.status === ProductConstant.APPROVED) {
-      console.log("run status approved");
-      updateProductData = {
-        ...updateProductData,
-        status: ProductConstant.APPROVED,
-        rating: productDto.rating,
-        total_score: productDto.total_score,
-      }
-      updateProductSpec = await this.productSpecificationRepository.updateProductSpecificationsScore(id, productDto.specification);
-    }
+    const updateProduct = {
+      ...productDto,
+      last_updated_on: new Date(),
+      last_updated_by: username
+    };
 
-    const product = await this.productRepository.update(id, updateProductData);
+    const product = await this.productVerificationRepository.update(id, updateProduct);
 
     return ObjectUtils.isNotEmpty(product) && updateProductSpec;
   }
 
-  async deleteProductById(id: string): Promise<boolean> {
-    const specResult = await this.productSpecificationRepository.deleteProductSpecificationByProId(id);
-    const productResult = await this.productRepository.delete(id);
+  async updateProductVerificationReviewById(id: string, productDto: ProductDto): Promise<boolean> {
+    //TODO: get logged in ID
+    const username = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+
+    const updateProductData: any = {
+      reviewed_on: new Date(),
+      reviewed_by: username,
+      status: productDto.status,
+      rejected_reason: productDto.rejected_reason ?? null
+    };
+
+    let updateProductSpec = true;
+    if ([ProductConstant.APPROVED, ProductConstant.PENDING].includes(productDto.status)) {
+      if (productDto.status === ProductConstant.APPROVED) {
+        Object.assign(updateProductData, {
+          rating: productDto.rating,
+          total_score: productDto.total_score
+        });
+        await this.createProduct(productDto);
+      }
+      updateProductSpec = await this.productVerificationSpecificationRepository.updateProductSpecificationsScore(id, productDto.specification);
+    }
+
+    const product = await this.productVerificationRepository.update(id, updateProductData);
+
+    return ObjectUtils.isNotEmpty(product) && updateProductSpec;
+  }
+
+  async deleteProductVerificationDetailsById(id: string): Promise<boolean> {
+    const specResult = await this.productVerificationSpecificationRepository.deleteProductSpecificationByVerificationId(id);
+    const productResult = await this.productVerificationRepository.delete(id);
     return ObjectUtils.isNotEmpty(productResult) && ObjectUtils.isNotEmpty(specResult);
   }
 }
