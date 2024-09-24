@@ -6,7 +6,6 @@ export class RatingScoreDto {
   action: string;
 
   @IsString()
-  @IsNotEmpty()
   value: string;
 
   @IsNumber()

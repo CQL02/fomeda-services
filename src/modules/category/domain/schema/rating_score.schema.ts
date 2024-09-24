@@ -5,7 +5,7 @@ export class RatingScore {
   @Prop({ required: true, type: String })
   action: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ type: String })
   value: string;
 
   @Prop({ required: true, type: Number })
