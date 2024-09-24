@@ -29,7 +29,6 @@ import {
   ProductVerificationSpecificationRepository
 } from "../../domain/repositories/product-verification-specification.repository";
 import { SubcategorySpecificationDto } from "../../../category/dtos/subcategory-specification.dto";
-import { SubcategorySubspecificationDto } from "../../../category/dtos/subcategory-subspecification.dto";
 
 @Injectable()
 export class ProductService implements IProductService {
