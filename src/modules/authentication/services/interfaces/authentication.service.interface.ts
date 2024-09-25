@@ -3,6 +3,8 @@ import { AdminDto } from "../../dtos/admin.dto";
 import { SupplierDto } from "../../dtos/supplier.dto";
 
 export interface IAuthenticationService {
+  login(userDto: UserDto): Promise<any>
+  logout(sessionId: string): Promise<any>
   createUser(userDto: UserDto): Promise<UserDto | AdminDto>;
   getUserDetailBySessionId(sessionId: string): Promise<UserDto>;
   generateJwtToken(user: UserDto): Promise<string>

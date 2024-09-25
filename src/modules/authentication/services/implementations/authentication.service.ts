@@ -10,6 +10,9 @@ import { SessionService } from './session.service';
 import * as bcrypt from 'bcrypt';
 import { ISessionService } from '../interfaces/session.service.interface';
 import { JwtService } from '@nestjs/jwt';
+import { RoleService } from '../../../role/services/implementations/role.service';
+import { IRoleService } from '../../../role/services/interfaces/role.service.interface';
+import { AuthErrorConstant, AuthException } from '../../../../common/exception/auth.exception';
 
 @Injectable()
 export class AuthenticationService implements IAuthenticationService {
@@ -18,8 +21,47 @@ export class AuthenticationService implements IAuthenticationService {
     private readonly supplierRepository: SupplierRepository,
     private readonly adminRepository: AdminRepository,
     private readonly jwtService: JwtService,
-    @Inject(SessionService.name) private readonly sessionService: ISessionService
+    @Inject(SessionService.name) private readonly sessionService: ISessionService,
+    @Inject(RoleService.name) private readonly roleService: IRoleService,
   ) {
+  }
+
+  async login(req: any): Promise<any> {
+    const { fullname, username, type, email_address, user_id, is_active, role_id} = req?.user || {};
+
+    if (!is_active)
+      throw new AuthException(AuthErrorConstant.INVALID_STATUS);
+
+    const sessionId = await this.sessionService.findSessionIdByUserId(user_id);
+    if (!sessionId)
+      throw new AuthException(AuthErrorConstant.INVALID_SESSION);
+
+    let payload: any = { fullname, username, email_address, sub: user_id, role: type };
+
+    if (type === 'supplier') {
+      payload = { ...payload, sessionId, modules: ['product_management']};
+    } else if (type === 'admin') {
+      const { modules, is_active: isRoleActive } = await this.roleService.getModules(role_id) || {};
+
+      if (!isRoleActive)
+        throw new AuthException(AuthErrorConstant.INVALID_ROLE);
+
+      payload = { ...payload, sessionId, modules };
+    }
+
+    const jwtToken = this.jwtService.sign(payload);
+
+    return {
+      token: jwtToken,
+      sessionId,
+    }
+  }
+
+  async logout(sessionId: string): Promise<any> {
+    await this.sessionService.deleteSession(sessionId);
+    return{
+      message: 'Logout successful'
+    };
   }
 
   async createUser(userDto): Promise<SupplierDto | AdminDto> {

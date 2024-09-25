@@ -16,9 +16,6 @@ import { LocalAuthGuard } from '../passport/local-auth.guard';
 import { SessionService } from '../services/implementations/session.service';
 import { IAuthenticationService } from '../services/interfaces/authentication.service.interface';
 import { ISessionService } from '../services/interfaces/session.service.interface';
-import { RoleService } from '../../role/services/implementations/role.service';
-import { IRoleService } from '../../role/services/interfaces/role.service.interface';
-import { JwtService } from '@nestjs/jwt';
 import { AdminDto } from '../dtos/admin.dto';
 
 @Controller('auth')
@@ -26,8 +23,6 @@ export class AuthenticationController {
 
   constructor(@Inject(AuthenticationService.name) private readonly authenticationService: IAuthenticationService,
               @Inject(SessionService.name) private readonly sessionService: ISessionService,
-              @Inject(RoleService.name) private readonly roleService: IRoleService,
-              private readonly jwtService: JwtService
   ) {
   }
 
@@ -43,45 +38,16 @@ export class AuthenticationController {
   async login(
     @Request() req,
   ) {
-    const { fullname, username, type, email_address, user_id: userId, is_active: isUserActive, role_id: roleId } = req?.user || {};
-
-    if (!isUserActive) return null;
-
-    const sessionId = await this.sessionService.findSessionIdByUserId(userId);
-    if (!sessionId) return null;
-
-    let payload: any = { fullname, username, email_address, sub: userId, role: type };
-
-    if (type === 'supplier') {
-
-      payload = { ...payload, sessionId, modules: ['product_management']};
-    } else if (type === 'admin') {
-      const { modules, is_active: isRoleActive } = await this.roleService.getModules(roleId) || {};
-
-      if (!isRoleActive) return null;
-
-      payload = { ...payload, sessionId, modules };
-    }
-
-    const jwtToken = this.jwtService.sign(payload);
-
-    return {
-      token: jwtToken,
-      sessionId,
-    };
-
+    return this.authenticationService.login(req);
   }
 
   @Post('logout')
   async logout(
     @Body() sessionDto: SessionDto,
   ) {
-    const sessionId = sessionDto?.session_id;
-    await this.sessionService.deleteSession(sessionId as string);
-    return { message: 'Logout successful' };
+    return this.authenticationService.logout(sessionDto?.session_id)
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Get('check-email')
   async checkEmailDuplicate(
     @Query('email') email: string,
