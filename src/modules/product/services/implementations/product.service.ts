@@ -29,7 +29,6 @@ import {
   ProductVerificationSpecificationRepository
 } from "../../domain/repositories/product-verification-specification.repository";
 import { SubcategorySpecificationDto } from "../../../category/dtos/subcategory-specification.dto";
-import { SubcategorySubspecificationDto } from "../../../category/dtos/subcategory-subspecification.dto";
 
 @Injectable()
 export class ProductService implements IProductService {
@@ -163,17 +162,22 @@ export class ProductService implements IProductService {
       return await this.updateProductVerificationDetailsById(verificationId, productDto);
     }
 
-    //If resubmit Approved or Rejected application
-    if (ObjectUtils.isNotEmpty(searchVerification)) {
+    //If resubmit Approved or Rejected application with no any changes
+    if (ObjectUtils.isNotEmpty(searchVerification) && !productDto.specification) {
       const proDetails = await this.getProductVerificationDetailsById(productDto.verification_id);
       proDetails.status = ProductConstant.PENDING;
+      proDetails.reviewed_by = null;
+      proDetails.reviewed_on = null;
+      productDto.rejected_reason = null;
+      productDto.rating = 0;
+      productDto.total_score = 0;
       const resubmitApplication = await this.productVerificationRepository.create({ ...proDetails, _id });
       const specifications = this.mapSpecificationsWithVerificationId(proDetails.specification, _id)
       const resubmitSpecification = await this.productVerificationSpecificationRepository.createList(specifications);
       return ObjectUtils.isNotEmpty(resubmitSpecification) || ObjectUtils.isNotEmpty(resubmitApplication);
     }
 
-    //new application
+    //new application or resubmit with changes
     const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
     const productVerification = await this.productVerificationRepository.create({
       ...productDto,
