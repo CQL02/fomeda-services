@@ -7,7 +7,8 @@ export class User extends Document {
   @Prop({
     required: true,
     type: String,
-    default: uuidv4()
+    default: () => uuidv4(),
+    unique: true,
   })
   user_id: string
 
