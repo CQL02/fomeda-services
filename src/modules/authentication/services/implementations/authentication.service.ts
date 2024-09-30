@@ -36,7 +36,7 @@ export class AuthenticationService implements IAuthenticationService {
     if (!sessionId)
       throw new AuthException(AuthErrorConstant.INVALID_SESSION);
 
-    let payload: any = { fullname, username, email_address, sub: user_id, role: type };
+    let payload: any = { fullname, username, email_address, user_id, role: type };
 
     if (type === 'supplier') {
       payload = { ...payload, sessionId, modules: ['product_management']};
