@@ -63,6 +63,10 @@ export class ContentService implements IContentService {
     return this.carouselRepository.aggregate(pipeline);
   }
 
+  async findVisibleCarousel(): Promise<Carousel[]> {
+    return this.carouselRepository.findAllByFilter({}, {image: 1});
+  }
+
   async updateCarousel(id: string, carouselDto: CarouselDto): Promise<Carousel> {
     return this.carouselRepository.update(id, {...carouselDto, last_updated_on: new Date()});
   }
@@ -116,6 +120,10 @@ export class ContentService implements IContentService {
     return this.contentRepository.aggregate(pipeline);
   }
 
+  async findVisibleContent(): Promise<Content[]> {
+    return this.contentRepository.findAllByFilter({}, {title: 1, description: 1});
+  }
+
   async updateContent(id: string, contentDto: ContentDto): Promise<Content> {
     return this.contentRepository.update(id, {...contentDto, last_updated_on: new Date()});
   }
@@ -167,6 +175,10 @@ export class ContentService implements IContentService {
       { $unset: ['creator', 'updater'] }
     ];
     return this.historyTimelineRepository.aggregate(pipeline);
+  }
+
+  async findVisibleHistoryTimeline(): Promise<HistoryTimeline[]> {
+    return this.historyTimelineRepository.findAllByFilter({}, {title: 1, description: 1, date: 1});
   }
 
   async updateHistoryTimeline(id: string, historyTimelineDto: HistoryTimelineDto): Promise<HistoryTimeline> {

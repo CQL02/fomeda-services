@@ -21,6 +21,11 @@ export class ContentController {
     return this.contentService.findAllCarousel();
   }
 
+  @Get('find-visible-carousel')
+  async findVisibleCarousel():Promise<CarouselDto[]> {
+    return this.contentService.findVisibleCarousel();
+  }
+
   @Patch('update-carousel')
   async updateCarousel(@Query("id") id: string, @Body() carouselDto: CarouselDto) {
     return this.contentService.updateCarousel(id, carouselDto);
@@ -41,6 +46,11 @@ export class ContentController {
     return this.contentService.findAllContent();
   }
 
+  @Get('find-visible-content')
+  async findVisibleContent():Promise<ContentDto[]> {
+    return this.contentService.findVisibleContent();
+  }
+
   @Patch('update-content')
   async updateContent(@Query("id") id: string, @Body() contentDto: ContentDto) {
     return this.contentService.updateContent(id, contentDto);
@@ -59,6 +69,11 @@ export class ContentController {
   @Get('find-all-history-timeline')
   async findAllHistoryTimeline():Promise<ContentDto[]> {
     return this.contentService.findAllHistoryTimeline();
+  }
+
+  @Get('find-visible-history-timeline')
+  async findVisibleHistoryTimeline():Promise<ContentDto[]> {
+    return this.contentService.findVisibleHistoryTimeline();
   }
 
   @Patch('update-history-timeline')
