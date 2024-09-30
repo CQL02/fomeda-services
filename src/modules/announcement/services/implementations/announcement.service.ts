@@ -19,11 +19,48 @@ export class AnnouncementService implements IAnnouncementService {
   }
 
   async findAllAnnouncements(): Promise<Announcement[]> {
-    return this.announcementRepository.findAll();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'created_by',
+          foreignField: 'user_id',
+          as: 'creator',
+        },
+      },
+      {
+        $unwind: {
+          path: '$creator',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'updated_by',
+          foreignField: 'user_id',
+          as: 'updater',
+        },
+      },
+      {
+        $unwind: {
+          path: '$updater',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          created_by: { $ifNull: ['$creator.username', '$created_by'] },
+          updated_by: { $ifNull: ['$updater.username', '$updated_by'] },
+        },
+      },
+      { $unset: ['creator', 'updater'] }
+    ];
+    return await this.announcementRepository.aggregate(pipeline);
   }
 
-  async findAllAnnouncementByFilter(filterDto): Promise<Announcement[]> {
-    return this.announcementRepository.findAllByFilter(filterDto);
+  async findVisibleAnnouncement(filterDto): Promise<Announcement[]> {
+    return this.announcementRepository.findAllByFilter(filterDto, {title: 1, description: 1, file_uploaded: 1, created_on: 1});
   }
 
 

@@ -4,5 +4,5 @@ import { AnnouncementDto } from "../../dtos/announcement.dto";
 export interface IAnnouncementService {
   createAnnouncement(announcementDto: AnnouncementDto): Promise<Announcement>;
   findAllAnnouncements(): Promise<Announcement[]>;
-  findAllAnnouncementByFilter(filterDto): Promise<Announcement[]>;
+  findVisibleAnnouncement(filterDto): Promise<Announcement[]>;
 }
