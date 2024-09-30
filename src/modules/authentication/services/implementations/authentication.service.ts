@@ -72,7 +72,7 @@ export class AuthenticationService implements IAuthenticationService {
     else if (userDto?.type === 'admin')
       hashedPassword = await bcrypt.hash('123456@ABCdefg', 14);
 
-    const response = await this.userRepository.create({ ...userDto, password: hashedPassword });
+    const response = await this.userRepository.create({ ...userDto, password: hashedPassword, status: "pending_review" });
 
     if (!response) {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -261,7 +261,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
-    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
+    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true, status: "approved" });
     return this.supplierRepository.updateOneByFilter({ user_id }, {
       ...supplierDto,
       last_updated_on: new Date(),
@@ -275,9 +275,12 @@ export class AuthenticationService implements IAuthenticationService {
       rejected_on: new Date(),
       reason: supplierDto?.reason,
     };
+
+    await this.userRepository.updateOneByFilter({user_id}, {status: "rejected"});
     return this.supplierRepository.updateOneByFilter({ user_id }, {
       $push: { rejection: rejection },
       last_updated_on: new Date(),
+      status: "rejected"
     });
   }
 
