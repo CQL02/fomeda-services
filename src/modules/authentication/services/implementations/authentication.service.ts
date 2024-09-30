@@ -136,6 +136,33 @@ export class AuthenticationService implements IAuthenticationService {
     return !!user;
   }
 
+  async checkSupplierStatus(username: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ username, type: "supplier" });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+    else {
+      return {
+        status: user?.status
+      }
+    }
+  }
+
+  async getRejectionInfo(username: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({username})
+    const user_id = user?.user_id;
+    const supplier = await this.supplierRepository.findOneByFilter({user_id});
+
+    const lastRejection = supplier?.rejection.slice(-1)[0];
+
+    if (lastRejection) {
+      const { rejected_on, reason } = lastRejection;
+      return { rejected_on, reason };
+    }
+
+    throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+  }
+
   async createSupplier(supplierDto: SupplierDto): Promise<SupplierDto> {
     return this.supplierRepository.create({ ...supplierDto });
   }

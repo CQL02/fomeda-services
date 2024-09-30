@@ -62,6 +62,21 @@ export class AuthenticationController {
     return this.authenticationService.checkUsernameDuplicate(username);
   }
 
+  @Get('check-status')
+  async checkSupplierStatus(
+    @Query('username') username: string,
+  ) {
+    return this.authenticationService.checkSupplierStatus(username);
+  }
+
+  @Get('get-rejection-info')
+  async getRejectionInfo(
+    @Query('username') username: string,
+  ) {
+    return this.authenticationService.getRejectionInfo(username);
+  }
+
+
   @Get('get-details')
   async getDetails(
     @Query('sessionId') session_id: string,
