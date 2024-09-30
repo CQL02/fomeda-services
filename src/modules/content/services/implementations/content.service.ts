@@ -23,7 +23,44 @@ export class ContentService implements IContentService {
   }
 
   async findAllCarousel(): Promise<Carousel[]> {
-    return this.carouselRepository.findAll();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'created_by',
+          foreignField: 'user_id',
+          as: 'creator',
+        },
+      },
+      {
+        $unwind: {
+          path: '$creator',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'last_updated_by',
+          foreignField: 'user_id',
+          as: 'updater',
+        },
+      },
+      {
+        $unwind: {
+          path: '$updater',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          created_by: { $ifNull: ['$creator.username', '$created_by'] },
+          last_updated_by: { $ifNull: ['$updater.username', '$last_updated_by'] },
+        },
+      },
+      { $unset: ['creator', 'updater'] }
+    ];
+    return this.carouselRepository.aggregate(pipeline);
   }
 
   async updateCarousel(id: string, carouselDto: CarouselDto): Promise<Carousel> {
@@ -39,7 +76,44 @@ export class ContentService implements IContentService {
   }
 
   async findAllContent(): Promise<Content[]> {
-    return this.contentRepository.findAll();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'created_by',
+          foreignField: 'user_id',
+          as: 'creator',
+        },
+      },
+      {
+        $unwind: {
+          path: '$creator',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'last_updated_by',
+          foreignField: 'user_id',
+          as: 'updater',
+        },
+      },
+      {
+        $unwind: {
+          path: '$updater',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          created_by: { $ifNull: ['$creator.username', '$created_by'] },
+          last_updated_by: { $ifNull: ['$updater.username', '$last_updated_by'] },
+        },
+      },
+      { $unset: ['creator', 'updater'] }
+    ];
+    return this.contentRepository.aggregate(pipeline);
   }
 
   async updateContent(id: string, contentDto: ContentDto): Promise<Content> {
@@ -55,7 +129,44 @@ export class ContentService implements IContentService {
   }
 
   async findAllHistoryTimeline(): Promise<HistoryTimeline[]> {
-    return this.historyTimelineRepository.findAll();
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'created_by',
+          foreignField: 'user_id',
+          as: 'creator',
+        },
+      },
+      {
+        $unwind: {
+          path: '$creator',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'last_updated_by',
+          foreignField: 'user_id',
+          as: 'updater',
+        },
+      },
+      {
+        $unwind: {
+          path: '$updater',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          created_by: { $ifNull: ['$creator.username', '$created_by'] },
+          last_updated_by: { $ifNull: ['$updater.username', '$last_updated_by'] },
+        },
+      },
+      { $unset: ['creator', 'updater'] }
+    ];
+    return this.historyTimelineRepository.aggregate(pipeline);
   }
 
   async updateHistoryTimeline(id: string, historyTimelineDto: HistoryTimelineDto): Promise<HistoryTimeline> {
