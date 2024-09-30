@@ -14,8 +14,8 @@ export abstract class AbstractRepository<T extends Document> {
     return this.model.find().exec();
   }
 
-  async findAllByFilter(filterDto): Promise<T[]> {
-    return this.model.find(filterDto).exec();
+  async findAllByFilter(filterDto, projection={}): Promise<T[]> {
+    return this.model.find(filterDto, projection).exec();
   }
 
   async findOneById(id: string): Promise<T> {
