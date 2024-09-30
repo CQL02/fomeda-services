@@ -27,7 +27,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async login(req: any): Promise<any> {
-    const { fullname, username, type, email_address, user_id, is_active, role_id} = req?.user || {};
+    const { fullname, username, type, email_address, user_id, is_active, role_id } = req?.user || {};
 
     if (!is_active)
       throw new AuthException(AuthErrorConstant.INVALID_STATUS);
@@ -39,7 +39,7 @@ export class AuthenticationService implements IAuthenticationService {
     let payload: any = { fullname, username, email_address, user_id, role: type };
 
     if (type === 'supplier') {
-      payload = { ...payload, sessionId, modules: ['product_management']};
+      payload = { ...payload, sessionId, modules: ['product_management'] };
     } else if (type === 'admin') {
       const { modules, is_active: isRoleActive } = await this.roleService.getModules(role_id) || {};
 
@@ -54,13 +54,13 @@ export class AuthenticationService implements IAuthenticationService {
     return {
       token: jwtToken,
       sessionId,
-    }
+    };
   }
 
   async logout(sessionId: string): Promise<any> {
     await this.sessionService.deleteSession(sessionId);
-    return{
-      message: 'Logout successful'
+    return {
+      message: 'Logout successful',
     };
   }
 
@@ -70,7 +70,7 @@ export class AuthenticationService implements IAuthenticationService {
     if (userDto?.type === 'supplier')
       hashedPassword = await bcrypt.hash(userDto?.password, 14);
     else if (userDto?.type === 'admin')
-      hashedPassword = await bcrypt.hash("123456@ABCdefg", 14);
+      hashedPassword = await bcrypt.hash('123456@ABCdefg', 14);
 
     const response = await this.userRepository.create({ ...userDto, password: hashedPassword });
 
@@ -88,7 +88,7 @@ export class AuthenticationService implements IAuthenticationService {
       const adminDto = {
         user_id: response?.user_id,
         created_by: userDto?.created_by,
-        last_updated_by: userDto?.last_updated_by
+        last_updated_by: userDto?.last_updated_by,
       };
       return this.createAdmin(adminDto);
     }
@@ -132,7 +132,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async checkUsernameDuplicate(username: string): Promise<boolean> {
-    const user = await this.userRepository.findOneByFilter( { username });
+    const user = await this.userRepository.findOneByFilter({ username });
     return !!user;
   }
 
@@ -170,7 +170,7 @@ export class AuthenticationService implements IAuthenticationService {
             registered_on: '$supplier_info.registered_on',
           },
         },
-      }
+      },
     ];
     return await this.userRepository.aggregate(pipeline);
   }
@@ -203,7 +203,7 @@ export class AuthenticationService implements IAuthenticationService {
             approved_on: '$supplier_info.approved_on',
           },
         },
-      }
+      },
     ];
     return await this.userRepository.aggregate(pipeline);
   }
@@ -214,7 +214,11 @@ export class AuthenticationService implements IAuthenticationService {
 
   async approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
     await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
-    return this.supplierRepository.updateOneByFilter({ user_id }, {...supplierDto, last_updated_on: new Date(), approved_on: new Date()})
+    return this.supplierRepository.updateOneByFilter({ user_id }, {
+      ...supplierDto,
+      last_updated_on: new Date(),
+      approved_on: new Date(),
+    });
   }
 
   async rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
@@ -223,7 +227,10 @@ export class AuthenticationService implements IAuthenticationService {
       rejected_on: new Date(),
       reason: supplierDto?.reason,
     };
-    return this.supplierRepository.updateOneByFilter({ user_id }, {$push: {rejection: rejection}, last_updated_on: new Date()})
+    return this.supplierRepository.updateOneByFilter({ user_id }, {
+      $push: { rejection: rejection },
+      last_updated_on: new Date(),
+    });
   }
 
   async createAdmin(adminDto: AdminDto): Promise<AdminDto> {
@@ -232,7 +239,8 @@ export class AuthenticationService implements IAuthenticationService {
 
   async findAllAdmins(): Promise<AdminDto[]> {
     const pipeline = [
-      { $match: { type: 'admin'} },
+      { $match: { type: 'admin' } },
+      //lookup from admin collection to find admin info
       {
         $lookup: {
           from: 'admin',
@@ -242,6 +250,40 @@ export class AuthenticationService implements IAuthenticationService {
         },
       },
       { $unwind: '$admin_info' },
+
+      // lookup from user collection to match created_by username
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'admin_info.created_by',
+          foreignField: 'user_id',
+          as: 'created_by_info',
+        },
+      },
+      {
+        $unwind: {
+          path: '$created_by_info',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // lookup from user collection to match last_updated_by username
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'admin_info.last_updated_by',
+          foreignField: 'user_id',
+          as: 'last_updated_by_info',
+        },
+      },
+      {
+        $unwind: {
+          path: '$last_updated_by_info',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // replace response with new root
       {
         $replaceRoot: {
           newRoot: {
@@ -253,12 +295,16 @@ export class AuthenticationService implements IAuthenticationService {
             role_id: '$role_id',
             email_address: '$email_address',
             created_on: '$admin_info.created_on',
-            created_by: '$admin_info.created_by',
+            created_by: {
+              $ifNull: ['$created_by_info.username', '$admin_info.created_by'],
+            },
             last_updated_on: '$admin_info.last_updated_on',
-            last_updated_by: '$admin_info.last_updated_by'
+            last_updated_by: {
+              $ifNull: ['$last_updated_by_info.username', '$admin_info.last_updated_by'],
+            },
           },
         },
-      }
+      },
     ];
     return await this.userRepository.aggregate(pipeline);
   }
@@ -268,8 +314,8 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async updateAdminById(user_id: string, adminDto: AdminDto): Promise<AdminDto> {
-    await this.userRepository.updateOneByFilter({user_id}, {...adminDto})
-    return await this.adminRepository.updateOneByFilter( {user_id} , {...adminDto, last_updated_on: new Date()});
+    await this.userRepository.updateOneByFilter({ user_id }, { ...adminDto });
+    return await this.adminRepository.updateOneByFilter({ user_id }, { ...adminDto, last_updated_on: new Date() });
   }
 
 }
