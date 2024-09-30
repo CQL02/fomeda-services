@@ -14,6 +14,11 @@ export class AnnouncementController {
     return this.announcementService.findAllAnnouncements();
   }
 
+  @Get('find-visible-announcement')
+  async getVisibleAnnouncement() {
+    return this.announcementService.findAllAnnouncementByFilter({visibility: true});
+  }
+
   @Post('create-announcement')
   async createAnnouncement(@Body() announcementDto: AnnouncementDto) {
     return this.announcementService.createAnnouncement(announcementDto);
