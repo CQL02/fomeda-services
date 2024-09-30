@@ -52,13 +52,13 @@ export class Supplier extends Document {
   approved_on: Date;
 
   @Prop({
-    type: Object,
+    type: Array,
   })
   rejection: {
     rejected_by: string;
     rejected_on: Date;
     reason: string;
-  };
+  }[];
 }
 
 export const SupplierSchema = SchemaFactory.createForClass(Supplier);
