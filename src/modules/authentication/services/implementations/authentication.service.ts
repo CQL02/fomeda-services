@@ -177,6 +177,7 @@ export class AuthenticationService implements IAuthenticationService {
 
   async findAllActiveSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
+      //lookup from supplier collection to find supplier info
       { $match: { type: 'supplier', is_active: true } },
       {
         $lookup: {
@@ -187,6 +188,24 @@ export class AuthenticationService implements IAuthenticationService {
         },
       },
       { $unwind: '$supplier_info' },
+
+      // lookup from user collection to match approved_by with username
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.approved_by',
+          foreignField: 'user_id',
+          as: 'approve_info',
+        },
+      },
+      {
+        $unwind: {
+          path: '$approve_info',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Replace response with new root
       {
         $replaceRoot: {
           newRoot: {
@@ -199,7 +218,9 @@ export class AuthenticationService implements IAuthenticationService {
             company_no: '$supplier_info.company_no',
             company_address: '$supplier_info.company_address',
             registered_on: '$supplier_info.registered_on',
-            approved_by: '$supplier_info.approved_by',
+            approved_by: {
+              $ifNull: ['$approve_info.username', '$supplier_info.approved_by'],
+            },
             approved_on: '$supplier_info.approved_on',
           },
         },
