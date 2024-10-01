@@ -171,9 +171,10 @@ export class AuthenticationService implements IAuthenticationService {
     return this.supplierRepository.findAll();
   }
 
-  async findAllInactiveSuppliers(): Promise<SupplierDto[]> {
+  async findAllPendingSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
-      { $match: { type: 'supplier', is_active: false } },
+      //lookup from supplier collection to match user_id
+      { $match: { type: 'supplier', is_active: false, status: "pending_review" } },
       {
         $lookup: {
           from: 'supplier',
@@ -183,6 +184,52 @@ export class AuthenticationService implements IAuthenticationService {
         },
       },
       { $unwind: '$supplier_info' },
+
+      //lookup from users to map rejected_by in each rejection object
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.rejection.rejected_by',
+          foreignField: 'user_id',
+          as: 'rejected_users',
+        },
+      },
+
+      //map over the rejection array and replace rejected_by with the username
+      {
+        $addFields: {
+          'supplier_info.rejection': {
+            $map: {
+              input: '$supplier_info.rejection',
+              as: 'rej',
+              in: {
+                rejected_by: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: {
+                          $filter: {
+                            input: '$rejected_users',
+                            as: 'user',
+                            cond: { $eq: ['$$user.user_id', '$$rej.rejected_by'] },
+                          },
+                        },
+                        as: 'user',
+                        in: '$$user.username',
+                      },
+                    },
+                    0,
+                  ],
+                },
+                rejected_on: '$$rej.rejected_on',
+                reason: '$$rej.reason',
+              },
+            },
+          },
+        },
+      },
+
+      // Replace response
       {
         $replaceRoot: {
           newRoot: {
@@ -195,6 +242,7 @@ export class AuthenticationService implements IAuthenticationService {
             company_no: '$supplier_info.company_no',
             company_address: '$supplier_info.company_address',
             registered_on: '$supplier_info.registered_on',
+            rejection: '$supplier_info.rejection'
           },
         },
       },
@@ -202,10 +250,95 @@ export class AuthenticationService implements IAuthenticationService {
     return await this.userRepository.aggregate(pipeline);
   }
 
-  async findAllActiveSuppliers(): Promise<SupplierDto[]> {
+  async findAllRejectedSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       //lookup from supplier collection to find supplier info
-      { $match: { type: 'supplier', is_active: true } },
+      { $match: { type: 'supplier', is_active: false, status: "rejected" } },
+      {
+        $lookup: {
+          from: 'supplier',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          as: 'supplier_info',
+        },
+      },
+      { $unwind: '$supplier_info' },
+
+      //lookup from users to map rejected_by in each rejection object
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.rejection.rejected_by',
+          foreignField: 'user_id',
+          as: 'rejected_users',
+        },
+      },
+
+      //map over the rejection array and replace rejected_by with the username
+      {
+        $addFields: {
+          'supplier_info.rejection': {
+            $map: {
+              input: '$supplier_info.rejection',
+              as: 'rej',
+              in: {
+                rejected_by: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: {
+                          $filter: {
+                            input: '$rejected_users',
+                            as: 'user',
+                            cond: { $eq: ['$$user.user_id', '$$rej.rejected_by'] },
+                          },
+                        },
+                        as: 'user',
+                        in: '$$user.username',
+                      },
+                    },
+                    0,
+                  ],
+                },
+                rejected_on: '$$rej.rejected_on',
+                reason: '$$rej.reason',
+              },
+            },
+          },
+        },
+      },
+
+      // Replace response with new root
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: '$supplier_info._id',
+            user_id: '$supplier_info.user_id',
+            fullname: '$fullname',
+            username: '$username',
+            email_address: '$email_address',
+            company_name: '$supplier_info.company_name',
+            company_no: '$supplier_info.company_no',
+            company_address: '$supplier_info.company_address',
+            registered_on: '$supplier_info.registered_on',
+            rejection: '$supplier_info.rejection',
+            last_rejected_by: {
+              $arrayElemAt: ['$supplier_info.rejection.rejected_by', -1]
+            },
+            last_rejected_on: {
+              $arrayElemAt: ['$supplier_info.rejection.rejected_on', -1]
+            },
+          },
+        },
+      },
+    ];
+    return await this.userRepository.aggregate(pipeline);
+  }
+
+  async findAllApprovedSuppliers(): Promise<SupplierDto[]> {
+    const pipeline = [
+      //lookup from supplier collection to find supplier info
+      { $match: { type: 'supplier', is_active: true, status: "approved" } },
       {
         $lookup: {
           from: 'supplier',
@@ -232,6 +365,50 @@ export class AuthenticationService implements IAuthenticationService {
         },
       },
 
+      //lookup from users to map rejected_by in each rejection object
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.rejection.rejected_by',
+          foreignField: 'user_id',
+          as: 'rejected_users',
+        },
+      },
+
+      //map over the rejection array and replace rejected_by with the username
+      {
+        $addFields: {
+          'supplier_info.rejection': {
+            $map: {
+              input: '$supplier_info.rejection',
+              as: 'rej',
+              in: {
+                rejected_by: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: {
+                          $filter: {
+                            input: '$rejected_users',
+                            as: 'user',
+                            cond: { $eq: ['$$user.user_id', '$$rej.rejected_by'] },
+                          },
+                        },
+                        as: 'user',
+                        in: '$$user.username',
+                      },
+                    },
+                    0,
+                  ],
+                },
+                rejected_on: '$$rej.rejected_on',
+                reason: '$$rej.reason',
+              },
+            },
+          },
+        },
+      },
+
       // Replace response with new root
       {
         $replaceRoot: {
@@ -249,6 +426,7 @@ export class AuthenticationService implements IAuthenticationService {
               $ifNull: ['$approve_info.username', '$supplier_info.approved_by'],
             },
             approved_on: '$supplier_info.approved_on',
+            rejection: '$supplier_info.rejection'
           },
         },
       },

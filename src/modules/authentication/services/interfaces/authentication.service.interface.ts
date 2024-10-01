@@ -20,8 +20,9 @@ export interface IAuthenticationService {
 
   createSupplier(supplierDto: SupplierDto): Promise<SupplierDto>;
   findAllSuppliers(): Promise<SupplierDto[]>;
-  findAllInactiveSuppliers(): Promise<SupplierDto[]>;
-  findAllActiveSuppliers(): Promise<SupplierDto[]>;
+  findAllPendingSuppliers(): Promise<SupplierDto[]>;
+  findAllRejectedSuppliers(): Promise<SupplierDto[]>;
+  findAllApprovedSuppliers(): Promise<SupplierDto[]>;
   findSupplierById(user_id: string): Promise<SupplierDto>;
   approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto);
   rejectSupplierReviewStatus(user_id: string, supplierDto: SupplierDto);

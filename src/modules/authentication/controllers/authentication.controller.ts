@@ -92,14 +92,18 @@ export class AuthenticationController {
     return this.authenticationService.updateUserStatus(user_id, userDto);
   }
 
-  @Get('inactive-suppliers')
-  async findAllInactiveSuppliers() {
-    return this.authenticationService.findAllInactiveSuppliers();
+  @Get('pending-suppliers')
+  async findAllPendingSuppliers() {
+    return this.authenticationService.findAllPendingSuppliers();
+  }
+  @Get('rejected-suppliers')
+  async findAllRejectedSuppliers() {
+    return this.authenticationService.findAllRejectedSuppliers();
   }
 
-  @Get('active-suppliers')
-  async findAllActiveSuppliers() {
-    return this.authenticationService.findAllActiveSuppliers();
+  @Get('approved-suppliers')
+  async findAllApprovedSuppliers() {
+    return this.authenticationService.findAllApprovedSuppliers();
   }
 
   @Get('user_id')
