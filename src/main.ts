@@ -6,6 +6,7 @@ import * as session from 'express-session';
 import * as connectMongoDBSession from 'connect-mongodb-session';
 import * as bodyParser from 'body-parser';
 import * as crypto from 'crypto';
+import { ConfigService } from "@nestjs/config";
 
 const MongoDBStore = connectMongoDBSession(session);
 
@@ -24,7 +25,9 @@ async function bootstrap() {
   //     transform: true,
   //   } ));
 
+  const configService =app.get(ConfigService);
   app.enableCors({
+    origin: configService.get('FRONTEND_URL'),
     credentials: true
   });
 
@@ -42,6 +45,6 @@ async function bootstrap() {
   app.use(passport.session())
   app.use(bodyParser.json({limit: '50mb'}));
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-  await app.listen(4000);
+  await app.listen(process.env.PORT || 4000);
 }
 bootstrap();
