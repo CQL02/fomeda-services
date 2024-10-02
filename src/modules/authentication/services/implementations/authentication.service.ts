@@ -72,7 +72,11 @@ export class AuthenticationService implements IAuthenticationService {
     else if (userDto?.type === 'admin')
       hashedPassword = await bcrypt.hash('123456@ABCdefg', 14);
 
-    const response = await this.userRepository.create({ ...userDto, password: hashedPassword, status: "pending_review" });
+    const response = await this.userRepository.create({
+      ...userDto,
+      password: hashedPassword,
+      status: 'pending_review',
+    });
 
     if (!response) {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -106,7 +110,7 @@ export class AuthenticationService implements IAuthenticationService {
     return this.jwtService.sign(payload);
   }
 
-  async findUser(filterDto): Promise<UserDto> {
+  async findUser(filterDto: any): Promise<UserDto> {
     return this.userRepository.findOneByFilter(filterDto, { _id: 0 });
   }
 
@@ -114,7 +118,7 @@ export class AuthenticationService implements IAuthenticationService {
     return this.userRepository.findAll();
   }
 
-  async findAllUsersByFilter(filterDto): Promise<UserDto[]> {
+  async findAllUsersByFilter(filterDto: any): Promise<UserDto[]> {
     return this.userRepository.findAllByFilter(filterDto);
   }
 
@@ -137,21 +141,21 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async checkSupplierStatus(username: string): Promise<any> {
-    const user = await this.userRepository.findOneByFilter({ username, type: "supplier" });
+    const user = await this.userRepository.findOneByFilter({ username, type: 'supplier' });
 
     if (!user)
       throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
     else {
       return {
-        status: user?.status
-      }
+        status: user?.status,
+      };
     }
   }
 
   async getRejectionInfo(username: string): Promise<any> {
-    const user = await this.userRepository.findOneByFilter({username})
+    const user = await this.userRepository.findOneByFilter({ username });
     const user_id = user?.user_id;
-    const supplier = await this.supplierRepository.findOneByFilter({user_id});
+    const supplier = await this.supplierRepository.findOneByFilter({ user_id });
 
     const lastRejection = supplier?.rejection.slice(-1)[0];
 
@@ -163,18 +167,74 @@ export class AuthenticationService implements IAuthenticationService {
     throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
   }
 
+  async getProfileInfo(user_id: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ user_id });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    if (user?.type === 'supplier') {
+      const supplier = await this.supplierRepository.findOneByFilter({ user_id });
+
+      if (!supplier)
+        throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+      return {
+        user_id: user?.user_id,
+        fullname: user?.fullname,
+        username: user?.username,
+        email_address: user?.email_address,
+        company_name: supplier?.company_name,
+        company_no: supplier?.company_no,
+        company_address: supplier?.company_address,
+        registered_on: supplier?.registered_on,
+        approved_on: supplier?.approved_on,
+      };
+    } else {
+      const admin = await this.adminRepository.findOneByFilter({ user_id });
+
+      if (!admin)
+        throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+      return {
+        user_id: user?.user_id,
+        fullname: user?.fullname,
+        username: user?.username,
+        email_address: user?.email_address,
+        created_on: admin?.created_on,
+      };
+    }
+  }
+
+  async updateProfile(user_id: string, userDto): Promise<SupplierDto | AdminDto> {
+    const user = await this.userRepository.findOneByFilter({ user_id });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    const type = user?.type;
+
+    if (type === 'supplier') {
+      return await this.updateSupplierById(user_id, userDto);
+    } else if (type === 'admin') {
+      return await this.updateAdminById(user_id, userDto);
+    }
+
+    throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+  }
+
   async createSupplier(supplierDto: SupplierDto): Promise<SupplierDto> {
-    return this.supplierRepository.create({ ...supplierDto });
+    return await this.supplierRepository.create(supplierDto);
   }
 
   async findAllSuppliers(): Promise<SupplierDto[]> {
-    return this.supplierRepository.findAll();
+    return await this.supplierRepository.findAll();
   }
 
   async findAllPendingSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       //lookup from supplier collection to match user_id
-      { $match: { type: 'supplier', is_active: false, status: "pending_review" } },
+      { $match: { type: 'supplier', is_active: false, status: 'pending_review' } },
       {
         $lookup: {
           from: 'supplier',
@@ -242,7 +302,7 @@ export class AuthenticationService implements IAuthenticationService {
             company_no: '$supplier_info.company_no',
             company_address: '$supplier_info.company_address',
             registered_on: '$supplier_info.registered_on',
-            rejection: '$supplier_info.rejection'
+            rejection: '$supplier_info.rejection',
           },
         },
       },
@@ -253,7 +313,7 @@ export class AuthenticationService implements IAuthenticationService {
   async findAllRejectedSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       //lookup from supplier collection to find supplier info
-      { $match: { type: 'supplier', is_active: false, status: "rejected" } },
+      { $match: { type: 'supplier', is_active: false, status: 'rejected' } },
       {
         $lookup: {
           from: 'supplier',
@@ -323,10 +383,10 @@ export class AuthenticationService implements IAuthenticationService {
             registered_on: '$supplier_info.registered_on',
             rejection: '$supplier_info.rejection',
             last_rejected_by: {
-              $arrayElemAt: ['$supplier_info.rejection.rejected_by', -1]
+              $arrayElemAt: ['$supplier_info.rejection.rejected_by', -1],
             },
             last_rejected_on: {
-              $arrayElemAt: ['$supplier_info.rejection.rejected_on', -1]
+              $arrayElemAt: ['$supplier_info.rejection.rejected_on', -1],
             },
           },
         },
@@ -338,7 +398,7 @@ export class AuthenticationService implements IAuthenticationService {
   async findAllApprovedSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       //lookup from supplier collection to find supplier info
-      { $match: { type: 'supplier', is_active: true, status: "approved" } },
+      { $match: { type: 'supplier', is_active: true, status: 'approved' } },
       {
         $lookup: {
           from: 'supplier',
@@ -426,7 +486,7 @@ export class AuthenticationService implements IAuthenticationService {
               $ifNull: ['$approve_info.username', '$supplier_info.approved_by'],
             },
             approved_on: '$supplier_info.approved_on',
-            rejection: '$supplier_info.rejection'
+            rejection: '$supplier_info.rejection',
           },
         },
       },
@@ -439,7 +499,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
-    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true, status: "approved" });
+    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true, status: 'approved' });
     return this.supplierRepository.updateOneByFilter({ user_id }, {
       ...supplierDto,
       last_updated_on: new Date(),
@@ -454,11 +514,19 @@ export class AuthenticationService implements IAuthenticationService {
       reason: supplierDto?.reason,
     };
 
-    await this.userRepository.updateOneByFilter({user_id}, {status: "rejected"});
+    await this.userRepository.updateOneByFilter({ user_id }, { status: 'rejected' });
     return this.supplierRepository.updateOneByFilter({ user_id }, {
       $push: { rejection: rejection },
       last_updated_on: new Date(),
-      status: "rejected"
+      status: 'rejected',
+    });
+  }
+
+  async updateSupplierById(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
+    await this.userRepository.updateOneByFilter({ user_id }, { ...supplierDto });
+    return await this.supplierRepository.updateOneByFilter({ user_id }, {
+      ...supplierDto,
+      last_updated_on: new Date(),
     });
   }
 

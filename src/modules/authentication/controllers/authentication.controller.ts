@@ -84,6 +84,21 @@ export class AuthenticationController {
     return this.authenticationService.getUserDetailBySessionId(session_id);
   }
 
+  @Get('get-profile-info')
+  async getProfileInfo(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.getProfileInfo(user_id);
+  }
+
+  @Patch('update-profile')
+  async updateProfile(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.updateProfile(user_id, userDto);
+  }
+
   @Patch('user_id')
   async updateUserStatus(
     @Param('user_id') user_id: string,
