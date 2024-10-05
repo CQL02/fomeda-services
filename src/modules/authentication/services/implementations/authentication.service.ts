@@ -13,7 +13,6 @@ import { JwtService } from '@nestjs/jwt';
 import { RoleService } from '../../../role/services/implementations/role.service';
 import { IRoleService } from '../../../role/services/interfaces/role.service.interface';
 import { AuthErrorConstant, AuthException } from '../../../../common/exception/auth.exception';
-import { response } from 'express';
 
 @Injectable()
 export class AuthenticationService implements IAuthenticationService {
@@ -102,7 +101,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async updatePassword(user_id: string, userDto: UserDto): Promise<any> {
-    const user = await this.userRepository.findOneByFilter({user_id})
+    const user = await this.userRepository.findOneByFilter({ user_id });
 
     if (!user)
       throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
@@ -171,13 +170,12 @@ export class AuthenticationService implements IAuthenticationService {
     else {
       return {
         status: user?.status,
+        ...(user.status === 'rejected' && { user_id: user.user_id }),
       };
     }
   }
 
-  async getRejectionInfo(username: string): Promise<any> {
-    const user = await this.userRepository.findOneByFilter({ username });
-    const user_id = user?.user_id;
+  async getRejectionInfo(user_id: string): Promise<any> {
     const supplier = await this.supplierRepository.findOneByFilter({ user_id });
 
     const lastRejection = supplier?.rejection.slice(-1)[0];
@@ -188,6 +186,44 @@ export class AuthenticationService implements IAuthenticationService {
     }
 
     throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+  }
+
+  async getAppealInfo(user_id: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ user_id, status: 'rejected' });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    const supplier = await this.supplierRepository.findOneByFilter({ user_id });
+
+    if (!supplier)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    return {
+      user_id: user?.user_id,
+      fullname: user?.fullname,
+      username: user?.username,
+      email_address: user?.email_address,
+      company_name: supplier?.company_name,
+      company_no: supplier?.company_no,
+      company_address: supplier?.company_address,
+    };
+  }
+
+  async appealRegistration(user_id: string, userDto: UserDto): Promise<any> {
+    try {
+      await this.userRepository.updateOneByFilter({ user_id, status: 'rejected' }, {
+        ...userDto, status: 'pending_review',
+      });
+      await this.supplierRepository.updateOneByFilter({ user_id }, {
+        ...userDto,
+        last_updated_on: new Date(),
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
   async getProfileInfo(user_id: string): Promise<any> {

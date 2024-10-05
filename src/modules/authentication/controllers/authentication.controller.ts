@@ -71,11 +71,25 @@ export class AuthenticationController {
 
   @Get('get-rejection-info')
   async getRejectionInfo(
-    @Query('username') username: string,
+    @Query('user_id') user_id: string,
   ) {
-    return this.authenticationService.getRejectionInfo(username);
+    return this.authenticationService.getRejectionInfo(user_id);
   }
 
+  @Get('get-appeal-info')
+  async getAppealInfo(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.getAppealInfo(user_id);
+  }
+
+  @Patch('appeal')
+  async Appeal(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.appealRegistration(user_id, userDto);
+  }
 
   @Get('get-details')
   async getDetails(

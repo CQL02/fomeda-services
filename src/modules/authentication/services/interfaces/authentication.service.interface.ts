@@ -17,6 +17,8 @@ export interface IAuthenticationService {
   checkUsernameDuplicate(username: string): Promise<boolean>
   checkSupplierStatus(username: string): Promise<any>
   getRejectionInfo(username: string): Promise<any>
+  getAppealInfo(user_id: string): Promise<any>
+  appealRegistration(user_id: string, userDto: UserDto): Promise<any>
   getProfileInfo(user_id: string): Promise<any>
   updateProfile(user_id: string, userDto: UserDto): Promise<SupplierDto | AdminDto>
   updatePassword(user_id: string, userDto: UserDto): Promise<any>;
