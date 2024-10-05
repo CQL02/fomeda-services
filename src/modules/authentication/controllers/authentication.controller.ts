@@ -99,6 +99,14 @@ export class AuthenticationController {
     return this.authenticationService.updateProfile(user_id, userDto);
   }
 
+  @Patch('update-password')
+  async updatePassword(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.updatePassword(user_id, userDto);
+  }
+
   @Patch('user_id')
   async updateUserStatus(
     @Param('user_id') user_id: string,

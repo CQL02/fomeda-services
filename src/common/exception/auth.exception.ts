@@ -5,6 +5,7 @@ export enum AuthErrorConstant {
   INVALID_STATUS = 3002,
   INVALID_SESSION = 3003,
   INVALID_ROLE = 3004,
+  INVALID_OLD_PASSWORD = 3005
 }
 
 export const AuthErrorMessage = {
@@ -12,6 +13,7 @@ export const AuthErrorMessage = {
   [AuthErrorConstant.INVALID_STATUS]: 'Invalid status',
   [AuthErrorConstant.INVALID_SESSION]: 'Invalid session',
   [AuthErrorConstant.INVALID_ROLE]: 'Invalid role',
+  [AuthErrorConstant.INVALID_OLD_PASSWORD]: 'Invalid old password'
 }
 
 export class AuthException extends HttpException {

@@ -13,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RoleService } from '../../../role/services/implementations/role.service';
 import { IRoleService } from '../../../role/services/interfaces/role.service.interface';
 import { AuthErrorConstant, AuthException } from '../../../../common/exception/auth.exception';
+import { response } from 'express';
 
 @Injectable()
 export class AuthenticationService implements IAuthenticationService {
@@ -98,6 +99,28 @@ export class AuthenticationService implements IAuthenticationService {
     }
 
     throw new Error('Internal error');
+  }
+
+  async updatePassword(user_id: string, userDto: UserDto): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({user_id})
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    const isMatch = await bcrypt.compare(userDto?.password, user?.password);
+
+    if (!isMatch) {
+      throw new AuthException(AuthErrorConstant.INVALID_OLD_PASSWORD);
+    }
+    const hashedPassword = await bcrypt.hash(userDto?.new_password, 14);
+
+    try {
+      await this.userRepository.updateOneByFilter({ user_id }, { password: hashedPassword });
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
   async getUserDetailBySessionId(sessionId: string): Promise<UserDto> {

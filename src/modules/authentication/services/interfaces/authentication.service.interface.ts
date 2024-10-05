@@ -19,6 +19,7 @@ export interface IAuthenticationService {
   getRejectionInfo(username: string): Promise<any>
   getProfileInfo(user_id: string): Promise<any>
   updateProfile(user_id: string, userDto: UserDto): Promise<SupplierDto | AdminDto>
+  updatePassword(user_id: string, userDto: UserDto): Promise<any>;
 
   createSupplier(supplierDto: SupplierDto): Promise<SupplierDto>;
   findAllSuppliers(): Promise<SupplierDto[]>;
