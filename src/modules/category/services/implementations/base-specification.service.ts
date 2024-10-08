@@ -58,7 +58,6 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     });
     return [...generalSpecList, ...result];
   }
-
   async findActiveBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]> {
     const generalSpecList = this.categoryMapper.mapGeneralSpecificationDtoListToBaseSpecificationDtoList(
       await this.generalSpecificationService.findAllActiveGeneralSpecification()
@@ -73,6 +72,22 @@ export class BaseSpecificationService implements IBaseSpecificationService {
       return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
     });
     return [...generalSpecList, ...result];
+  }
+
+  async findActiveBaseSpecificationByCatIds(ids: string[]): Promise<BaseSpecificationDto[]> {
+    const filter: any = { is_active: true };
+    if (ids && ids.length > 0) {
+      filter.cat_id = { $in: ids };
+    }
+
+    const specificationList = await this.categoryBaseSpecificationRepository.findAllByFilter(filter);
+    const specificationIdList = specificationList.map(spec => spec._id);
+    const subspecificationList = await this.categoryBaseSubspecificationRepository.findAllByFilter({ subcat_spec_id: { $in: specificationIdList }, is_active: true });
+
+    return specificationList.map(spec => {
+      const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
+      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+    });
   }
 
   async findBaseSpecificationById(id: string): Promise<BaseSpecificationDto> {

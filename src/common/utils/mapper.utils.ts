@@ -22,6 +22,8 @@ export class MapperUtils {
           dtoInstance[key] = new Map(Object.entries(value));
         } else if (Array.isArray(value)) {
           dtoInstance[key] = value
+        } else if (type === Object) {
+          dtoInstance[key] = value;
         } else if (typeof value === 'object' && value !== null) {
           dtoInstance[key] = this.mapToDto(value, dto);
         } else {

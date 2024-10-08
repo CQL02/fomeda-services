@@ -3,10 +3,15 @@ import { ProductService } from "../services/implementations/product.service";
 import { IProductService } from "../services/interfaces/product.service.interface";
 import { ProductDto } from "../dtos/product.dto";
 import { ProductListFilterDto } from "../dtos/product-list-filter.dto";
+import { ConsumerService } from "../services/implementations/consumer.service";
+import { ConsumerProductFilterDto } from "../dtos/consumer-product-filter.dto";
 
 @Controller("product")
 export class ProductController {
-  constructor(@Inject(ProductService.name) private readonly productService: IProductService) {
+  constructor(
+    @Inject(ProductService.name) private readonly productService: IProductService,
+    @Inject(ConsumerService.name) private readonly consumerService: ConsumerService
+  ) {
   }
 
   //Product
@@ -70,5 +75,29 @@ export class ProductController {
   @Delete("delete-product-verification-details-by-id")
   async deleteProductVerificationDetailsById(@Query("id") id: string): Promise<boolean> {
     return await this.productService.deleteProductVerificationDetailsById(id);
+  }
+
+  //Consumer
+  @Post("get-consumer-product-by-filter")
+  async getConsumerProductByFilter(@Query("skip") skip: number,
+                                   @Query("limit") limit: number,
+                                   @Body() filter: ConsumerProductFilterDto): Promise<{products: ProductDto[], total: number}> {
+    return await this.consumerService.getConsumerProductByFilter(filter, skip, limit);
+  }
+
+  @Get("get-consumer-specification-filter-by-subcat_id")
+  async getConsumerSpecificationFilterBySubcatId(@Query("id") subcat_id: string): Promise<ConsumerProductFilterDto> {
+    return await this.consumerService.getConsumerSpecificationFilterBySubcatId(subcat_id);
+  }
+
+  @Get("get-consumer-compared-product")
+  async getConsumerComparedProduct(@Query("subcat_id") subcat_id: string,
+                                   @Query("ids") ids: string[]) {
+    return await this.consumerService.getConsumerComparedProduct(subcat_id, ids);
+  }
+
+  @Get("get-product-details")
+  async getProductDetails(@Query("id") id: string) {
+    return await this.consumerService.getProductDetails(id);
   }
 }
