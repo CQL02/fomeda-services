@@ -16,6 +16,8 @@ import { IProductService } from "../interfaces/product.service.interface";
 import { ConsumerProductFilterDto } from "../../dtos/consumer-product-filter.dto";
 import { SubcategorySpecificationDto } from "../../../category/dtos/subcategory-specification.dto";
 import { ProductMapper } from "../mapper/product.mapper";
+import { ObjectUtils } from "../../../../common/utils/object.utils";
+import { ProductErrorConstant, ProductException } from "../../../../common/exception/product.exception";
 
 @Injectable()
 export class ConsumerService implements IConsumerService {
@@ -37,10 +39,6 @@ export class ConsumerService implements IConsumerService {
       const result = await this.productService.getProductDetailsById(id);
       if (result.specification) {
         result.specification.map((spec) => {
-          if(spec.spec_id === "category" || spec.spec_id === "subcategory" || spec.spec_id === "model_no" || spec.spec_id === "product_name") {
-            return;
-          }
-
           const currentSpec = specMap.get(spec.spec_id);
           spec.spec_name = currentSpec.name;
           spec.spec_type = currentSpec.spec_type;
@@ -157,7 +155,34 @@ export class ConsumerService implements IConsumerService {
   }
 
   async getProductDetails(id: string): Promise<ProductDto> {
-    return await this.productService.getProductDetailsById(id);
+    const product = await this.productService.getProductDetailsById(id);
+    if(ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND)
+    }
+
+    const specList = await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(product.subcat_id);
+    const { specMap, subspecMap } = this.getSpecMaps(specList);
+
+    if(product.specification){
+      product.specification.map((spec) => {
+        const specData = specMap.get(spec.spec_id)
+        spec.spec_name = specData.name;
+        spec.spec_type = specData.spec_type;
+        spec.prefix = specData.prefix;
+        spec.suffix = specData.suffix;
+
+        if(spec.subspecification){
+          spec.subspecification.map((subspec) => {
+            const subspecData = subspecMap.get(subspec.subspec_id);
+            subspec.subspec_name = subspecData.name;
+            subspec.prefix = subspecData.prefix;
+            subspec.suffix = subspecData.suffix;
+          })
+        }
+      })
+    }
+
+    return product;
   }
 
 }
