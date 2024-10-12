@@ -62,7 +62,7 @@ export class ProductRepository extends AbstractRepository<Product> {
 
       const ratingSpec = specification.find((spec) => spec.spec_id === "rating");
       if (ratingSpec) {
-        const descArray =  ratingSpec.desc_list.map(Number)
+        const descArray = ratingSpec.desc_list.map(Number);
         matchStage.$and = [{ rating: { $in: descArray } }];
       }
 
@@ -71,12 +71,13 @@ export class ProductRepository extends AbstractRepository<Product> {
           const specFilter: any = { "specification.spec_id": spec.spec_id };
           if (spec.desc_list && spec.desc_list.length > 0) {
             specFilter["specification.spec_desc"] = { $in: spec.desc_list };
+          } else {
+            specFilter["specification.spec_desc"] = { $nin: ["", "-"] };
           }
           proSpecFilters.push(specFilter);
         }
       });
     }
-
 
     if (subspecification) {
       subspecification.forEach(subspec => {
