@@ -18,6 +18,8 @@ import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
 import { StringUtils } from "../../../../common/utils/string.utils";
 import { ProductFormSpecificationDto } from "../../dtos/product-form-specification.dto";
+import { GeneralSpecificationService } from "./general-specification.service";
+import { IGeneralSpecificationService } from "../interfaces/general-specification.service.interface";
 
 @Injectable()
 export class SubcategorySpecificationService implements ISubcategorySpecificationService {
@@ -27,7 +29,8 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     private readonly categoryMapper: CategoryMapper,
     @Inject(SequenceService.name) private readonly sequenceService: ISequenceService,
     @Inject(CategoryService.name) private readonly categoryService: ICategoryService,
-    @Inject(BaseSpecificationService.name) private readonly baseSpecificationService: IBaseSpecificationService
+    @Inject(BaseSpecificationService.name) private readonly baseSpecificationService: IBaseSpecificationService,
+    @Inject(GeneralSpecificationService.name) private readonly generalSpecificationService: IGeneralSpecificationService,
   ) {
   }
 
@@ -77,6 +80,32 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     });
 
     return [...baseSpecList, ...result];
+  }
+
+  async findActiveSubcategorySpecificationByCatIdsAndSubcatIds(cat_ids: string[], subcat_ids: string[]): Promise<SubcategorySpecificationDto[]> {
+    const generalSpecList = await this.generalSpecificationService.findAllActiveGeneralSpecification();
+
+    const baseSpecList = await this.baseSpecificationService.findActiveBaseSpecificationByCatIds(cat_ids);
+
+    let result = []
+    if(subcat_ids && subcat_ids.length > 0) {
+      const specificationList = await this.subcategorySpecificationRepository.findAllByFilter({
+        subcat_id: { $in: subcat_ids },
+        is_active: true
+      });
+      const specificationIdList = specificationList.map(spec => spec._id);
+      const subspecificationList = await this.subcategorySubspecificationRepository.findAllByFilter({
+        subcat_spec_id: { $in: specificationIdList },
+        is_active: true
+      });
+
+      result = specificationList.map(spec => {
+        const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
+        return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+      });
+    }
+
+    return [...generalSpecList, ...baseSpecList, ...result];
   }
 
   async findSubcategorySpecificationById(id: string): Promise<SubcategorySpecificationDto> {

@@ -18,6 +18,7 @@ import { ProductVerificationRepository } from "./domain/repositories/product-ver
 import {
   ProductVerificationSpecificationRepository
 } from "./domain/repositories/product-verification-specification.repository";
+import { ConsumerService } from "./services/implementations/consumer.service";
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import {
   controllers: [ProductController],
   providers: [
     { provide: ProductService.name, useClass: ProductService },
+    { provide: ConsumerService.name, useClass: ConsumerService },
     ProductRepository,
     ProductSpecificationRepository,
     ProductVerificationRepository,
