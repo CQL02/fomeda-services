@@ -10,6 +10,7 @@ import { AnnouncementModule } from '../modules/announcement/announcement.module'
 import { ContentModule } from '../modules/content/content.module';
 import { ProductModule } from "../modules/product/product.module";
 import { RoleModule } from '../modules/role/role.module';
+import { ReportModule } from "../modules/report/report.module";
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { RoleModule } from '../modules/role/role.module';
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule, CategoryModule, AuthenticationModule, AnnouncementModule, ContentModule, ProductModule, RoleModule],
+      imports: [ConfigModule, CategoryModule, AuthenticationModule, AnnouncementModule, ContentModule, ProductModule, RoleModule, ReportModule],
       useFactory: (configService: ConfigService) =>
         getMongoConfig(configService),
       inject: [ConfigService],

@@ -62,11 +62,63 @@ export class AuthenticationController {
     return this.authenticationService.checkUsernameDuplicate(username);
   }
 
+  @Get('check-status')
+  async checkSupplierStatus(
+    @Query('username') username: string,
+  ) {
+    return this.authenticationService.checkSupplierStatus(username);
+  }
+
+  @Get('get-rejection-info')
+  async getRejectionInfo(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.getRejectionInfo(user_id);
+  }
+
+  @Get('get-appeal-info')
+  async getAppealInfo(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.getAppealInfo(user_id);
+  }
+
+  @Patch('appeal')
+  async Appeal(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.appealRegistration(user_id, userDto);
+  }
+
   @Get('get-details')
   async getDetails(
     @Query('sessionId') session_id: string,
   ) {
     return this.authenticationService.getUserDetailBySessionId(session_id);
+  }
+
+  @Get('get-profile-info')
+  async getProfileInfo(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.getProfileInfo(user_id);
+  }
+
+  @Patch('update-profile')
+  async updateProfile(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.updateProfile(user_id, userDto);
+  }
+
+  @Patch('update-password')
+  async updatePassword(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.updatePassword(user_id, userDto);
   }
 
   @Patch('user_id')
@@ -77,14 +129,18 @@ export class AuthenticationController {
     return this.authenticationService.updateUserStatus(user_id, userDto);
   }
 
-  @Get('inactive-suppliers')
-  async findAllInactiveSuppliers() {
-    return this.authenticationService.findAllInactiveSuppliers();
+  @Get('pending-suppliers')
+  async findAllPendingSuppliers() {
+    return this.authenticationService.findAllPendingSuppliers();
+  }
+  @Get('rejected-suppliers')
+  async findAllRejectedSuppliers() {
+    return this.authenticationService.findAllRejectedSuppliers();
   }
 
-  @Get('active-suppliers')
-  async findAllActiveSuppliers() {
-    return this.authenticationService.findAllActiveSuppliers();
+  @Get('approved-suppliers')
+  async findAllApprovedSuppliers() {
+    return this.authenticationService.findAllApprovedSuppliers();
   }
 
   @Get('user_id')

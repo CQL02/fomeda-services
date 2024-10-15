@@ -72,7 +72,11 @@ export class AuthenticationService implements IAuthenticationService {
     else if (userDto?.type === 'admin')
       hashedPassword = await bcrypt.hash('123456@ABCdefg', 14);
 
-    const response = await this.userRepository.create({ ...userDto, password: hashedPassword });
+    const response = await this.userRepository.create({
+      ...userDto,
+      password: hashedPassword,
+      status: 'pending_review',
+    });
 
     if (!response) {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -96,6 +100,28 @@ export class AuthenticationService implements IAuthenticationService {
     throw new Error('Internal error');
   }
 
+  async updatePassword(user_id: string, userDto: UserDto): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ user_id });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    const isMatch = await bcrypt.compare(userDto?.password, user?.password);
+
+    if (!isMatch) {
+      throw new AuthException(AuthErrorConstant.INVALID_OLD_PASSWORD);
+    }
+    const hashedPassword = await bcrypt.hash(userDto?.new_password, 14);
+
+    try {
+      await this.userRepository.updateOneByFilter({ user_id }, { password: hashedPassword });
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
   async getUserDetailBySessionId(sessionId: string): Promise<UserDto> {
     const userId = await this.sessionService.validateSession(sessionId);
     return this.userRepository.findOneByFilter({ user_id: userId }, { _id: 0, password: 0 });
@@ -106,7 +132,7 @@ export class AuthenticationService implements IAuthenticationService {
     return this.jwtService.sign(payload);
   }
 
-  async findUser(filterDto): Promise<UserDto> {
+  async findUser(filterDto: any): Promise<UserDto> {
     return this.userRepository.findOneByFilter(filterDto, { _id: 0 });
   }
 
@@ -114,7 +140,7 @@ export class AuthenticationService implements IAuthenticationService {
     return this.userRepository.findAll();
   }
 
-  async findAllUsersByFilter(filterDto): Promise<UserDto[]> {
+  async findAllUsersByFilter(filterDto: any): Promise<UserDto[]> {
     return this.userRepository.findAllByFilter(filterDto);
   }
 
@@ -136,17 +162,138 @@ export class AuthenticationService implements IAuthenticationService {
     return !!user;
   }
 
+  async checkSupplierStatus(username: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ username, type: 'supplier' });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+    else {
+      return {
+        status: user?.status,
+        ...(user.status === 'rejected' && { user_id: user.user_id }),
+      };
+    }
+  }
+
+  async getRejectionInfo(user_id: string): Promise<any> {
+    const supplier = await this.supplierRepository.findOneByFilter({ user_id });
+
+    const lastRejection = supplier?.rejection.slice(-1)[0];
+
+    if (lastRejection) {
+      const { rejected_on, reason } = lastRejection;
+      return { rejected_on, reason };
+    }
+
+    throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+  }
+
+  async getAppealInfo(user_id: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ user_id, status: 'rejected' });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    const supplier = await this.supplierRepository.findOneByFilter({ user_id });
+
+    if (!supplier)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    return {
+      user_id: user?.user_id,
+      fullname: user?.fullname,
+      username: user?.username,
+      email_address: user?.email_address,
+      company_name: supplier?.company_name,
+      company_no: supplier?.company_no,
+      company_address: supplier?.company_address,
+    };
+  }
+
+  async appealRegistration(user_id: string, userDto: UserDto): Promise<any> {
+    try {
+      await this.userRepository.updateOneByFilter({ user_id, status: 'rejected' }, {
+        ...userDto, status: 'pending_review',
+      });
+      await this.supplierRepository.updateOneByFilter({ user_id }, {
+        ...userDto,
+        last_updated_on: new Date(),
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  async getProfileInfo(user_id: string): Promise<any> {
+    const user = await this.userRepository.findOneByFilter({ user_id });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    if (user?.type === 'supplier') {
+      const supplier = await this.supplierRepository.findOneByFilter({ user_id });
+
+      if (!supplier)
+        throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+      return {
+        user_id: user?.user_id,
+        fullname: user?.fullname,
+        username: user?.username,
+        email_address: user?.email_address,
+        company_name: supplier?.company_name,
+        company_no: supplier?.company_no,
+        company_address: supplier?.company_address,
+        registered_on: supplier?.registered_on,
+        approved_on: supplier?.approved_on,
+      };
+    } else {
+      const admin = await this.adminRepository.findOneByFilter({ user_id });
+
+      if (!admin)
+        throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+      return {
+        user_id: user?.user_id,
+        fullname: user?.fullname,
+        username: user?.username,
+        email_address: user?.email_address,
+        created_on: admin?.created_on,
+      };
+    }
+  }
+
+  async updateProfile(user_id: string, userDto): Promise<SupplierDto | AdminDto> {
+    const user = await this.userRepository.findOneByFilter({ user_id });
+
+    if (!user)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+
+    const type = user?.type;
+
+    if (type === 'supplier') {
+      return await this.updateSupplierById(user_id, userDto);
+    } else if (type === 'admin') {
+      return await this.updateAdminById(user_id, userDto);
+    }
+
+    throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
+  }
+
   async createSupplier(supplierDto: SupplierDto): Promise<SupplierDto> {
-    return this.supplierRepository.create({ ...supplierDto });
+    return await this.supplierRepository.create(supplierDto);
   }
 
   async findAllSuppliers(): Promise<SupplierDto[]> {
-    return this.supplierRepository.findAll();
+    return await this.supplierRepository.findAll();
   }
 
-  async findAllInactiveSuppliers(): Promise<SupplierDto[]> {
+  async findAllPendingSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
-      { $match: { type: 'supplier', is_active: false } },
+      //lookup from supplier collection to match user_id
+      { $match: { type: 'supplier', is_active: false, status: 'pending_review' } },
       {
         $lookup: {
           from: 'supplier',
@@ -156,6 +303,52 @@ export class AuthenticationService implements IAuthenticationService {
         },
       },
       { $unwind: '$supplier_info' },
+
+      //lookup from users to map rejected_by in each rejection object
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.rejection.rejected_by',
+          foreignField: 'user_id',
+          as: 'rejected_users',
+        },
+      },
+
+      //map over the rejection array and replace rejected_by with the username
+      {
+        $addFields: {
+          'supplier_info.rejection': {
+            $map: {
+              input: '$supplier_info.rejection',
+              as: 'rej',
+              in: {
+                rejected_by: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: {
+                          $filter: {
+                            input: '$rejected_users',
+                            as: 'user',
+                            cond: { $eq: ['$$user.user_id', '$$rej.rejected_by'] },
+                          },
+                        },
+                        as: 'user',
+                        in: '$$user.username',
+                      },
+                    },
+                    0,
+                  ],
+                },
+                rejected_on: '$$rej.rejected_on',
+                reason: '$$rej.reason',
+              },
+            },
+          },
+        },
+      },
+
+      // Replace response
       {
         $replaceRoot: {
           newRoot: {
@@ -168,6 +361,7 @@ export class AuthenticationService implements IAuthenticationService {
             company_no: '$supplier_info.company_no',
             company_address: '$supplier_info.company_address',
             registered_on: '$supplier_info.registered_on',
+            rejection: '$supplier_info.rejection',
           },
         },
       },
@@ -175,10 +369,95 @@ export class AuthenticationService implements IAuthenticationService {
     return await this.userRepository.aggregate(pipeline);
   }
 
-  async findAllActiveSuppliers(): Promise<SupplierDto[]> {
+  async findAllRejectedSuppliers(): Promise<SupplierDto[]> {
     const pipeline = [
       //lookup from supplier collection to find supplier info
-      { $match: { type: 'supplier', is_active: true } },
+      { $match: { type: 'supplier', is_active: false, status: 'rejected' } },
+      {
+        $lookup: {
+          from: 'supplier',
+          localField: 'user_id',
+          foreignField: 'user_id',
+          as: 'supplier_info',
+        },
+      },
+      { $unwind: '$supplier_info' },
+
+      //lookup from users to map rejected_by in each rejection object
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.rejection.rejected_by',
+          foreignField: 'user_id',
+          as: 'rejected_users',
+        },
+      },
+
+      //map over the rejection array and replace rejected_by with the username
+      {
+        $addFields: {
+          'supplier_info.rejection': {
+            $map: {
+              input: '$supplier_info.rejection',
+              as: 'rej',
+              in: {
+                rejected_by: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: {
+                          $filter: {
+                            input: '$rejected_users',
+                            as: 'user',
+                            cond: { $eq: ['$$user.user_id', '$$rej.rejected_by'] },
+                          },
+                        },
+                        as: 'user',
+                        in: '$$user.username',
+                      },
+                    },
+                    0,
+                  ],
+                },
+                rejected_on: '$$rej.rejected_on',
+                reason: '$$rej.reason',
+              },
+            },
+          },
+        },
+      },
+
+      // Replace response with new root
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: '$supplier_info._id',
+            user_id: '$supplier_info.user_id',
+            fullname: '$fullname',
+            username: '$username',
+            email_address: '$email_address',
+            company_name: '$supplier_info.company_name',
+            company_no: '$supplier_info.company_no',
+            company_address: '$supplier_info.company_address',
+            registered_on: '$supplier_info.registered_on',
+            rejection: '$supplier_info.rejection',
+            last_rejected_by: {
+              $arrayElemAt: ['$supplier_info.rejection.rejected_by', -1],
+            },
+            last_rejected_on: {
+              $arrayElemAt: ['$supplier_info.rejection.rejected_on', -1],
+            },
+          },
+        },
+      },
+    ];
+    return await this.userRepository.aggregate(pipeline);
+  }
+
+  async findAllApprovedSuppliers(): Promise<SupplierDto[]> {
+    const pipeline = [
+      //lookup from supplier collection to find supplier info
+      { $match: { type: 'supplier', is_active: true, status: 'approved' } },
       {
         $lookup: {
           from: 'supplier',
@@ -205,6 +484,50 @@ export class AuthenticationService implements IAuthenticationService {
         },
       },
 
+      //lookup from users to map rejected_by in each rejection object
+      {
+        $lookup: {
+          from: 'user',
+          localField: 'supplier_info.rejection.rejected_by',
+          foreignField: 'user_id',
+          as: 'rejected_users',
+        },
+      },
+
+      //map over the rejection array and replace rejected_by with the username
+      {
+        $addFields: {
+          'supplier_info.rejection': {
+            $map: {
+              input: '$supplier_info.rejection',
+              as: 'rej',
+              in: {
+                rejected_by: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: {
+                          $filter: {
+                            input: '$rejected_users',
+                            as: 'user',
+                            cond: { $eq: ['$$user.user_id', '$$rej.rejected_by'] },
+                          },
+                        },
+                        as: 'user',
+                        in: '$$user.username',
+                      },
+                    },
+                    0,
+                  ],
+                },
+                rejected_on: '$$rej.rejected_on',
+                reason: '$$rej.reason',
+              },
+            },
+          },
+        },
+      },
+
       // Replace response with new root
       {
         $replaceRoot: {
@@ -222,6 +545,7 @@ export class AuthenticationService implements IAuthenticationService {
               $ifNull: ['$approve_info.username', '$supplier_info.approved_by'],
             },
             approved_on: '$supplier_info.approved_on',
+            rejection: '$supplier_info.rejection',
           },
         },
       },
@@ -234,7 +558,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async approveSupplierReviewStatus(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
-    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true });
+    await this.userRepository.updateOneByFilter({ user_id }, { is_active: true, status: 'approved' });
     return this.supplierRepository.updateOneByFilter({ user_id }, {
       ...supplierDto,
       last_updated_on: new Date(),
@@ -248,8 +572,19 @@ export class AuthenticationService implements IAuthenticationService {
       rejected_on: new Date(),
       reason: supplierDto?.reason,
     };
+
+    await this.userRepository.updateOneByFilter({ user_id }, { status: 'rejected' });
     return this.supplierRepository.updateOneByFilter({ user_id }, {
       $push: { rejection: rejection },
+      last_updated_on: new Date(),
+      status: 'rejected',
+    });
+  }
+
+  async updateSupplierById(user_id: string, supplierDto: SupplierDto): Promise<SupplierDto> {
+    await this.userRepository.updateOneByFilter({ user_id }, { ...supplierDto });
+    return await this.supplierRepository.updateOneByFilter({ user_id }, {
+      ...supplierDto,
       last_updated_on: new Date(),
     });
   }

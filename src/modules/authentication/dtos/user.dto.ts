@@ -52,4 +52,8 @@ export class UserDto {
   @IsOptional()
   @IsNotEmpty({ message: 'The role_id cannot be empty' })
   role_id?: string;
+
+  @IsString()
+  @IsOptional()
+  new_password?: string;
 }
