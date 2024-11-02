@@ -29,6 +29,7 @@ import {
   ProductVerificationSpecificationRepository
 } from "../../domain/repositories/product-verification-specification.repository";
 import { SubcategorySpecificationDto } from "../../../category/dtos/subcategory-specification.dto";
+import { Request } from "express";
 
 @Injectable()
 export class ProductService implements IProductService {
@@ -93,10 +94,8 @@ export class ProductService implements IProductService {
   }
 
 
-  async getProductListByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
-    //TODO: get owner_id
-    const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
-    productListFilterDto.owner_id = owner_id;
+  async getProductListByFilter(req: Request, productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    productListFilterDto.owner_id = String(req.user);
 
     const productList = await this.productRepository.getProductByFilter(productListFilterDto);
     if (ObjectUtils.isEmpty(productList)) {
@@ -146,7 +145,7 @@ export class ProductService implements IProductService {
   }
 
   // Product Verification
-  async createProductVerification(productDto: ProductDto): Promise<boolean> {
+  async createProductVerification(req: Request, productDto: ProductDto): Promise<boolean> {
     if (ObjectUtils.isEmpty(productDto)) {
       throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
     }
@@ -159,7 +158,7 @@ export class ProductService implements IProductService {
 
     //If there is existed PENDING application
     if (ObjectUtils.isNotEmpty(searchVerification) && searchVerification.status === ProductConstant.PENDING) {
-      return await this.updateProductVerificationDetailsById(verificationId, productDto);
+      return await this.updateProductVerificationDetailsById(req, verificationId, productDto);
     }
 
     //If resubmit Approved or Rejected application with no any changes
@@ -178,7 +177,7 @@ export class ProductService implements IProductService {
     }
 
     //new application or resubmit with changes
-    const owner_id = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+    const owner_id = String(req.user);
     const productVerification = await this.productVerificationRepository.create({
       ...productDto,
       _id,
@@ -312,7 +311,8 @@ export class ProductService implements IProductService {
     return maxScore;
   }
 
-  async getProductVerificationListByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+  async getProductVerificationListByFilter(req: Request,  productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    productListFilterDto.owner_id = String(req.user);
     const productList = await this.productVerificationRepository.getProductByFilter(productListFilterDto);
     if (ObjectUtils.isEmpty(productList)) {
       return [];
@@ -357,9 +357,8 @@ export class ProductService implements IProductService {
     }, new Map<string, string>());
   }
 
-  async updateProductVerificationDetailsById(id: string, productDto: ProductDto): Promise<boolean> {
-    //TODO: get logged in Id
-    const username = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+  async updateProductVerificationDetailsById(req: Request, id: string, productDto: ProductDto): Promise<boolean> {
+    const username = String(req.user);
 
     const updateProductSpec = await this.productVerificationSpecificationRepository.updateProductSpecifications(id, productDto.specification);
 
@@ -374,9 +373,8 @@ export class ProductService implements IProductService {
     return ObjectUtils.isNotEmpty(product) && updateProductSpec;
   }
 
-  async updateProductVerificationReviewById(id: string, productDto: ProductDto): Promise<boolean> {
-    //TODO: get logged in ID
-    const username = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+  async updateProductVerificationReviewById(req: Request, id: string, productDto: ProductDto): Promise<boolean> {
+    const username = String(req.user);
 
     const updateProductData: any = {
       reviewed_on: new Date(),

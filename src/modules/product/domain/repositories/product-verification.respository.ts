@@ -15,11 +15,11 @@ export class ProductVerificationRepository extends AbstractRepository<ProductVer
   }
 
   async getProductByFilter(productListFilterDto: ProductListFilterDto): Promise<ProductVerification[]> {
-    const { owner_id, status, cat_ids, search } = productListFilterDto;
+    const { owner_id, status, cat_ids, search, is_supplier } = productListFilterDto;
 
     const filters: any = {};
 
-    if (owner_id) {
+    if (Boolean(is_supplier) === true && owner_id) {
       filters.owner_id = owner_id;
     }
 

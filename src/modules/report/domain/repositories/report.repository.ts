@@ -42,7 +42,7 @@ export class ReportRepository extends AbstractRepository<Report> {
           as: "product_data"
         }
       },
-      { $unwind: { path: "$product_data", preserveNullAndEmptyArrays: true } }
+      { $unwind: { path: "$product_data", preserveNullAndEmptyArrays: false } }
     ];
 
     if (subcat_ids && subcat_ids.length > 0) {

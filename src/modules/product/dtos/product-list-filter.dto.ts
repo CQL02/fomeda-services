@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsNotEmpty, IsString } from "class-validator";
 
 export class ProductListFilterDto {
   @IsString()
@@ -13,4 +13,7 @@ export class ProductListFilterDto {
 
   @IsString()
   search: string[];
+
+  @IsBoolean()
+  is_supplier: boolean;
 }
