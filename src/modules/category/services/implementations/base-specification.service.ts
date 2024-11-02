@@ -15,6 +15,7 @@ import { ISequenceService } from "../../../sequence/services/interfaces/sequence
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
 import { StringUtils } from "../../../../common/utils/string.utils";
+import { Request } from "express";
 
 @Injectable()
 export class BaseSpecificationService implements IBaseSpecificationService {
@@ -27,7 +28,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   ) {
   }
 
-  async createBaseSpecification(baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
+  async createBaseSpecification(req: Request, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
     if (ObjectUtils.isEmpty(baseSpecificationDto) || StringUtils.isEmpty(baseSpecificationDto.subcat_spec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
@@ -35,10 +36,10 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_BASE_SPECIFICATION_PREFIX
     );
+    const user_id = req.user;
 
     const result = await this.categoryBaseSpecificationRepository.create({
-      ...baseSpecificationDto,
-      _id
+      ...baseSpecificationDto, _id, created_by: user_id, last_updated_by: user_id
     });
     return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
@@ -48,13 +49,13 @@ export class BaseSpecificationService implements IBaseSpecificationService {
       await this.generalSpecificationService.findAllGeneralSpecification()
     );
 
-    const specificationList = await this.categoryBaseSpecificationRepository.findAllByFilter({ cat_id: id });
+    const specificationList = await this.categoryBaseSpecificationRepository.findAllByFilterWithUsername({ cat_id: id });
     const specificationIdList = specificationList.map(spec => spec._id);
-    const subspecificationList = await this.categoryBaseSubspecificationRepository.findAllByFilter({ subcat_spec_id: { $in: specificationIdList } });
+    const subspecificationList = await this.categoryBaseSubspecificationRepository.findAllByFilterWithUsername({ subcat_spec_id: { $in: specificationIdList } });
 
     const result = specificationList.map(spec => {
       const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
-      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+      return filteredSubspec.length > 0 ? { ...spec, children: filteredSubspec } : spec;
     });
     return [...generalSpecList, ...result];
   }
@@ -84,10 +85,12 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     const specificationIdList = specificationList.map(spec => spec._id);
     const subspecificationList = await this.categoryBaseSubspecificationRepository.findAllByFilter({ subcat_spec_id: { $in: specificationIdList }, is_active: true });
 
-    return specificationList.map(spec => {
+    const result = specificationList.map(spec => {
       const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
-      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+      return (filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject());
     });
+
+    return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
   async findBaseSpecificationById(id: string): Promise<BaseSpecificationDto> {
@@ -101,12 +104,14 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   }
 
 
-  async updateBaseSpecification(id: string, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
+  async updateBaseSpecification(req: Request, id: string, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto> {
     if (ObjectUtils.isEmpty(baseSpecificationDto) || StringUtils.isEmpty(baseSpecificationDto.subcat_spec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    baseSpecificationDto = { ...baseSpecificationDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    baseSpecificationDto = { ...baseSpecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.categoryBaseSpecificationRepository.update(id, baseSpecificationDto);
 
     if (ObjectUtils.isEmpty(result)) {
@@ -116,8 +121,8 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
-  async deactivateBaseSpecification(id: string, is_active: boolean): Promise<BaseSpecificationDto> {
-    const result = await this.categoryBaseSpecificationRepository.deactivateCategoryBaseSpecificationById(id, is_active);
+  async deactivateBaseSpecification(req: Request, id: string, is_active: boolean): Promise<BaseSpecificationDto> {
+    const result = await this.categoryBaseSpecificationRepository.deactivateCategoryBaseSpecificationById(req, id, is_active);
 
     if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND);
@@ -137,7 +142,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     return this.categoryMapper.mapSchemaToModel(result, BaseSpecificationDto);
   }
 
-  async createBaseSubspecification(baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
+  async createBaseSubspecification(req: Request, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
     if (ObjectUtils.isEmpty(baseSubspecificationDto) || StringUtils.isEmpty(baseSubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
@@ -145,8 +150,9 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_BASE_SUBSPECIFICATION_PREFIX
     );
+    const user_id = req.user;
 
-    const result = await this.categoryBaseSubspecificationRepository.create({ ...baseSubspecificationDto, _id });
+    const result = await this.categoryBaseSubspecificationRepository.create({ ...baseSubspecificationDto, _id, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, BaseSubspecificationDto);
   }
 
@@ -160,12 +166,14 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     return this.categoryMapper.mapSchemaToModel(result.toObject(), BaseSubspecificationDto);
   }
 
-  async updateBaseSubspecification(id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
+  async updateBaseSubspecification(req: Request, id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
     if (ObjectUtils.isEmpty(baseSubspecificationDto) || StringUtils.isEmpty(baseSubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    baseSubspecificationDto = { ...baseSubspecificationDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    baseSubspecificationDto = { ...baseSubspecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.categoryBaseSubspecificationRepository.update(id, baseSubspecificationDto);
 
     if (ObjectUtils.isEmpty(result)) {
@@ -175,8 +183,8 @@ export class BaseSpecificationService implements IBaseSpecificationService {
     return this.categoryMapper.mapSchemaToModel(result, BaseSubspecificationDto);
   }
 
-  async deactivateBaseSubspecification(id: string, is_active: boolean): Promise<BaseSubspecificationDto> {
-    const result = await this.categoryBaseSubspecificationRepository.deactivateCategoryBaseSubspecificationById(id, is_active);
+  async deactivateBaseSubspecification(req: Request, id: string, is_active: boolean): Promise<BaseSubspecificationDto> {
+    const result = await this.categoryBaseSubspecificationRepository.deactivateCategoryBaseSubspecificationById(req, id, is_active);
 
     if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND);

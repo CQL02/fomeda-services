@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Inject, Post, Put, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Post,
+  Put,
+  Query,
+  Req, UseGuards
+} from "@nestjs/common";
 import { CategoryDto } from "../dtos/category.dto";
 import { CategoryService } from "../services/implementations/category.service";
 import { GeneralSpecificationDto } from "../dtos/general-specification.dto";
@@ -16,6 +26,8 @@ import { IBaseSpecificationService } from "../services/interfaces/base-specifica
 import { ISubcategorySpecificationService } from "../services/interfaces/subcategory-specification.service.interface";
 import { ICategoryService } from "../services/interfaces/category.service.interface";
 import { ProductFormSpecificationDto } from "../dtos/product-form-specification.dto";
+import { Request } from "express";
+import { AuthenticationGuard } from "../../authentication/passport/authentication.guard";
 
 @Controller("category")
 export class CategoryController {
@@ -27,14 +39,16 @@ export class CategoryController {
   }
 
   /* Category Service */
+  @UseGuards(AuthenticationGuard)
   @Post("create-category")
-  async createCategory(@Body() categoryDto: CategoryDto) {
-    return await this.categoryService.createCategory(categoryDto);
+  async createCategory(@Req() req: Request, @Body() categoryDto: CategoryDto) {
+    return await this.categoryService.createCategory(req, categoryDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-category")
-  async updateCategory(@Query("id") id: string, @Body() categoryDto: CategoryDto) {
-    return await this.categoryService.updateCategory(id, categoryDto);
+  async updateCategory(@Req() req: Request, @Query("id") id: string, @Body() categoryDto: CategoryDto) {
+    return await this.categoryService.updateCategory(req, id, categoryDto);
   }
 
   @Get("find-all-category")
@@ -52,9 +66,10 @@ export class CategoryController {
     return await this.categoryService.findCategoryById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Post("create-subcategory")
-  async createSubcategory(@Body() subcategoryDto: SubcategoryDto) {
-    return await this.categoryService.createSubcategory(subcategoryDto);
+  async createSubcategory(@Req() req: Request, @Body() subcategoryDto: SubcategoryDto) {
+    return await this.categoryService.createSubcategory(req, subcategoryDto);
   }
 
   @Get("find-one-subcategory-by-id")
@@ -62,19 +77,22 @@ export class CategoryController {
     return await this.categoryService.findOneSubcategoryById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-subcategory")
-  async updateSubcategory(@Query("id") id: string, @Body() subcategoryDto: SubcategoryDto) {
-    return await this.categoryService.updateSubcategory(id, subcategoryDto);
+  async updateSubcategory(@Req() req: Request, @Query("id") id: string, @Body() subcategoryDto: SubcategoryDto) {
+    return await this.categoryService.updateSubcategory(req, id, subcategoryDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-category")
-  async deactivateCategory(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.categoryService.deactivateCategory(id, is_active);
+  async deactivateCategory(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.categoryService.deactivateCategory(req, id, is_active);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-subcategory")
-  async deactivateSubcategory(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.categoryService.deactivateSubcategory(id, is_active);
+  async deactivateSubcategory(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.categoryService.deactivateSubcategory(req, id, is_active);
   }
 
   @Delete("delete-category")
@@ -93,9 +111,10 @@ export class CategoryController {
   }
 
   /* General Specification Service */
+  @UseGuards(AuthenticationGuard)
   @Post("create-general-specification")
-  async createGeneralSpecification(@Body() generalSpecificationDto: GeneralSpecificationDto) {
-    return await this.generalSpecificationService.createGeneralSpecification(generalSpecificationDto);
+  async createGeneralSpecification(@Req() req: Request, @Body() generalSpecificationDto: GeneralSpecificationDto) {
+    return await this.generalSpecificationService.createGeneralSpecification(req, generalSpecificationDto);
   }
 
   @Get("find-all-general-specification")
@@ -108,14 +127,16 @@ export class CategoryController {
     return await this.generalSpecificationService.findGeneralSpecificationById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-general-specification")
-  async updateGeneralSpecification(@Query("id") id: string, @Body() generalSpecificationDto: GeneralSpecificationDto) {
-    return await this.generalSpecificationService.updateGeneralSpecification(id, generalSpecificationDto);
+  async updateGeneralSpecification(@Req() req: Request, @Query("id") id: string, @Body() generalSpecificationDto: GeneralSpecificationDto) {
+    return await this.generalSpecificationService.updateGeneralSpecification(req, id, generalSpecificationDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-general-specification")
-  async deactivateGeneralSpecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.generalSpecificationService.deactivateGeneralSpecification(id, is_active);
+  async deactivateGeneralSpecification(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.generalSpecificationService.deactivateGeneralSpecification(req, id, is_active);
   }
 
   @Delete("delete-general-specification")
@@ -123,9 +144,10 @@ export class CategoryController {
     return await this.generalSpecificationService.deleteGeneralSpecification(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Post("create-general-subspecification")
-  async createGeneralSubspecification(@Body() generalSubspecificationDto: GeneralSubspecificationDto) {
-    return await this.generalSpecificationService.createGeneralSubspecification(generalSubspecificationDto);
+  async createGeneralSubspecification(@Req() req: Request, @Body() generalSubspecificationDto: GeneralSubspecificationDto) {
+    return await this.generalSpecificationService.createGeneralSubspecification(req, generalSubspecificationDto);
   }
 
   @Get("find-general-subspecification-by-id")
@@ -138,14 +160,16 @@ export class CategoryController {
     return await this.generalSpecificationService.findAllGeneralSubspecification();
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-general-subspecification")
-  async updateGeneralSubspecification(@Query("id") id: string, @Body() generalSubspecificationDto: GeneralSubspecificationDto) {
-    return await this.generalSpecificationService.updateGeneralSubspecification(id, generalSubspecificationDto);
+  async updateGeneralSubspecification(@Req() req: Request, @Query("id") id: string, @Body() generalSubspecificationDto: GeneralSubspecificationDto) {
+    return await this.generalSpecificationService.updateGeneralSubspecification(req, id, generalSubspecificationDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-general-subspecification")
-  async deactivateGeneralSubspecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.generalSpecificationService.deactivateGeneralSubspecification(id, is_active);
+  async deactivateGeneralSubspecification(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.generalSpecificationService.deactivateGeneralSubspecification(req, id, is_active);
   }
 
   @Delete("delete-general-subspecification")
@@ -154,9 +178,10 @@ export class CategoryController {
   }
 
   /* base specification */
+  @UseGuards(AuthenticationGuard)
   @Post("create-base-specification")
-  async createBaseSpecification(@Body() baseSpecificationDto: BaseSpecificationDto) {
-    return await this.baseSpecificationService.createBaseSpecification(baseSpecificationDto);
+  async createBaseSpecification(@Req() req: Request, @Body() baseSpecificationDto: BaseSpecificationDto) {
+    return await this.baseSpecificationService.createBaseSpecification(req, baseSpecificationDto);
   }
 
   @Get("find-base-specification-by-cat-id")
@@ -169,14 +194,16 @@ export class CategoryController {
     return await this.baseSpecificationService.findBaseSpecificationById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-base-specification")
-  async updateBaseSpecification(@Query("id") id: string, @Body() baseSpecificationDto: BaseSpecificationDto) {
-    return await this.baseSpecificationService.updateBaseSpecification(id, baseSpecificationDto);
+  async updateBaseSpecification(@Req() req: Request, @Query("id") id: string, @Body() baseSpecificationDto: BaseSpecificationDto) {
+    return await this.baseSpecificationService.updateBaseSpecification(req, id, baseSpecificationDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-base-specification")
-  async deactivateBaseSpecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.baseSpecificationService.deactivateBaseSpecification(id, is_active);
+  async deactivateBaseSpecification(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.baseSpecificationService.deactivateBaseSpecification(req, id, is_active);
   }
 
   @Delete("delete-base-specification")
@@ -184,9 +211,10 @@ export class CategoryController {
     return await this.baseSpecificationService.deleteBaseSpecification(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Post("create-base-subspecification")
-  async createBaseSubspecification(@Body() baseSubspecificationDto: BaseSubspecificationDto) {
-    return await this.baseSpecificationService.createBaseSubspecification(baseSubspecificationDto);
+  async createBaseSubspecification(@Req() req: Request, @Body() baseSubspecificationDto: BaseSubspecificationDto) {
+    return await this.baseSpecificationService.createBaseSubspecification(req, baseSubspecificationDto);
   }
 
   @Get("find-base-subspecification-by-id")
@@ -194,14 +222,16 @@ export class CategoryController {
     return await this.baseSpecificationService.findBaseSubspecificationById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-base-subspecification")
-  async updateBaseSubspecification(@Query("id") id: string, @Body() baseSubspecificationDto: BaseSubspecificationDto) {
-    return await this.baseSpecificationService.updateBaseSubspecification(id, baseSubspecificationDto);
+  async updateBaseSubspecification(@Req() req: Request, @Query("id") id: string, @Body() baseSubspecificationDto: BaseSubspecificationDto) {
+    return await this.baseSpecificationService.updateBaseSubspecification(req, id, baseSubspecificationDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-base-subspecification")
-  async deactivateBaseSubspecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.baseSpecificationService.deactivateBaseSubspecification(id, is_active);
+  async deactivateBaseSubspecification(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.baseSpecificationService.deactivateBaseSubspecification(req, id, is_active);
   }
 
   @Delete("delete-base-subspecification")
@@ -210,9 +240,10 @@ export class CategoryController {
   }
 
   /* subcategory specification */
+  @UseGuards(AuthenticationGuard)
   @Post("create-subcategory-specification")
-  async createSubcategorySpecification(@Body() subcategorySpecificationDto: SubcategorySpecificationDto) {
-    return await this.subcategorySpecificationService.createSubcategorySpecification(subcategorySpecificationDto);
+  async createSubcategorySpecification(@Req() req: Request, @Body() subcategorySpecificationDto: SubcategorySpecificationDto) {
+    return await this.subcategorySpecificationService.createSubcategorySpecification(req, subcategorySpecificationDto);
   }
 
   @Get("find-subcategory-specification-by-cat-id")
@@ -230,14 +261,16 @@ export class CategoryController {
     return await this.subcategorySpecificationService.findSubcategorySpecificationById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-subcategory-specification")
-  async updateSubcategorySpecification(@Query("id") id: string, @Body() subcategorySpecificationDto: SubcategorySpecificationDto) {
-    return await this.subcategorySpecificationService.updateSubcategorySpecification(id, subcategorySpecificationDto);
+  async updateSubcategorySpecification(@Req() req: Request, @Query("id") id: string, @Body() subcategorySpecificationDto: SubcategorySpecificationDto) {
+    return await this.subcategorySpecificationService.updateSubcategorySpecification(req, id, subcategorySpecificationDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-subcategory-specification")
-  async deactivateSubcategorySpecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.subcategorySpecificationService.deactivateSubcategorySpecification(id, is_active);
+  async deactivateSubcategorySpecification(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.subcategorySpecificationService.deactivateSubcategorySpecification(req, id, is_active);
   }
 
   @Delete("delete-subcategory-specification")
@@ -245,9 +278,10 @@ export class CategoryController {
     return await this.subcategorySpecificationService.deleteSubcategorySpecification(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Post("create-subcategory-subspecification")
-  async createSubcategorySubspecification(@Body() subcategorySubspecificationDto: SubcategorySubspecificationDto) {
-    return await this.subcategorySpecificationService.createSubcategorySubspecification(subcategorySubspecificationDto);
+  async createSubcategorySubspecification(@Req() req: Request, @Body() subcategorySubspecificationDto: SubcategorySubspecificationDto) {
+    return await this.subcategorySpecificationService.createSubcategorySubspecification(req, subcategorySubspecificationDto);
   }
 
   @Get("find-subcategory-subspecification-by-id")
@@ -260,14 +294,16 @@ export class CategoryController {
     return await this.subcategorySpecificationService.getProductSpecificationBySubcatId(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-subcategory-subspecification")
-  async updateSubcategorySubspecification(@Query("id") id: string, @Body() subcategorySubspecificationDto: SubcategorySubspecificationDto) {
-    return await this.subcategorySpecificationService.updateSubcategorySubspecification(id, subcategorySubspecificationDto);
+  async updateSubcategorySubspecification(@Req() req: Request, @Query("id") id: string, @Body() subcategorySubspecificationDto: SubcategorySubspecificationDto) {
+    return await this.subcategorySpecificationService.updateSubcategorySubspecification(req, id, subcategorySubspecificationDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("deactivate-subcategory-subspecification")
-  async deactivateSubcategorySubspecification(@Query("id") id: string, @Query("is_active") is_active: boolean) {
-    return await this.subcategorySpecificationService.deactivateSubcategorySubspecification(id, is_active);
+  async deactivateSubcategorySubspecification(@Req() req: Request, @Query("id") id: string, @Query("is_active") is_active: boolean) {
+    return await this.subcategorySpecificationService.deactivateSubcategorySubspecification(req, id, is_active);
   }
 
   @Delete("delete-subcategory-subspecification")

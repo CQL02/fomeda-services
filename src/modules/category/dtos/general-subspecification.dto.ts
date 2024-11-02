@@ -8,6 +8,9 @@ import { RatingScoreDto } from "./rating-score.dto";
 
 export class GeneralSubspecificationDto {
   @IsString()
+  _id: string;
+
+  @IsString()
   @IsNotEmpty()
   subcat_spec_id: string;
 
@@ -19,12 +22,18 @@ export class GeneralSubspecificationDto {
   @IsNotEmpty()
   created_by: string;
 
+  @IsString()
+  created_name: string;
+
   @IsDate()
   created_on: Date;
 
   @IsString()
   @IsNotEmpty()
   last_updated_by: string;
+
+  @IsString()
+  last_updated_name: string;
 
   @IsDate()
   last_updated_on: Date;
