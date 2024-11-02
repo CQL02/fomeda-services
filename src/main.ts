@@ -42,9 +42,10 @@ async function bootstrap() {
     session({
       secret: "secret",
       resave: false,
-      cookie: { maxAge: 10 * 60 * 1000}, // 10 minutes
+      saveUninitialized: false,
+      cookie: { maxAge: 10 * 60 * 1000, secure: true}, // 10 minutes
       // store: store,
-      genid: () => crypto.randomBytes(16).toString('hex')
+      // genid: () => crypto.randomBytes(16).toString('hex')
     })
   )
 
