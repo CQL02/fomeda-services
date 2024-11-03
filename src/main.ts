@@ -43,7 +43,7 @@ async function bootstrap() {
       secret: "secret",
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 10 * 60 * 1000, secure: true}, // 10 minutes
+      cookie: { maxAge: 10 * 60 * 1000 }, // 10 minutes
       // store: store,
       // genid: () => crypto.randomBytes(16).toString('hex')
     })
