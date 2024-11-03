@@ -6,7 +6,7 @@ import {
   Post,
   Patch,
   UseGuards,
-  Request, Query, Inject,
+  Request, Query, Inject, Res,
 } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { SupplierDto } from '../dtos/supplier.dto';
@@ -17,6 +17,8 @@ import { SessionService } from '../services/implementations/session.service';
 import { IAuthenticationService } from '../services/interfaces/authentication.service.interface';
 import { ISessionService } from '../services/interfaces/session.service.interface';
 import { AdminDto } from '../dtos/admin.dto';
+import { OtpDto } from '../dtos/otp.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -53,6 +55,13 @@ export class AuthenticationController {
     @Query('email') email: string,
   ) {
     return this.authenticationService.checkEmailDuplicate(email);
+  }
+
+  @Get('check-forget-password-email')
+  async checkForgetPasswordEmail(
+    @Query('email') email: string,
+  ) {
+    return this.authenticationService.checkForgetPasswordEmail(email);
   }
 
   @Get('check-username')
@@ -121,6 +130,14 @@ export class AuthenticationController {
     return this.authenticationService.updatePassword(user_id, userDto);
   }
 
+  @Patch('reset-password')
+  async resetPassword(
+    @Query('user_id') user_id: string,
+    @Body() userDto: UserDto
+  ) {
+    return this.authenticationService.resetPassword(user_id, userDto);
+  }
+
   @Patch('user_id')
   async updateUserStatus(
     @Param('user_id') user_id: string,
@@ -180,5 +197,27 @@ export class AuthenticationController {
     @Body() adminDto: AdminDto,
   ) {
     return this.authenticationService.updateAdminById(user_id, adminDto);
+  }
+
+  @Post('send-otp')
+  async sendOtp(
+    @Body() otpDto: OtpDto,
+  ) {
+    return this.authenticationService.sendOTP(otpDto);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(
+    @Body() otpDto: OtpDto,
+    @Res() res: Response
+  ) {
+    return this.authenticationService.verifyOTP(otpDto, res);
+  }
+
+  @Get('get-email')
+  async getEmail(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.getEmail(user_id);
   }
 }
