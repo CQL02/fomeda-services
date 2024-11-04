@@ -214,6 +214,21 @@ export class AuthenticationController {
     return this.authenticationService.verifyOTP(otpDto, res);
   }
 
+  @Post('send-delete-otp')
+  async sendDeleteOtp(
+    @Body() otpDto: OtpDto,
+  ) {
+    return this.authenticationService.sendDeleteOTP(otpDto);
+  }
+
+  @Post('verify-delete-otp')
+  async verifyDeleteOtp(
+    @Body() otpDto: OtpDto,
+    @Res() res: Response
+  ) {
+    return this.authenticationService.verifyDeleteOTP(otpDto, res);
+  }
+
   @Get('get-email')
   async getEmail(
     @Query('user_id') user_id: string,

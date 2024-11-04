@@ -706,12 +706,13 @@ export class AuthenticationService implements IAuthenticationService {
     return await this.adminRepository.updateOneByFilter({ user_id }, { ...adminDto, last_updated_on: new Date() });
   }
 
-  async sendOTP(otpDto: OtpDto): Promise<boolean> {
+  async sendOTP(otpDto: OtpDto): Promise<any> {
     const email = otpDto?.email;
     const otp = randomInt(100000, 999999).toString();
     const hashedOtp = await bcrypt.hash(otp, 14);
 
     await this.otpRepository.create({
+      type: "reset_password",
       user_email: email,
       otp: hashedOtp,
       expiration: Date.now() + 300000,
@@ -732,7 +733,7 @@ export class AuthenticationService implements IAuthenticationService {
     const email = otpDto?.email;
     const otp = otpDto?.otp;
 
-    const otpRecords = await this.otpRepository.findAllByFilter({ user_email: email, is_used: false });
+    const otpRecords = await this.otpRepository.findAllByFilter({ type: "reset_password", user_email: email, is_used: false });
 
     const validOtpRecords = otpRecords.filter(record => Date.now() <= record.expiration.getTime());
 
@@ -772,6 +773,64 @@ export class AuthenticationService implements IAuthenticationService {
     return {
       email_address: user?.email_address,
     };
+  }
+
+  async sendDeleteOTP(otpDto: OtpDto): Promise<any> {
+    const email = otpDto?.email;
+    const otp = randomInt(100000, 999999).toString();
+    const hashedOtp = await bcrypt.hash(otp, 14);
+
+    await this.otpRepository.create({
+      type: "delete_account",
+      user_email: email,
+      otp: hashedOtp,
+      expiration: Date.now() + 300000,
+      isUsed: false,
+    });
+
+    const subject = `FOMEDA System Delete Account Verification Code`;
+    const html = `
+      <p>We received a request to delete your account. Please use the verification code below to proceed with resetting your password.</p>
+      <p>Your OTP verification code is: <strong>${otp}</strong>. This code is valid for the <strong>next 5 minutes<strong>.</p>
+      <p>If you did not request a delete account, please contact the admin. Please note that this is an automated email. Do not reply to this message.</p>
+    `;
+
+    return await this.mailerService.sendMail(email, subject, '', html);
+  }
+
+  async verifyDeleteOTP(otpDto: OtpDto, res: Response): Promise<any> {
+    const email = otpDto?.email;
+    const otp = otpDto?.otp;
+
+    const otpRecords = await this.otpRepository.findAllByFilter({ type: "delete_account", user_email: email, is_used: false });
+
+    const validOtpRecords = otpRecords.filter(record => Date.now() <= record.expiration.getTime());
+
+    for (const otpRecord of validOtpRecords) {
+      const isOtpValid = await bcrypt.compare(otp, otpRecord?.otp);
+
+      if (isOtpValid) {
+        await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
+
+        res.cookie('isDeleteVerified', 'true', {
+          httpOnly: true,
+          // secure: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 10 * 60 * 1000,
+        });
+
+        res.json({
+          message: 'OTP verified successfully',
+          verified: true,
+        });
+      }
+    }
+
+    res.json({
+      message: 'OTP verified failed',
+      verified: false,
+    });
   }
 }
 

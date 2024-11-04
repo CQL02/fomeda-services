@@ -4,6 +4,11 @@ import { Document } from 'mongoose';
 @Schema({ versionKey: false, collection: 'otp' })
 export class Otp extends Document {
   @Prop({
+    type: String,
+  })
+  type: string;
+
+  @Prop({
     required: true,
     type: String,
   })
