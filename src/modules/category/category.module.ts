@@ -44,6 +44,7 @@ import { GeneralSpecificationService } from "./services/implementations/general-
 import { BaseSpecificationService } from "./services/implementations/base-specification.service";
 import { SubcategorySpecificationService } from "./services/implementations/subcategory-specification.service";
 import { CategoryMapper } from "./services/mapper/category.mapper";
+import { AuthenticationModule } from "../authentication/authentication.module";
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { CategoryMapper } from "./services/mapper/category.mapper";
       { name: SubcategorySubspecification.name, schema: SubcategorySubspecificationSchema, },
     ]),
     SequenceModule,
+    AuthenticationModule,
   ],
   controllers: [CategoryController],
   exports: [CategoryService.name, SubcategorySpecificationService.name],

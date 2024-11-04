@@ -20,6 +20,7 @@ import { StringUtils } from "../../../../common/utils/string.utils";
 import { ProductFormSpecificationDto } from "../../dtos/product-form-specification.dto";
 import { GeneralSpecificationService } from "./general-specification.service";
 import { IGeneralSpecificationService } from "../interfaces/general-specification.service.interface";
+import { Request } from "express";
 
 @Injectable()
 export class SubcategorySpecificationService implements ISubcategorySpecificationService {
@@ -34,7 +35,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   ) {
   }
 
-  async createSubcategorySpecification(subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
+  async createSubcategorySpecification(req: Request, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySpecificationDto) || StringUtils.isEmpty(subcategorySpecificationDto.subcat_spec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
@@ -42,7 +43,9 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SPECIFICATION_PREFIX
     );
-    const result = await this.subcategorySpecificationRepository.create({ ...subcategorySpecificationDto, _id });
+    const user_id = req.user;
+
+    const result = await this.subcategorySpecificationRepository.create({ ...subcategorySpecificationDto, _id, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
@@ -52,13 +55,13 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
       await this.baseSpecificationService.findBaseSpecificationByCatId(subcategory.cat_id)
     );
 
-    const specificationList = await this.subcategorySpecificationRepository.findAllByFilter({ subcat_id: id });
+    const specificationList = await this.subcategorySpecificationRepository.findAllByFilterWithUsername({ subcat_id: id });
     const specificationIdList = specificationList.map(spec => spec._id);
-    const subspecificationList = await this.subcategorySubspecificationRepository.findAllByFilter({ subcat_spec_id: { $in: specificationIdList } });
+    const subspecificationList = await this.subcategorySubspecificationRepository.findAllByFilterWithUsername({ subcat_spec_id: { $in: specificationIdList } });
 
     const result = specificationList.map(spec => {
       const filteredSubspec = subspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
-      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+      return filteredSubspec.length > 0 ? { ...spec, children: filteredSubspec } : spec;
     });
 
     return [...baseSpecList, ...result];
@@ -130,12 +133,14 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   }
 
 
-  async updateSubcategorySpecification(id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
+  async updateSubcategorySpecification(req: Request, id: string, subcategorySpecificationDto: SubcategorySpecificationDto): Promise<SubcategorySpecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySpecificationDto) || StringUtils.isEmpty(subcategorySpecificationDto.subcat_spec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    subcategorySpecificationDto = { ...subcategorySpecificationDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    subcategorySpecificationDto = { ...subcategorySpecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.subcategorySpecificationRepository.update(id, subcategorySpecificationDto);
 
     if (ObjectUtils.isEmpty(result)) {
@@ -145,8 +150,8 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
-  async deactivateSubcategorySpecification(id: string, is_active: boolean): Promise<SubcategorySpecificationDto> {
-    const result = await this.subcategorySpecificationRepository.deactivateSubcategorySpecificationById(id, is_active);
+  async deactivateSubcategorySpecification(req: Request, id: string, is_active: boolean): Promise<SubcategorySpecificationDto> {
+    const result = await this.subcategorySpecificationRepository.deactivateSubcategorySpecificationById(req, id, is_active);
 
     if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND);
@@ -166,7 +171,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     return this.categoryMapper.mapSchemaToModel(result, SubcategorySpecificationDto);
   }
 
-  async createSubcategorySubspecification(subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
+  async createSubcategorySubspecification(req: Request, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySubspecificationDto) || StringUtils.isEmpty(subcategorySubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
@@ -174,7 +179,9 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SUBSPECIFICATION_PREFIX
     );
-    const result = await this.subcategorySubspecificationRepository.create({ ...subcategorySubspecificationDto, _id });
+    const user_id = req.user;
+
+    const result = await this.subcategorySubspecificationRepository.create({ ...subcategorySubspecificationDto, _id, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, SubcategorySubspecificationDto);
   }
 
@@ -189,12 +196,14 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     return this.categoryMapper.mapSchemaToModel(result.toObject(), SubcategorySubspecificationDto);
   }
 
-  async updateSubcategorySubspecification(id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
+  async updateSubcategorySubspecification(req: Request, id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySubspecificationDto) || StringUtils.isEmpty(subcategorySubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    subcategorySubspecificationDto = { ...subcategorySubspecificationDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    subcategorySubspecificationDto = { ...subcategorySubspecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.subcategorySubspecificationRepository.update(id, subcategorySubspecificationDto);
 
     if (ObjectUtils.isEmpty(result)) {
@@ -204,8 +213,8 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
     return this.categoryMapper.mapSchemaToModel(result, SubcategorySubspecificationDto);
   }
 
-  async deactivateSubcategorySubspecification(id: string, is_active: boolean): Promise<SubcategorySubspecificationDto> {
-    const result = await this.subcategorySubspecificationRepository.deactivateSubcategorySubspecificationById(id, is_active);
+  async deactivateSubcategorySubspecification(req: Request, id: string, is_active: boolean): Promise<SubcategorySubspecificationDto> {
+    const result = await this.subcategorySubspecificationRepository.deactivateSubcategorySubspecificationById(req, id, is_active);
 
     if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND);

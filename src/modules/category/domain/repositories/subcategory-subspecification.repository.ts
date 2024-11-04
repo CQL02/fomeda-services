@@ -3,6 +3,8 @@ import { AbstractRepository } from "../../../../common/database/abstracts/reposi
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { SubcategorySubspecification } from "../schema/subcategory-subspecification.schema";
+import { Request } from "express";
+import { SubcategorySubspecificationDto } from "../../dtos/subcategory-subspecification.dto";
 
 @Injectable()
 export class SubcategorySubspecificationRepository extends AbstractRepository<SubcategorySubspecification> {
@@ -13,14 +15,49 @@ export class SubcategorySubspecificationRepository extends AbstractRepository<Su
     super(subcategorySubspecificationModel);
   }
 
-  async deactivateSubcategorySubspecificationById(id: string, is_active: boolean): Promise<SubcategorySubspecification> {
+  async deactivateSubcategorySubspecificationById(req: Request, id: string, is_active: boolean): Promise<SubcategorySubspecification> {
     return this.subcategorySubspecificationModel.findByIdAndUpdate(id, {
       is_active: is_active,
-      last_updated_on: new Date()
+      last_updated_on: new Date(),
+      last_updated_by: req.user,
     }).exec();
   }
 
   async deleteSubcategorySubspecificationBySpecId(subcat_spec_id: string) {
     return this.subcategorySubspecificationModel.deleteMany({ subcat_spec_id: subcat_spec_id }).exec();
+  }
+
+  async findAllByFilterWithUsername(filter: any): Promise<SubcategorySubspecificationDto[]> {
+    return this.subcategorySubspecificationModel.aggregate([
+      { $match: filter},
+      {
+        $lookup: {
+          from: "user",
+          localField: "created_by",
+          foreignField: "user_id",
+          as: "created_user"
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "last_updated_by",
+          foreignField: "user_id",
+          as: "last_updated_user"
+        }
+      },
+      {
+        $addFields: {
+          created_name: { $arrayElemAt: ["$created_user.username", 0] },
+          last_updated_name: { $arrayElemAt: ["$last_updated_user.username", 0] }
+        }
+      },
+      {
+        $project: {
+          created_user: 0,
+          last_updated_user: 0
+        }
+      }
+    ]);
   }
 }

@@ -29,7 +29,7 @@ export class SessionSerializer extends PassportSerializer {
     if (!userId) {
       done(null, null);
     } else {
-      done(null, { user_id: userId });
+      done(null, userId);
     }
   }
 }

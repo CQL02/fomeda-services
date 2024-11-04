@@ -12,6 +12,9 @@ import { CategoryMapper } from "../mapper/category.mapper";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { StringUtils } from "../../../../common/utils/string.utils";
+import { AuthenticationService } from "../../../authentication/services/implementations/authentication.service";
+import { IAuthenticationService } from "../../../authentication/services/interfaces/authentication.service.interface";
+import { Request } from "express";
 
 @Injectable()
 export class CategoryService implements ICategoryService {
@@ -19,11 +22,12 @@ export class CategoryService implements ICategoryService {
     private readonly categoryRepository: CategoryRepository,
     private readonly subcategoryRepository: SubcategoryRepository,
     private readonly categoryMapper: CategoryMapper,
-    @Inject(SequenceService.name) private readonly sequenceService: ISequenceService
+    @Inject(SequenceService.name) private readonly sequenceService: ISequenceService,
+    @Inject(AuthenticationService.name) private readonly authenticationService: IAuthenticationService
   ) {
   }
 
-  async createCategory(categoryDto: CategoryDto): Promise<CategoryDto> {
+  async createCategory(req: Request, categoryDto: CategoryDto): Promise<CategoryDto> {
     if (ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
       throw new CategoryException(CategoryErrorConstant.EMPTY_CATEGORY);
     }
@@ -31,18 +35,19 @@ export class CategoryService implements ICategoryService {
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_CATEGORY_PREFIX
     );
-    const result = await this.categoryRepository.create({ ...categoryDto, _id });
+    const user_id = req.user;
+
+    const result = await this.categoryRepository.create({ ...categoryDto, _id, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, CategoryDto);
   }
 
   async findAllCategories(): Promise<CategoryDto[]> {
-    const categoryList = await this.categoryRepository.findAll();
-    const subcategoryList = await this.subcategoryRepository.findAll();
-    const result = categoryList.map(cat => {
+    const categoryList = await this.categoryRepository.getAllCategoryWithUsername();
+    const subcategoryList = await this.subcategoryRepository.getAllSubcategoryWithUsername();
+    return categoryList.map(cat => {
       const filteredSubcategory = subcategoryList.filter(subcat => subcat.cat_id === cat._id.toString());
-      return filteredSubcategory.length > 0 ? { ...cat.toObject(), children: filteredSubcategory } : cat.toObject();
+      return filteredSubcategory.length > 0 ? { ...cat, children: filteredSubcategory } : cat;
     });
-    return result;
   }
 
   async findAllActiveCategories(): Promise<CategoryDto[]> {
@@ -69,12 +74,14 @@ export class CategoryService implements ICategoryService {
     return this.categoryMapper.mapSchemaToModel(result, CategoryDto);
   }
 
-  async updateCategory(id: string, categoryDto: CategoryDto): Promise<CategoryDto> {
+  async updateCategory(req: Request, id: string, categoryDto: CategoryDto): Promise<CategoryDto> {
     if (ObjectUtils.isEmpty(categoryDto) || StringUtils.isEmpty(categoryDto.cat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
-    categoryDto = { ...categoryDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    categoryDto = { ...categoryDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.categoryRepository.update(id, categoryDto);
 
     if (ObjectUtils.isEmpty(result)) {
@@ -84,8 +91,8 @@ export class CategoryService implements ICategoryService {
     return this.categoryMapper.mapSchemaToModel(result, CategoryDto);
   }
 
-  async deactivateCategory(id: string, is_active: boolean): Promise<CategoryDto> {
-    const result = await this.categoryRepository.deactivateCategoryById(id, is_active);
+  async deactivateCategory(req: Request, id: string, is_active: boolean): Promise<CategoryDto> {
+    const result = await this.categoryRepository.deactivateCategoryById(req, id, is_active);
 
     if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.CATEGORY_NOT_FOUND);
@@ -105,7 +112,7 @@ export class CategoryService implements ICategoryService {
     return this.categoryMapper.mapSchemaToModel(result, CategoryDto);
   }
 
-  async createSubcategory(subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
+  async createSubcategory(req: Request, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
     if (ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SUBCATEGORY);
     }
@@ -120,16 +127,18 @@ export class CategoryService implements ICategoryService {
       max_value: 0,
     }))
 
-    const result = await this.subcategoryRepository.create({ ...subcategoryDto, _id, rating_score });
+    const user_id = String(req.user);
+    const result = await this.subcategoryRepository.create({ ...subcategoryDto, _id, rating_score, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, SubcategoryDto);
   }
 
-  async updateSubcategory(id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
+  async updateSubcategory(req: Request, id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
     if (ObjectUtils.isEmpty(subcategoryDto)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
-    subcategoryDto = { ...subcategoryDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+    subcategoryDto = { ...subcategoryDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.subcategoryRepository.update(id, subcategoryDto);
 
     if (ObjectUtils.isEmpty(result)) {
@@ -139,8 +148,8 @@ export class CategoryService implements ICategoryService {
     return this.categoryMapper.mapSchemaToModel(result, SubcategoryDto);
   }
 
-  async deactivateSubcategory(id: string, is_active: boolean): Promise<SubcategoryDto> {
-    const result = await this.subcategoryRepository.deactivateSubcategoryById(id, is_active);
+  async deactivateSubcategory(req: Request, id: string, is_active: boolean): Promise<SubcategoryDto> {
+    const result = await this.subcategoryRepository.deactivateSubcategoryById(req, id, is_active);
 
     if (ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SUBCATEGORY_NOT_FOUND);

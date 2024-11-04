@@ -15,6 +15,7 @@ import { CategoryMapper } from "../mapper/category.mapper";
 import { ObjectUtils } from "../../../../common/utils/object.utils";
 import { CategoryErrorConstant, CategoryException } from "../../../../common/exception/category.exception";
 import { StringUtils } from "../../../../common/utils/string.utils";
+import { Request } from "express";
 
 @Injectable()
 export class GeneralSpecificationService implements IGeneralSpecificationService {
@@ -26,7 +27,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   ) {
   }
 
-  async createGeneralSpecification(generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
+  async createGeneralSpecification(req: Request, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
     if(ObjectUtils.isEmpty(generalSpecificationDto) || StringUtils.isEmpty(generalSpecificationDto.subcat_spec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
@@ -34,17 +35,19 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_GENERAL_SPECIFICATION_PREFIX
     );
-    const result = await this.generalSpecificationRepository.create({ ...generalSpecificationDto, _id });
+    const user_id = req.user;
+
+    const result = await this.generalSpecificationRepository.create({ ...generalSpecificationDto, _id, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, GeneralSpecificationDto);
   }
 
   async findAllGeneralSpecification(): Promise<GeneralSpecificationDto[]> {
-    const generalSpecificationList = await this.generalSpecificationRepository.findAll();
-    const generalSubspecificationList = await this.generalSubspecificationRepository.findAll();
+    const generalSpecificationList = await this.generalSpecificationRepository.findAllWithUsername();
+    const generalSubspecificationList = await this.generalSubspecificationRepository.findAllWithUsername();
 
     const result = generalSpecificationList.map(spec => {
       const filteredSubspec = generalSubspecificationList.filter(subspec => subspec.subcat_spec_id === spec._id.toString());
-      return filteredSubspec.length > 0 ? { ...spec.toObject(), children: filteredSubspec } : spec.toObject();
+      return filteredSubspec.length > 0 ? { ...spec, children: filteredSubspec } : spec;
     });
     return result;
   }
@@ -70,12 +73,14 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     return this.categoryMapper.mapSchemaToModel(result.toObject(), GeneralSpecificationDto);
   }
 
-  async updateGeneralSpecification(id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
+  async updateGeneralSpecification(req: Request, id: string, generalSpecificationDto: GeneralSpecificationDto): Promise<GeneralSpecificationDto> {
     if(ObjectUtils.isEmpty(generalSpecificationDto) || StringUtils.isEmpty(generalSpecificationDto.subcat_spec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
-    generalSpecificationDto = { ...generalSpecificationDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    generalSpecificationDto = { ...generalSpecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.generalSpecificationRepository.update(id, generalSpecificationDto);
 
     if(ObjectUtils.isEmpty(result)) {
@@ -85,8 +90,8 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     return this.categoryMapper.mapSchemaToModel(result, GeneralSpecificationDto);
   }
 
-  async deactivateGeneralSpecification(id: string, is_active: boolean): Promise<GeneralSpecificationDto> {
-    const result = await this.generalSpecificationRepository.deactivateGeneralSpecificationById(id, is_active);
+  async deactivateGeneralSpecification(req: Request, id: string, is_active: boolean): Promise<GeneralSpecificationDto> {
+    const result = await this.generalSpecificationRepository.deactivateGeneralSpecificationById(req, id, is_active);
 
     if(ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND);
@@ -106,7 +111,7 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     return this.categoryMapper.mapSchemaToModel(result, GeneralSpecificationDto);
   }
 
-  async createGeneralSubspecification(generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
+  async createGeneralSubspecification(req: Request, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
     if(ObjectUtils.isEmpty(generalSubspecificationDto) || StringUtils.isEmpty(generalSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
@@ -114,7 +119,9 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_GENERAL_SUBSPECIFICATION_PREFIX
     );
-    const result = await this.generalSubspecificationRepository.create({ ...generalSubspecificationDto, _id });
+    const user_id = req.user;
+
+    const result = await this.generalSubspecificationRepository.create({ ...generalSubspecificationDto, _id, created_by: user_id, last_updated_by: user_id });
     return this.categoryMapper.mapSchemaToModel(result, GeneralSubspecificationDto);
   }
 
@@ -133,12 +140,14 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     return this.categoryMapper.mapSchemaToModel(result.toObject(), GeneralSubspecificationDto);
   }
 
-  async updateGeneralSubspecification(id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
+  async updateGeneralSubspecification(req: Request, id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
     if(ObjectUtils.isEmpty(generalSubspecificationDto) || StringUtils.isEmpty(generalSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
-    generalSubspecificationDto = { ...generalSubspecificationDto, last_updated_on: new Date() };
+    const user_id = String(req.user);
+
+    generalSubspecificationDto = { ...generalSubspecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
     const result = await this.generalSubspecificationRepository.update(id, generalSubspecificationDto);
 
     if(ObjectUtils.isEmpty(result)) {
@@ -148,8 +157,8 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
     return this.categoryMapper.mapSchemaToModel(result, GeneralSubspecificationDto);
   }
 
-  async deactivateGeneralSubspecification(id: string, is_active: boolean): Promise<GeneralSubspecificationDto> {
-    const result = await this.generalSubspecificationRepository.deactivateGeneralSubspecificationById(id, is_active);
+  async deactivateGeneralSubspecification(req: Request, id: string, is_active: boolean): Promise<GeneralSubspecificationDto> {
+    const result = await this.generalSubspecificationRepository.deactivateGeneralSubspecificationById(req, id, is_active);
 
     if(ObjectUtils.isEmpty(result)) {
       throw new CategoryException(CategoryErrorConstant.SPECIFICATION_NOT_FOUND);

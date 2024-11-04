@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Inject, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
 import { ProductService } from "../services/implementations/product.service";
 import { IProductService } from "../services/interfaces/product.service.interface";
 import { ProductDto } from "../dtos/product.dto";
 import { ProductListFilterDto } from "../dtos/product-list-filter.dto";
 import { ConsumerService } from "../services/implementations/consumer.service";
 import { ConsumerProductFilterDto } from "../dtos/consumer-product-filter.dto";
+import { Request } from "express";
+import { AuthenticationGuard } from "../../authentication/passport/authentication.guard";
 
 @Controller("product")
 export class ProductController {
@@ -25,9 +27,10 @@ export class ProductController {
     return await this.productService.getProductDetailsById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Post("get-product-list-by-filter")
-  async getProductByFilter(@Body() productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
-    return await this.productService.getProductListByFilter(productListFilterDto);
+  async getProductByFilter(@Req() req: Request, @Body() productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    return await this.productService.getProductListByFilter(req, productListFilterDto);
   }
 
   @Put("update-product-details-by-id")
@@ -47,9 +50,10 @@ export class ProductController {
   }
 
   //Product Verification
+  @UseGuards(AuthenticationGuard)
   @Post("create-product-verification")
-  async createProductVerification(@Body() productDto: ProductDto): Promise<boolean> {
-    return await this.productService.createProductVerification(productDto);
+  async createProductVerification(@Req() req: Request, @Body() productDto: ProductDto): Promise<boolean> {
+    return await this.productService.createProductVerification(req, productDto);
   }
 
   @Get("get-product-verification-details-by-id")
@@ -57,19 +61,22 @@ export class ProductController {
     return await this.productService.getProductVerificationDetailsById(id);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Post("get-product-verification-list-by-filter")
-  async getProductVerificationDetailsByFilter(@Body() productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
-    return await this.productService.getProductVerificationListByFilter(productListFilterDto);
+  async getProductVerificationDetailsByFilter(@Req() req: Request, @Body() productListFilterDto: ProductListFilterDto): Promise<ProductDto[]> {
+    return await this.productService.getProductVerificationListByFilter(req, productListFilterDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-product-verification-details-by-id")
-  async updateProductVerificationDetailsById(@Query("id") id: string, @Body() productDto: ProductDto): Promise<boolean> {
-    return await this.productService.updateProductVerificationDetailsById(id, productDto);
+  async updateProductVerificationDetailsById(@Req() req: Request, @Query("id") id: string, @Body() productDto: ProductDto): Promise<boolean> {
+    return await this.productService.updateProductVerificationDetailsById(req, id, productDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Put("update-product-verification-review-by-id")
-  async updateProductVerificationReviewById(@Query("id") id: string, @Body() productDto: ProductDto): Promise<boolean> {
-    return await this.productService.updateProductVerificationReviewById(id, productDto);
+  async updateProductVerificationReviewById(@Req() req: Request, @Query("id") id: string, @Body() productDto: ProductDto): Promise<boolean> {
+    return await this.productService.updateProductVerificationReviewById(req, id, productDto);
   }
 
   @Delete("delete-product-verification-details-by-id")

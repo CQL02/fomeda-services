@@ -8,6 +8,7 @@ import { ReportMapper } from "../mapper/ReportMapper";
 import { v4 as uuidv4 } from "uuid";
 import { ReportErrorConstant, ReportException } from "../../../../common/exception/report.exception";
 import { ReportConstant } from "../../../../common/constant/report.constant";
+import { Request } from "express";
 
 @Injectable()
 export class ReportService implements IReportService {
@@ -33,9 +34,8 @@ export class ReportService implements IReportService {
     return this.reportMapper.mapSchemaToModel(report.toObject(), ReportDto);
   }
 
-  async getSupplierReportListByFilter(filterDto: ReportFilterDto): Promise<ReportDto[]> {
-    //TODO: get userId
-    const userId = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
+  async getSupplierReportListByFilter(req: Request, filterDto: ReportFilterDto): Promise<ReportDto[]> {
+    const userId = String(req.user);
 
     const reportList = await this.reportRepository.filterSupplierReportListByUserId(userId, filterDto);
     return this.reportMapper.mapSchemaListToDtoList(reportList, ReportDto);
@@ -46,7 +46,7 @@ export class ReportService implements IReportService {
     return this.reportMapper.mapSchemaListToDtoList(result, ReportDto);
   }
 
-  async updateReportStatus(id: string, reportDto: ReportDto): Promise<boolean> {
+  async updateReportStatus(req: Request, id: string, reportDto: ReportDto): Promise<boolean> {
     if (ObjectUtils.isEmpty(reportDto)) {
       throw new ReportException(ReportErrorConstant.INVALID_REPORT);
     }
@@ -57,9 +57,7 @@ export class ReportService implements IReportService {
       reportDto.sup_status = ReportConstant.CLOSED;
     }
 
-    //TODO: get userId
-    const userId = "cc49f722-7806-4557-96a2-d79bb55b5dd1";
-    reportDto.reviewed_by = userId;
+    reportDto.reviewed_by = String(req.user);
     reportDto.reviewed_on = new Date();
 
     const report = await this.reportRepository.update(id, reportDto);
