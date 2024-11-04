@@ -34,7 +34,10 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async login(req: any): Promise<any> {
-    const { fullname, username, type, email_address, user_id, is_active, role_id } = req?.user || {};
+    const { fullname, username, type, email_address, user_id, is_active, role_id, deleted } = req?.user || {};
+
+    if (deleted)
+      throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
 
     if (!is_active)
       throw new AuthException(AuthErrorConstant.INVALID_STATUS);
@@ -195,7 +198,7 @@ export class AuthenticationService implements IAuthenticationService {
   }
 
   async checkSupplierStatus(username: string): Promise<any> {
-    const user = await this.userRepository.findOneByFilter({ username, type: 'supplier' });
+    const user = await this.userRepository.findOneByFilter({ username, type: 'supplier', deleted: { $ne: true } });
 
     if (!user)
       throw new AuthException(AuthErrorConstant.USER_NOT_FOUND);
@@ -712,7 +715,7 @@ export class AuthenticationService implements IAuthenticationService {
     const hashedOtp = await bcrypt.hash(otp, 14);
 
     await this.otpRepository.create({
-      type: "reset_password",
+      type: 'reset_password',
       user_email: email,
       otp: hashedOtp,
       expiration: Date.now() + 300000,
@@ -733,7 +736,11 @@ export class AuthenticationService implements IAuthenticationService {
     const email = otpDto?.email;
     const otp = otpDto?.otp;
 
-    const otpRecords = await this.otpRepository.findAllByFilter({ type: "reset_password", user_email: email, is_used: false });
+    const otpRecords = await this.otpRepository.findAllByFilter({
+      type: 'reset_password',
+      user_email: email,
+      is_used: false,
+    });
 
     const validOtpRecords = otpRecords.filter(record => Date.now() <= record.expiration.getTime());
 
@@ -781,7 +788,7 @@ export class AuthenticationService implements IAuthenticationService {
     const hashedOtp = await bcrypt.hash(otp, 14);
 
     await this.otpRepository.create({
-      type: "delete_account",
+      type: 'delete_account',
       user_email: email,
       otp: hashedOtp,
       expiration: Date.now() + 300000,
@@ -802,7 +809,11 @@ export class AuthenticationService implements IAuthenticationService {
     const email = otpDto?.email;
     const otp = otpDto?.otp;
 
-    const otpRecords = await this.otpRepository.findAllByFilter({ type: "delete_account", user_email: email, is_used: false });
+    const otpRecords = await this.otpRepository.findAllByFilter({
+      type: 'delete_account',
+      user_email: email,
+      is_used: false,
+    });
 
     const validOtpRecords = otpRecords.filter(record => Date.now() <= record.expiration.getTime());
 
@@ -831,6 +842,14 @@ export class AuthenticationService implements IAuthenticationService {
       message: 'OTP verified failed',
       verified: false,
     });
+  }
+
+  async deleteAccount(user_id: string): Promise<boolean> {
+    const user = await this.userRepository.updateOneByFilter({ user_id }, {
+      is_active: false,
+      deleted: true,
+    })
+    return !!user;
   }
 }
 

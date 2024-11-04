@@ -31,6 +31,7 @@ export interface IAuthenticationService {
   getEmail(user_id: string): Promise<any>;
   sendDeleteOTP(otpDto: OtpDto): Promise<any>;
   verifyDeleteOTP(otpDto: OtpDto, res: Response): Promise<any>;
+  deleteAccount(user_id: string): Promise<boolean>;
 
   createSupplier(supplierDto: SupplierDto): Promise<SupplierDto>;
   findAllSuppliers(): Promise<SupplierDto[]>;
