@@ -3,11 +3,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Admin, AdminSchema } from './domain/schema/admin.schema';
 import { Supplier, SupplierSchema } from './domain/schema/supplier.schema';
 import { User, UserSchema } from './domain/schema/user.schema';
+import { Otp, OtpSchema } from './domain/schema/otp.schema';
 import { SessionSchema } from './domain/schema/session.schema';
 
 import { AdminRepository } from './domain/repositories/admin.repository';
 import { SupplierRepository } from './domain/repositories/supplier.repository';
 import { UserRepository } from './domain/repositories/user.repository';
+import { OtpRepository } from './domain/repositories/otp.repository';
 import { AuthenticationController } from './controllers/authentication.controller';
 import { AuthenticationService } from './services/implementations/authentication.service';
 import { SessionService } from './services/implementations/session.service';
@@ -18,6 +20,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RoleModule } from '../role/role.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './passport/jwt.strategy';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
@@ -25,6 +28,7 @@ import { JwtStrategy } from './passport/jwt.strategy';
       { name: Admin.name, schema: AdminSchema },
       { name: Supplier.name, schema: SupplierSchema },
       { name: User.name, schema: UserSchema },
+      { name: Otp.name, schema: OtpSchema},
       { name: 'Session', schema: SessionSchema },
     ]),
     RoleModule,
@@ -32,6 +36,7 @@ import { JwtStrategy } from './passport/jwt.strategy';
       secret: process.env.JWT_SECRET || 'jwt-secret-key',
       signOptions: { expiresIn: '2h' },
     }),
+    MailerModule,
     PassportModule.register({ session: true }),
     ScheduleModule.forRoot(),
   ],
@@ -40,7 +45,7 @@ import { JwtStrategy } from './passport/jwt.strategy';
   providers: [
     { provide: AuthenticationService.name, useClass: AuthenticationService },
     { provide: SessionService.name, useClass: SessionService },
-    AdminRepository, SupplierRepository, UserRepository, LocalStrategy, SessionSerializer, JwtStrategy
+    AdminRepository, SupplierRepository, UserRepository, OtpRepository, LocalStrategy, SessionSerializer, JwtStrategy
   ],
 })
 

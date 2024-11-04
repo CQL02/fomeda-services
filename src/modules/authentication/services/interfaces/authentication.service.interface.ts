@@ -1,6 +1,8 @@
 import { UserDto } from '../../dtos/user.dto';
 import { AdminDto } from "../../dtos/admin.dto";
 import { SupplierDto } from "../../dtos/supplier.dto";
+import { OtpDto } from '../../dtos/otp.dto';
+import { Response } from 'express';
 
 export interface IAuthenticationService {
   login(userDto: UserDto): Promise<any>
@@ -14,6 +16,7 @@ export interface IAuthenticationService {
   findAllUsersByFilter(filterDto);
   updateUserStatus(user_id: string, userDto: UserDto): Promise<UserDto>;
   checkEmailDuplicate(email: string): Promise<boolean>
+  checkForgetPasswordEmail(email: string): Promise<any>
   checkUsernameDuplicate(username: string): Promise<boolean>
   checkSupplierStatus(username: string): Promise<any>
   getRejectionInfo(username: string): Promise<any>
@@ -22,6 +25,13 @@ export interface IAuthenticationService {
   getProfileInfo(user_id: string): Promise<any>
   updateProfile(user_id: string, userDto: UserDto): Promise<SupplierDto | AdminDto>
   updatePassword(user_id: string, userDto: UserDto): Promise<any>;
+  resetPassword(user_id: string, userDto: UserDto): Promise<any>;
+  sendOTP(otpDto: OtpDto): Promise<boolean>;
+  verifyOTP(otpDto: OtpDto, res: Response): Promise<boolean>;
+  getEmail(user_id: string): Promise<any>;
+  sendDeleteOTP(otpDto: OtpDto): Promise<any>;
+  verifyDeleteOTP(otpDto: OtpDto, res: Response): Promise<any>;
+  deleteAccount(user_id: string): Promise<boolean>;
 
   createSupplier(supplierDto: SupplierDto): Promise<SupplierDto>;
   findAllSuppliers(): Promise<SupplierDto[]>;
