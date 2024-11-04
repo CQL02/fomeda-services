@@ -60,6 +60,12 @@ export class User extends Document {
     type: String,
   })
   status: string;
+
+
+  @Prop({
+    type: Boolean,
+  })
+  deleted?: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
