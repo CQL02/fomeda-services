@@ -235,4 +235,11 @@ export class AuthenticationController {
   ) {
     return this.authenticationService.getEmail(user_id);
   }
+
+  @Patch('delete-account')
+  async deleteAccount(
+    @Query('user_id') user_id: string,
+  ) {
+    return this.authenticationService.deleteAccount(user_id);
+  }
 }
