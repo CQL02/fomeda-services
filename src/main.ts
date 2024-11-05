@@ -45,7 +45,7 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        maxAge: 10 * 60 * 1000,
+        maxAge: 1 * 60 * 60 * 1000,
         sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
         secure: process.env.ENVIRONMENT === 'production',
       },
