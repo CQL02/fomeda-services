@@ -7,6 +7,7 @@ import * as connectMongoDBSession from 'connect-mongodb-session';
 import * as bodyParser from 'body-parser';
 import * as crypto from 'crypto';
 import { ConfigService } from "@nestjs/config";
+import * as express from 'express';
 
 const MongoDBStore = connectMongoDBSession(session);
 
@@ -17,7 +18,9 @@ const store = new MongoDBStore({
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const expressApp = app.getHttpAdapter().getInstance() as express.Express;
 
+  expressApp.set('trust proxy', 1);
   // app.useGlobalPipes(new ValidationPipe(
   //   {
   //     whitelist: true,
@@ -43,7 +46,11 @@ async function bootstrap() {
       secret: "secret",
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 10 * 60 * 1000 }, // 10 minutes
+      cookie: {
+        maxAge: 10 * 60 * 1000,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
       // store: store,
       // genid: () => crypto.randomBytes(16).toString('hex')
     })
