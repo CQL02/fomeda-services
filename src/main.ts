@@ -5,7 +5,7 @@ import * as session from 'express-session';
 import * as connectMongoDBSession from 'connect-mongodb-session';
 import * as bodyParser from 'body-parser';
 import { ConfigService } from "@nestjs/config";
-import * as express from 'express';
+// import * as express from 'express';
 
 const MongoDBStore = connectMongoDBSession(session);
 
@@ -16,9 +16,9 @@ const store = new MongoDBStore({
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const expressApp = app.getHttpAdapter().getInstance() as express.Express;
+  // const expressApp = app.getHttpAdapter().getInstance() as express.Express;
 
-  expressApp.set('trust proxy', 1);
+  // expressApp.set('trust proxy', 1);
   // app.useGlobalPipes(new ValidationPipe(
   //   {
   //     whitelist: true,
