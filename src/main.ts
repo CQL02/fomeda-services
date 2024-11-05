@@ -1,11 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { ValidationPipe } from "@nestjs/common";
 import * as passport from 'passport'
 import * as session from 'express-session';
 import * as connectMongoDBSession from 'connect-mongodb-session';
 import * as bodyParser from 'body-parser';
-import * as crypto from 'crypto';
 import { ConfigService } from "@nestjs/config";
 import * as express from 'express';
 
