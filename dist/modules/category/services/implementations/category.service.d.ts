@@ -1,0 +1,34 @@
+import { ICategoryService } from "../interfaces/category.service.interface";
+import { CategoryDto } from "../../dtos/category.dto";
+import { CategoryRepository } from "../../domain/repositories/category.repository";
+import { SubcategoryDto } from "../../dtos/subcategory.dto";
+import { SubcategoryRepository } from "../../domain/repositories/subcategory.repository";
+import { CategoryNameDto } from "../../dtos/category-name.dto";
+import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
+import { CategoryMapper } from "../mapper/category.mapper";
+import { IAuthenticationService } from "../../../authentication/services/interfaces/authentication.service.interface";
+import { Request } from "express";
+export declare class CategoryService implements ICategoryService {
+    private readonly categoryRepository;
+    private readonly subcategoryRepository;
+    private readonly categoryMapper;
+    private readonly sequenceService;
+    private readonly authenticationService;
+    constructor(categoryRepository: CategoryRepository, subcategoryRepository: SubcategoryRepository, categoryMapper: CategoryMapper, sequenceService: ISequenceService, authenticationService: IAuthenticationService);
+    createCategory(req: Request, categoryDto: CategoryDto): Promise<CategoryDto>;
+    findAllCategories(): Promise<CategoryDto[]>;
+    findAllActiveCategories(): Promise<CategoryDto[]>;
+    findCategoryById(id: string): Promise<CategoryDto>;
+    updateCategory(req: Request, id: string, categoryDto: CategoryDto): Promise<CategoryDto>;
+    deactivateCategory(req: Request, id: string, is_active: boolean): Promise<CategoryDto>;
+    deleteCategory(id: string): Promise<CategoryDto>;
+    createSubcategory(req: Request, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto>;
+    updateSubcategory(req: Request, id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto>;
+    deactivateSubcategory(req: Request, id: string, is_active: boolean): Promise<SubcategoryDto>;
+    deleteSubcategory(id: string): Promise<SubcategoryDto>;
+    findAllSubcategory(): Promise<SubcategoryDto[]>;
+    findAllSubcategoryByCatId(cat_id: string): Promise<SubcategoryDto[]>;
+    findOneSubcategoryById(id: string): Promise<SubcategoryDto>;
+    findNameById(id: string): Promise<CategoryNameDto>;
+    findAllSubcategoryNameByIds(ids: string[]): Promise<CategoryNameDto[]>;
+}

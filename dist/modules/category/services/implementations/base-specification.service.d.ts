@@ -1,0 +1,30 @@
+import { IBaseSpecificationService } from "../interfaces/base-specification.service.interface";
+import { BaseSpecificationDto } from "../../dtos/base-specification.dto";
+import { BaseSubspecificationDto } from "../../dtos/base-subspecification.dto";
+import { CategoryBaseSpecificationRepository } from "../../domain/repositories/category-base-specification.repository";
+import { CategoryBaseSubspecificationRepository } from "../../domain/repositories/category-base-subspecification.repository";
+import { CategoryMapper } from "../mapper/category.mapper";
+import { IGeneralSpecificationService } from "../interfaces/general-specification.service.interface";
+import { ISequenceService } from "../../../sequence/services/interfaces/sequence.service.interface";
+import { Request } from "express";
+export declare class BaseSpecificationService implements IBaseSpecificationService {
+    private readonly categoryBaseSpecificationRepository;
+    private readonly categoryBaseSubspecificationRepository;
+    private readonly categoryMapper;
+    private readonly sequenceService;
+    private readonly generalSpecificationService;
+    constructor(categoryBaseSpecificationRepository: CategoryBaseSpecificationRepository, categoryBaseSubspecificationRepository: CategoryBaseSubspecificationRepository, categoryMapper: CategoryMapper, sequenceService: ISequenceService, generalSpecificationService: IGeneralSpecificationService);
+    createBaseSpecification(req: Request, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto>;
+    findBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]>;
+    findActiveBaseSpecificationByCatId(id: string): Promise<BaseSpecificationDto[]>;
+    findActiveBaseSpecificationByCatIds(ids: string[]): Promise<BaseSpecificationDto[]>;
+    findBaseSpecificationById(id: string): Promise<BaseSpecificationDto>;
+    updateBaseSpecification(req: Request, id: string, baseSpecificationDto: BaseSpecificationDto): Promise<BaseSpecificationDto>;
+    deactivateBaseSpecification(req: Request, id: string, is_active: boolean): Promise<BaseSpecificationDto>;
+    deleteBaseSpecification(id: string): Promise<BaseSpecificationDto>;
+    createBaseSubspecification(req: Request, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto>;
+    findBaseSubspecificationById(id: string): Promise<BaseSubspecificationDto>;
+    updateBaseSubspecification(req: Request, id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto>;
+    deactivateBaseSubspecification(req: Request, id: string, is_active: boolean): Promise<BaseSubspecificationDto>;
+    deleteBaseSubspecification(id: string): Promise<BaseSubspecificationDto>;
+}

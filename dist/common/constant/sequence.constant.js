@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SequenceConstant = void 0;
+exports.SequenceConstant = {
+    PRODUCT_CATEGORY_PREFIX: 'CAT',
+    PRODUCT_SUBCATEGORY_PREFIX: 'SCAT',
+    PRODUCT_SPECIFICATION_PREFIX: 'SPEC',
+    PRODUCT_SUBSPECIFICATION_PREFIX: 'SSPEC',
+    PRODUCT_GENERAL_SPECIFICATION_PREFIX: 'GSPEC',
+    PRODUCT_GENERAL_SUBSPECIFICATION_PREFIX: 'GSSPEC',
+    PRODUCT_BASE_SPECIFICATION_PREFIX: 'BSPEC',
+    PRODUCT_BASE_SUBSPECIFICATION_PREFIX: 'BSSPEC',
+};
+//# sourceMappingURL=sequence.constant.js.map

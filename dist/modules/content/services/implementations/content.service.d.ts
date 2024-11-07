@@ -1,0 +1,31 @@
+import { IContentService } from '../interfaces/content.service.interface';
+import { CarouselDto } from '../../dtos/carousel.dto';
+import { Carousel } from '../../domain/schema/carousel.schema';
+import { CarouselRepository } from '../../domain/repositories/carousel.repository';
+import { ContentDto } from '../../dtos/content.dto';
+import { Content } from '../../domain/schema/content.schema';
+import { ContentRepository } from '../../domain/repositories/content.repository';
+import { HistoryTimelineDto } from '../../dtos/history-timeline.dto';
+import { HistoryTimeline } from '../../domain/schema/history-timeline.schema';
+import { HistoryTimelineRepository } from '../../domain/repositories/history-timeline.repository';
+export declare class ContentService implements IContentService {
+    private readonly carouselRepository;
+    private readonly contentRepository;
+    private readonly historyTimelineRepository;
+    constructor(carouselRepository: CarouselRepository, contentRepository: ContentRepository, historyTimelineRepository: HistoryTimelineRepository);
+    createCarousel(carouselDto: CarouselDto): Promise<Carousel>;
+    findAllCarousel(): Promise<Carousel[]>;
+    findVisibleCarousel(): Promise<Carousel[]>;
+    updateCarousel(id: string, carouselDto: CarouselDto): Promise<Carousel>;
+    deleteCarousel(id: string): Promise<Carousel>;
+    createContent(contentDto: ContentDto): Promise<Content>;
+    findAllContent(): Promise<Content[]>;
+    findVisibleContent(): Promise<Content[]>;
+    updateContent(id: string, contentDto: ContentDto): Promise<Content>;
+    deleteContent(id: string): Promise<Content>;
+    createHistoryTimeline(historyTimelineDto: HistoryTimelineDto): Promise<HistoryTimeline>;
+    findAllHistoryTimeline(): Promise<HistoryTimeline[]>;
+    findVisibleHistoryTimeline(): Promise<HistoryTimeline[]>;
+    updateHistoryTimeline(id: string, historyTimelineDto: HistoryTimelineDto): Promise<HistoryTimeline>;
+    deleteHistoryTimeline(id: string): Promise<HistoryTimeline>;
+}
