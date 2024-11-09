@@ -2,17 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import * as passport from 'passport'
 import * as session from 'express-session';
-import * as connectMongoDBSession from 'connect-mongodb-session';
+// import * as connectMongoDBSession from 'connect-mongodb-session';
 import * as bodyParser from 'body-parser';
 import { ConfigService } from "@nestjs/config";
 import * as express from 'express';
 
-const MongoDBStore = connectMongoDBSession(session);
-
-const store = new MongoDBStore({
-  uri: process.env.MONGO_URI,
-  collection: 'sessions'
-});
+// const MongoDBStore = connectMongoDBSession(session);
+//
+// const store = new MongoDBStore({
+//   uri: process.env.MONGO_URI,
+//   collection: 'sessions'
+// });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

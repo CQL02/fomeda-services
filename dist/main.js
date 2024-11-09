@@ -4,14 +4,8 @@ const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app/app.module");
 const passport = require("passport");
 const session = require("express-session");
-const connectMongoDBSession = require("connect-mongodb-session");
 const bodyParser = require("body-parser");
 const config_1 = require("@nestjs/config");
-const MongoDBStore = connectMongoDBSession(session);
-const store = new MongoDBStore({
-    uri: process.env.MONGO_URI,
-    collection: 'sessions'
-});
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const expressApp = app.getHttpAdapter().getInstance();
@@ -35,8 +29,8 @@ async function bootstrap() {
         saveUninitialized: false,
         cookie: {
             maxAge: 10 * 60 * 1000,
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
+            secure: process.env.ENVIRONMENT === 'production',
         },
     }));
     app.use(passport.initialize());
