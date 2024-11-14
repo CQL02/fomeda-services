@@ -815,15 +815,6 @@ export class AuthenticationService implements IAuthenticationService {
 
       if (isOtpValid) {
         await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
-
-        res.cookie('isDeleteVerified', 'true', {
-          httpOnly: true,
-          // secure: true,
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 10 * 60 * 1000,
-        });
-
         res.json({
           message: 'OTP verified successfully',
           verified: true,
