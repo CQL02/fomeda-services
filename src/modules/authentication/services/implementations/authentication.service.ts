@@ -750,14 +750,6 @@ export class AuthenticationService implements IAuthenticationService {
       if (isOtpValid) {
         await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
 
-        res.cookie('isResetVerified', 'true', {
-          httpOnly: false,
-          secure: true,
-          sameSite: 'none',
-          path: '/',
-          maxAge: 10 * 60 * 1000,
-        });
-
         res.json({
           message: 'OTP verified successfully',
           verified: true,

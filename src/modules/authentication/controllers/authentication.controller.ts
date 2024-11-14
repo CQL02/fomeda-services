@@ -6,7 +6,7 @@ import {
   Post,
   Patch,
   UseGuards,
-  Request, Query, Inject, Res, Req,
+  Request, Query, Inject, Res,
 } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { SupplierDto } from '../dtos/supplier.dto';
