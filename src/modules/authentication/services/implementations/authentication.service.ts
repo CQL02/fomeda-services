@@ -751,7 +751,7 @@ export class AuthenticationService implements IAuthenticationService {
         await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
 
         res.cookie('isResetVerified', 'true', {
-          httpOnly: true,
+          httpOnly: false,
           // secure: true,
           sameSite: 'none',
           path: '/',
