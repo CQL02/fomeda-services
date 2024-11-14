@@ -752,7 +752,7 @@ export class AuthenticationService implements IAuthenticationService {
 
         res.cookie('isResetVerified', 'true', {
           httpOnly: false,
-          // secure: true,
+          secure: true,
           sameSite: 'none',
           path: '/',
           maxAge: 10 * 60 * 1000,
