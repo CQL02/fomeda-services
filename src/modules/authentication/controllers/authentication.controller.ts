@@ -18,7 +18,7 @@ import { IAuthenticationService } from '../services/interfaces/authentication.se
 import { ISessionService } from '../services/interfaces/session.service.interface';
 import { AdminDto } from '../dtos/admin.dto';
 import { OtpDto } from '../dtos/otp.dto';
-import { Request as ExpressRequest, Response } from 'express';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -210,9 +210,8 @@ export class AuthenticationController {
   async verifyOtp(
     @Body() otpDto: OtpDto,
     @Res() res: Response,
-    @Req() req: ExpressRequest
   ) {
-    return this.authenticationService.verifyOTP(otpDto, req, res);
+    return this.authenticationService.verifyOTP(otpDto, res);
   }
 
   @Post('send-delete-otp')

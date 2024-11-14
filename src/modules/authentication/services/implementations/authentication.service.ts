@@ -17,7 +17,7 @@ import { MailerService } from '../../../mailer/mailer.service';
 import { randomInt } from 'crypto';
 import { OtpRepository } from '../../domain/repositories/otp.repository';
 import { OtpDto } from '../../dtos/otp.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthenticationService implements IAuthenticationService {
@@ -732,7 +732,7 @@ export class AuthenticationService implements IAuthenticationService {
     return await this.mailerService.sendMail(email, subject, '', html);
   }
 
-  async verifyOTP(otpDto: OtpDto, req: Request, res: Response): Promise<any> {
+  async verifyOTP(otpDto: OtpDto, res: Response): Promise<any> {
     const email = otpDto?.email;
     const otp = otpDto?.otp;
 
@@ -750,22 +750,19 @@ export class AuthenticationService implements IAuthenticationService {
       if (isOtpValid) {
         await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
 
-        const origin = req.get('Origin');
-        const domain = new URL(origin).hostname;
-
         res.cookie('isResetVerified', 'true', {
           httpOnly: false,
           secure: true,
           sameSite: 'none',
           path: '/',
           maxAge: 10 * 60 * 1000,
-          domain: domain,
         });
 
         res.json({
           message: 'OTP verified successfully',
           verified: true,
         });
+
       }
     }
 
