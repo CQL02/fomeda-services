@@ -744,24 +744,29 @@ export class AuthenticationService implements IAuthenticationService {
 
     const validOtpRecords = otpRecords.filter(record => Date.now() <= record.expiration.getTime());
 
+    let otpVerified = false;
+
     for (const otpRecord of validOtpRecords) {
       const isOtpValid = await bcrypt.compare(otp, otpRecord?.otp);
 
       if (isOtpValid) {
         await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
-
-        res.json({
-          message: 'OTP verified successfully',
-          verified: true,
-        });
-
+        otpVerified = true;
+        break;
       }
     }
 
-    res.json({
-      message: 'OTP verified failed',
-      verified: false,
-    });
+    if (otpVerified) {
+      res.json({
+        message: 'OTP verified successfully',
+        verified: true,
+      });
+    } else {
+      res.json({
+        message: 'OTP verification failed',
+        verified: false,
+      });
+    }
   }
 
   async getEmail(user_id: string): Promise<any> {
@@ -810,29 +815,36 @@ export class AuthenticationService implements IAuthenticationService {
 
     const validOtpRecords = otpRecords.filter(record => Date.now() <= record.expiration.getTime());
 
+    let otpVerified = false;
+
     for (const otpRecord of validOtpRecords) {
       const isOtpValid = await bcrypt.compare(otp, otpRecord?.otp);
 
       if (isOtpValid) {
         await this.otpRepository.updateOneByFilter(otpRecord?._id, { is_used: true });
-        res.json({
-          message: 'OTP verified successfully',
-          verified: true,
-        });
+        otpVerified = true;
+        break;
       }
     }
 
-    res.json({
-      message: 'OTP verified failed',
-      verified: false,
-    });
+    if (otpVerified) {
+      res.json({
+        message: 'OTP verified successfully',
+        verified: true,
+      });
+    } else {
+      res.json({
+        message: 'OTP verification failed',
+        verified: false,
+      });
+    }
   }
 
   async deleteAccount(user_id: string): Promise<boolean> {
     const user = await this.userRepository.updateOneByFilter({ user_id }, {
       is_active: false,
       deleted: true,
-    })
+    });
     return !!user;
   }
 }
