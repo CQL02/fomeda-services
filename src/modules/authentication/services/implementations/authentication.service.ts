@@ -756,7 +756,6 @@ export class AuthenticationService implements IAuthenticationService {
           sameSite: 'none',
           path: '/',
           maxAge: 10 * 60 * 1000,
-          domain: '.onrender.com',
         });
 
         res.json({
