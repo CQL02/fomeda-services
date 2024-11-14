@@ -6,7 +6,7 @@ import {
   Post,
   Patch,
   UseGuards,
-  Request, Query, Inject, Res,
+  Request, Query, Inject, Res, Req,
 } from '@nestjs/common';
 import { UserDto } from '../dtos/user.dto';
 import { SupplierDto } from '../dtos/supplier.dto';
@@ -18,7 +18,7 @@ import { IAuthenticationService } from '../services/interfaces/authentication.se
 import { ISessionService } from '../services/interfaces/session.service.interface';
 import { AdminDto } from '../dtos/admin.dto';
 import { OtpDto } from '../dtos/otp.dto';
-import { Response } from 'express';
+import { Request as ExpressRequest, Response } from 'express';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -209,9 +209,10 @@ export class AuthenticationController {
   @Post('verify-otp')
   async verifyOtp(
     @Body() otpDto: OtpDto,
-    @Res() res: Response
+    @Res() res: Response,
+    @Req() req: ExpressRequest
   ) {
-    return this.authenticationService.verifyOTP(otpDto, res);
+    return this.authenticationService.verifyOTP(otpDto, req, res);
   }
 
   @Post('send-delete-otp')

@@ -2,7 +2,7 @@ import { UserDto } from '../../dtos/user.dto';
 import { AdminDto } from "../../dtos/admin.dto";
 import { SupplierDto } from "../../dtos/supplier.dto";
 import { OtpDto } from '../../dtos/otp.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 export interface IAuthenticationService {
   login(userDto: UserDto): Promise<any>
@@ -27,7 +27,7 @@ export interface IAuthenticationService {
   updatePassword(user_id: string, userDto: UserDto): Promise<any>;
   resetPassword(user_id: string, userDto: UserDto): Promise<any>;
   sendOTP(otpDto: OtpDto): Promise<boolean>;
-  verifyOTP(otpDto: OtpDto, res: Response): Promise<boolean>;
+  verifyOTP(otpDto: OtpDto, req: Request, res: Response): Promise<boolean>;
   getEmail(user_id: string): Promise<any>;
   sendDeleteOTP(otpDto: OtpDto): Promise<any>;
   verifyDeleteOTP(otpDto: OtpDto, res: Response): Promise<any>;
