@@ -59,4 +59,20 @@ export class CategoryGeneralSubspecificationRepository extends AbstractRepositor
       }
     ]);
   }
+
+  async findBySubspecificationName(specId: string, subpecName: string): Promise<GeneralSubspecificationDto> {
+    return this.categoryGeneralSubspecificationModel.findOne({
+      $and: [
+        { subcat_spec_id: specId },
+        {
+          $expr: {
+            $eq: [
+              { $toLower: "$subcat_subspec_name" },
+              subpecName.toLowerCase()
+            ]
+          }
+        }
+      ]
+    })
+  }
 }

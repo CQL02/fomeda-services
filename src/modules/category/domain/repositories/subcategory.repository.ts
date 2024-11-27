@@ -63,4 +63,20 @@ export class SubcategoryRepository extends AbstractRepository<Subcategory> {
       }
     ]);
   }
+
+  async findBySubcategoryName(catId: string, subcatName: string): Promise<SubcategoryDto> {
+    return this.subcategoryModel.findOne({
+      $and: [
+        { cat_id: catId },
+        {
+          $expr: {
+            $eq: [
+              { $toLower: "$subcat_name" },
+              subcatName.toLowerCase()
+            ]
+          }
+        }
+      ]
+    });
+  }
 }

@@ -55,4 +55,15 @@ export class CategoryRepository extends AbstractRepository<Category> {
       }
     ]);
   }
+
+  async findByCategoryName(catName: string): Promise<CategoryDto> {
+    return this.categoryModel.findOne({
+      $expr: {
+        $eq: [
+          { $toLower: "$cat_name" },
+          catName.toLowerCase()
+        ]
+      }
+    })
+  }
 }

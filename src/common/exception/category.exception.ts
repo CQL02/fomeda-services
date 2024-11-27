@@ -8,6 +8,10 @@ export enum CategoryErrorConstant {
   INVALID_SPECIFICATION = 1005,
   SPECIFICATION_NOT_FOUND = 1006,
   SUBCATEGORY_NOT_FOUND = 1007,
+  DUPLICATE_CATEGORY = 1008,
+  DUPLICATE_SUBCATEGORY = 1009,
+  DUPLICATE_SPECIFICATION = 1010,
+  DUPLICATE_SUBSPECIFICATION = 1011,
 }
 
 export const CategoryErrorMessage = {
@@ -18,6 +22,10 @@ export const CategoryErrorMessage = {
   [CategoryErrorConstant.INVALID_SPECIFICATION]: 'Invalid Specification',
   [CategoryErrorConstant.SPECIFICATION_NOT_FOUND]: 'Specification Not Found',
   [CategoryErrorConstant.SUBCATEGORY_NOT_FOUND]: 'Subcategory Not Found',
+  [CategoryErrorConstant.DUPLICATE_CATEGORY]: 'Category Existed',
+  [CategoryErrorConstant.DUPLICATE_SUBCATEGORY]: 'Subcategory Existed',
+  [CategoryErrorConstant.DUPLICATE_SPECIFICATION]: 'Specification Existed',
+  [CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION]: 'Subspecification Existed',
 }
 
 export class CategoryException extends HttpException {

@@ -40,6 +40,11 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
+    const specification = await this.subcategorySpecificationRepository.findBySpecificationName(subcategorySpecificationDto.subcat_spec_name.trim(), subcategorySpecificationDto.cat_type);
+    if(ObjectUtils.isNotEmpty(specification)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
+    }
+
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_SPECIFICATION_PREFIX
     );
@@ -174,6 +179,11 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   async createSubcategorySubspecification(req: Request, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySubspecificationDto) || StringUtils.isEmpty(subcategorySubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
+    }
+
+    const subspecification = await this.subcategorySubspecificationRepository.findBySubspecificationName(subcategorySubspecificationDto.subcat_spec_id, subcategorySubspecificationDto.subcat_subspec_name.trim());
+    if(ObjectUtils.isNotEmpty(subspecification)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION);
     }
 
     const _id = await this.sequenceService.generateId(
