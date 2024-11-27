@@ -33,7 +33,7 @@ export class BaseSpecificationService implements IBaseSpecificationService {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    const specification = await this.categoryBaseSpecificationRepository.findBySpecificationName(baseSpecificationDto.subcat_spec_name.trim(), baseSpecificationDto.cat_type);
+    const specification = await this.categoryBaseSpecificationRepository.findBySpecificationName(baseSpecificationDto.subcat_spec_name.trim(), baseSpecificationDto.cat_type, baseSpecificationDto.cat_id);
     if(ObjectUtils.isNotEmpty(specification)) {
       throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
     }
