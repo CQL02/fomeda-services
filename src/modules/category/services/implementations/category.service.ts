@@ -32,6 +32,11 @@ export class CategoryService implements ICategoryService {
       throw new CategoryException(CategoryErrorConstant.EMPTY_CATEGORY);
     }
 
+    const category = await this.categoryRepository.findByCategoryName(categoryDto.cat_name.trim());
+    if(ObjectUtils.isNotEmpty(category)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_CATEGORY);
+    }
+
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_CATEGORY_PREFIX
     );
@@ -115,6 +120,11 @@ export class CategoryService implements ICategoryService {
   async createSubcategory(req: Request, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
     if (ObjectUtils.isEmpty(subcategoryDto) || StringUtils.isEmpty(subcategoryDto.subcat_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SUBCATEGORY);
+    }
+
+    const subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name.trim());
+    if(ObjectUtils.isNotEmpty(subcategory)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBCATEGORY);
     }
 
     const _id = await this.sequenceService.generateId(

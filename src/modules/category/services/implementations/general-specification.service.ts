@@ -32,6 +32,11 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
+    const specification = await this.generalSpecificationRepository.findBySpecificationName(generalSpecificationDto.subcat_spec_name.trim(), generalSpecificationDto.cat_type);
+    if(ObjectUtils.isNotEmpty(specification)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION)
+    }
+
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_GENERAL_SPECIFICATION_PREFIX
     );
@@ -114,6 +119,11 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   async createGeneralSubspecification(req: Request, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
     if(ObjectUtils.isEmpty(generalSubspecificationDto) || StringUtils.isEmpty(generalSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
+    const subspecification = await this.generalSubspecificationRepository.findBySubspecificationName(generalSubspecificationDto.subcat_spec_id, generalSubspecificationDto.subcat_subspec_name.trim());
+    if(ObjectUtils.isNotEmpty(subspecification)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION);
     }
 
     const _id = await this.sequenceService.generateId(

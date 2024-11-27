@@ -33,6 +33,11 @@ export class BaseSpecificationService implements IBaseSpecificationService {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
+    const specification = await this.categoryBaseSpecificationRepository.findBySpecificationName(baseSpecificationDto.subcat_spec_name.trim(), baseSpecificationDto.cat_type);
+    if(ObjectUtils.isNotEmpty(specification)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
+    }
+
     const _id = await this.sequenceService.generateId(
       SequenceConstant.PRODUCT_BASE_SPECIFICATION_PREFIX
     );
@@ -145,6 +150,11 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   async createBaseSubspecification(req: Request, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
     if (ObjectUtils.isEmpty(baseSubspecificationDto) || StringUtils.isEmpty(baseSubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
+    }
+
+    const subspecification = await this.categoryBaseSubspecificationRepository.findBySubspecificationName(baseSubspecificationDto.subcat_spec_id, baseSubspecificationDto.subcat_subspec_name.trim());
+    if(ObjectUtils.isNotEmpty(subspecification)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION);
     }
 
     const _id = await this.sequenceService.generateId(

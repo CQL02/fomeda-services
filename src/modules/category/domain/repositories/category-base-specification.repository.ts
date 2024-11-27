@@ -56,4 +56,48 @@ export class CategoryBaseSpecificationRepository extends AbstractRepository<Cate
       }
     ]);
   }
+
+  async findBySpecificationName(specName: string, catType: string): Promise<BaseSpecificationDto> {
+    const results = await this.categoryBaseSpecificationModel.aggregate([
+      {
+        $match: {
+          $and: [
+            { cat_type: catType },
+            {
+              $expr: {
+                $eq: [
+                  { $toLower: "$subcat_spec_name" },
+                  specName.toLowerCase()
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unionWith: {
+          coll: "category_general_specification",
+          pipeline: [
+            {
+              $match: {
+                $and: [
+                  { cat_type: catType },
+                  {
+                    $expr: {
+                      $eq: [
+                        { $toLower: "$subcat_spec_name" },
+                        specName.toLowerCase()
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]);
+
+    return results.length > 0 ? results[0] : null;
+  }
 }

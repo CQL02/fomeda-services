@@ -56,4 +56,70 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
       }
     ]);
   }
+
+  async findBySpecificationName(specName: string, catType: string): Promise<SubcategorySpecificationDto> {
+    const results = await this.subcategorySpecificationModel.aggregate([
+      {
+        $match: {
+          $and: [
+            { cat_type: catType },
+            {
+              $expr: {
+                $eq: [
+                  { $toLower: "$subcat_spec_name" },
+                  specName.toLowerCase()
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unionWith: {
+          coll: "category_general_specification",
+          pipeline: [
+            {
+              $match: {
+                $and: [
+                  { cat_type: catType },
+                  {
+                    $expr: {
+                      $eq: [
+                        { $toLower: "$subcat_spec_name" },
+                        specName.toLowerCase()
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unionWith: {
+          coll: "category_base_specification",
+          pipeline: [
+            {
+              $match: {
+                $and: [
+                  { cat_type: catType },
+                  {
+                    $expr: {
+                      $eq: [
+                        { $toLower: "$subcat_spec_name" },
+                        specName.toLowerCase()
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]);
+
+    return results.length > 0 ? results[0] : null;
+  }
 }
