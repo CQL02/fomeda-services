@@ -57,12 +57,13 @@ export class CategoryBaseSpecificationRepository extends AbstractRepository<Cate
     ]);
   }
 
-  async findBySpecificationName(specName: string, catType: string): Promise<BaseSpecificationDto> {
+  async findBySpecificationName(specName: string, catType: string, catId: string): Promise<BaseSpecificationDto> {
     const results = await this.categoryBaseSpecificationModel.aggregate([
       {
         $match: {
           $and: [
             { cat_type: catType },
+            { cat_id: catId },
             {
               $expr: {
                 $eq: [

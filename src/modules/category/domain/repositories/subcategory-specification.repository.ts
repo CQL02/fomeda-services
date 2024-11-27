@@ -57,12 +57,23 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
     ]);
   }
 
-  async findBySpecificationName(specName: string, catType: string): Promise<SubcategorySpecificationDto> {
+  async findBySpecificationName(specName: string, catType: string, subcatId: string): Promise<SubcategorySpecificationDto> {
     const results = await this.subcategorySpecificationModel.aggregate([
+      // Lookup to get the cat_id from the subcategory collection
+      {
+        $lookup: {
+          from: "subcategory",
+          localField: "subcat_id",
+          foreignField: "subcat_id",
+          as: "subcategoryInfo"
+        }
+      },
+      { $unwind: "$subcategoryInfo" },
       {
         $match: {
           $and: [
             { cat_type: catType },
+            { subcat_id: subcatId },
             {
               $expr: {
                 $eq: [
@@ -104,6 +115,14 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
               $match: {
                 $and: [
                   { cat_type: catType },
+                  {
+                    $expr: {
+                      $eq: [
+                        "$cat_id",
+                        "$subcategoryInfo.cat_id"
+                      ]
+                    }
+                  },
                   {
                     $expr: {
                       $eq: [

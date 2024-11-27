@@ -40,7 +40,7 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    const specification = await this.subcategorySpecificationRepository.findBySpecificationName(subcategorySpecificationDto.subcat_spec_name.trim(), subcategorySpecificationDto.cat_type);
+    const specification = await this.subcategorySpecificationRepository.findBySpecificationName(subcategorySpecificationDto.subcat_spec_name.trim(), subcategorySpecificationDto.cat_type, subcategorySpecificationDto.subcat_id);
     if(ObjectUtils.isNotEmpty(specification)) {
       throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
     }
