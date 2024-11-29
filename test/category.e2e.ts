@@ -15,7 +15,7 @@ export const categoryTest = () => {
 
 
     describe("Create", () => {
-      describe("create category", () => {
+      describe("UTC_PCT_01 create category", () => {
         it("Category created successfully", async () => {
           return request(app.getHttpServer())
             .post("/category/create-category")
@@ -47,7 +47,7 @@ export const categoryTest = () => {
         });
       });
 
-      describe("create subcategory", () => {
+      describe("UTC_PCT_02 create subcategory", () => {
         const data = {
           cat_id: "CAT000000000009",
           subcat_name: "new subcategory",
@@ -94,7 +94,7 @@ export const categoryTest = () => {
             });
         });
 
-        describe("Create General Specification", () => {
+        describe("UTC_PCT_03 Create General Specification", () => {
           const data = {
             cat_type: "WARRANTY",
             subcat_spec_name: "General Warranty",
