@@ -19,13 +19,13 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
     return this.subcategorySpecificationModel.findByIdAndUpdate(id, {
       is_active: is_active,
       last_updated_on: new Date(),
-      last_updated_by: req.user,
+      last_updated_by: req.user
     }).exec();
   }
 
   async findAllByFilterWithUsername(filter: any): Promise<SubcategorySpecificationDto[]> {
     return this.subcategorySpecificationModel.aggregate([
-      { $match: filter},
+      { $match: filter },
       {
         $lookup: {
           from: "user",
@@ -57,18 +57,8 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
     ]);
   }
 
-  async findBySpecificationName(specName: string, catType: string, subcatId: string): Promise<SubcategorySpecificationDto> {
+  async findBySpecificationName(specName: string, catType: string, subcatId: string, catId: string): Promise<SubcategorySpecificationDto> {
     const results = await this.subcategorySpecificationModel.aggregate([
-      // Lookup to get the cat_id from the subcategory collection
-      {
-        $lookup: {
-          from: "subcategory",
-          localField: "subcat_id",
-          foreignField: "subcat_id",
-          as: "subcategoryInfo"
-        }
-      },
-      { $unwind: "$subcategoryInfo" },
       {
         $match: {
           $and: [
@@ -115,14 +105,7 @@ export class SubcategorySpecificationRepository extends AbstractRepository<Subca
               $match: {
                 $and: [
                   { cat_type: catType },
-                  {
-                    $expr: {
-                      $eq: [
-                        "$cat_id",
-                        "$subcategoryInfo.cat_id"
-                      ]
-                    }
-                  },
+                  { cat_id: catId },
                   {
                     $expr: {
                       $eq: [

@@ -83,6 +83,11 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
     }
 
+    const specification = await this.generalSpecificationRepository.findBySpecificationName(generalSpecificationDto.subcat_spec_name.trim(), generalSpecificationDto.cat_type);
+    if(ObjectUtils.isNotEmpty(specification)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION)
+    }
+
     const user_id = String(req.user);
 
     generalSpecificationDto = { ...generalSpecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
@@ -153,6 +158,11 @@ export class GeneralSpecificationService implements IGeneralSpecificationService
   async updateGeneralSubspecification(req: Request, id: string, generalSubspecificationDto: GeneralSubspecificationDto): Promise<GeneralSubspecificationDto> {
     if(ObjectUtils.isEmpty(generalSubspecificationDto) || StringUtils.isEmpty(generalSubspecificationDto.subcat_subspec_name)){
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION)
+    }
+
+    const subspecification = await this.generalSubspecificationRepository.findBySubspecificationName(generalSubspecificationDto.subcat_spec_id, generalSubspecificationDto.subcat_subspec_name.trim());
+    if(ObjectUtils.isNotEmpty(subspecification)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION);
     }
 
     const user_id = String(req.user);
