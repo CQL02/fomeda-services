@@ -7,12 +7,13 @@ import { ConsumerService } from "../services/implementations/consumer.service";
 import { ConsumerProductFilterDto } from "../dtos/consumer-product-filter.dto";
 import { Request } from "express";
 import { AuthenticationGuard } from "../../authentication/passport/authentication.guard";
+import { IConsumerService } from "../services/interfaces/consumer.service.interface";
 
 @Controller("product")
 export class ProductController {
   constructor(
     @Inject(ProductService.name) private readonly productService: IProductService,
-    @Inject(ConsumerService.name) private readonly consumerService: ConsumerService
+    @Inject(ConsumerService.name) private readonly consumerService: IConsumerService
   ) {
   }
 
