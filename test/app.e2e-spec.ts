@@ -1,9 +1,11 @@
-import { INestApplication } from '@nestjs/common';
 import { categoryTest } from "./category.e2e";
 import { closeTestApp, getTestApp } from "./test-app.factory";
+import { productSearchAndComparisonTest } from "./product-search-and-comparison.e2e";
+import { reportTest } from "./report.e2e";
+import { productVerificationTest } from "./product-verification.e2e";
+import { productManagementTest } from "./product-management.e2e";
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication;
 
   beforeAll(async () => {
     await getTestApp(); // Ensure app is initialised
@@ -14,5 +16,9 @@ describe('AppController (e2e)', () => {
   });
 
 
-  categoryTest()
+  // categoryTest();
+  // productSearchAndComparisonTest();
+  // reportTest();
+  // productVerificationTest();
+  // productManagementTest();
 });
