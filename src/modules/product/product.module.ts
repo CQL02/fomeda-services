@@ -32,6 +32,7 @@ import { ConsumerService } from "./services/implementations/consumer.service";
     AuthenticationModule
   ],
   controllers: [ProductController],
+  exports: [ProductService.name],
   providers: [
     { provide: ProductService.name, useClass: ProductService },
     { provide: ConsumerService.name, useClass: ConsumerService },
