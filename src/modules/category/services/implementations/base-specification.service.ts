@@ -114,6 +114,11 @@ export class BaseSpecificationService implements IBaseSpecificationService {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
+    const specification = await this.categoryBaseSpecificationRepository.findBySpecificationName(baseSpecificationDto.subcat_spec_name.trim(), baseSpecificationDto.cat_type, baseSpecificationDto.cat_id);
+    if(ObjectUtils.isNotEmpty(specification)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
+    }
+
     const user_id = String(req.user);
 
     baseSpecificationDto = { ...baseSpecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
@@ -179,6 +184,11 @@ export class BaseSpecificationService implements IBaseSpecificationService {
   async updateBaseSubspecification(req: Request, id: string, baseSubspecificationDto: BaseSubspecificationDto): Promise<BaseSubspecificationDto> {
     if (ObjectUtils.isEmpty(baseSubspecificationDto) || StringUtils.isEmpty(baseSubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
+    }
+
+    const subspecification = await this.categoryBaseSubspecificationRepository.findBySubspecificationName(baseSubspecificationDto.subcat_spec_id, baseSubspecificationDto.subcat_subspec_name.trim());
+    if(ObjectUtils.isNotEmpty(subspecification)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION);
     }
 
     const user_id = String(req.user);

@@ -40,7 +40,8 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
-    const specification = await this.subcategorySpecificationRepository.findBySpecificationName(subcategorySpecificationDto.subcat_spec_name.trim(), subcategorySpecificationDto.cat_type, subcategorySpecificationDto.subcat_id);
+    const subcategory = await this.categoryService.findOneSubcategoryById(subcategorySpecificationDto.subcat_id);
+    const specification = await this.subcategorySpecificationRepository.findBySpecificationName(subcategorySpecificationDto.subcat_spec_name.trim(), subcategorySpecificationDto.cat_type, subcategorySpecificationDto.subcat_id, subcategory.cat_id);
     if(ObjectUtils.isNotEmpty(specification)) {
       throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
     }
@@ -143,6 +144,12 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
     }
 
+    const subcategory = await this.categoryService.findOneSubcategoryById(subcategorySpecificationDto.subcat_id);
+    const specification = await this.subcategorySpecificationRepository.findBySpecificationName(subcategorySpecificationDto.subcat_spec_name.trim(), subcategorySpecificationDto.cat_type, subcategorySpecificationDto.subcat_id, subcategory.cat_id);
+    if(ObjectUtils.isNotEmpty(specification)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SPECIFICATION);
+    }
+
     const user_id = String(req.user);
 
     subcategorySpecificationDto = { ...subcategorySpecificationDto, last_updated_on: new Date(), last_updated_by: user_id };
@@ -209,6 +216,11 @@ export class SubcategorySpecificationService implements ISubcategorySpecificatio
   async updateSubcategorySubspecification(req: Request, id: string, subcategorySubspecificationDto: SubcategorySubspecificationDto): Promise<SubcategorySubspecificationDto> {
     if (ObjectUtils.isEmpty(subcategorySubspecificationDto) || StringUtils.isEmpty(subcategorySubspecificationDto.subcat_subspec_name)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_SPECIFICATION);
+    }
+
+    const subspecification = await this.subcategorySubspecificationRepository.findBySubspecificationName(subcategorySubspecificationDto.subcat_spec_id, subcategorySubspecificationDto.subcat_subspec_name.trim());
+    if(ObjectUtils.isNotEmpty(subspecification)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBSPECIFICATION);
     }
 
     const user_id = String(req.user);

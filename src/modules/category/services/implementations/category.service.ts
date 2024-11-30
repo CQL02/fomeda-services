@@ -43,7 +43,7 @@ export class CategoryService implements ICategoryService {
     const user_id = req.user;
 
     const result = await this.categoryRepository.create({ ...categoryDto, _id, created_by: user_id, last_updated_by: user_id });
-    return this.categoryMapper.mapSchemaToModel(result, CategoryDto);
+    return this.categoryMapper.mapSchemaToModel(result.toObject(), CategoryDto);
   }
 
   async findAllCategories(): Promise<CategoryDto[]> {
@@ -84,6 +84,11 @@ export class CategoryService implements ICategoryService {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
+    const category = await this.categoryRepository.findByCategoryName(categoryDto.cat_name.trim());
+    if(ObjectUtils.isNotEmpty(category)) {
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_CATEGORY);
+    }
+
     const user_id = String(req.user);
 
     categoryDto = { ...categoryDto, last_updated_on: new Date(), last_updated_by: user_id };
@@ -122,6 +127,10 @@ export class CategoryService implements ICategoryService {
       throw new CategoryException(CategoryErrorConstant.INVALID_SUBCATEGORY);
     }
 
+    if(StringUtils.isEmpty(subcategoryDto.cat_id)) {
+      throw new CategoryException(CategoryErrorConstant.CATEGORY_NOT_FOUND);
+    }
+
     const subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name.trim());
     if(ObjectUtils.isNotEmpty(subcategory)){
       throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBCATEGORY);
@@ -145,6 +154,11 @@ export class CategoryService implements ICategoryService {
   async updateSubcategory(req: Request, id: string, subcategoryDto: SubcategoryDto): Promise<SubcategoryDto> {
     if (ObjectUtils.isEmpty(subcategoryDto)) {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
+    }
+
+    const subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name.trim());
+    if(ObjectUtils.isNotEmpty(subcategory)){
+      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBCATEGORY);
     }
 
     const user_id = String(req.user);
