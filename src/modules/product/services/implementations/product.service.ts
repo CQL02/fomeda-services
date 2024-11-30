@@ -18,9 +18,7 @@ import {
 import {
   ISubcategorySpecificationService
 } from "../../../category/services/interfaces/subcategory-specification.service.interface";
-import {
-  IAuthenticationService
-} from '../../../authentication/services/interfaces/authentication.service.interface';
+import { IAuthenticationService } from "../../../authentication/services/interfaces/authentication.service.interface";
 import { ProductSpecificationDto } from "../../dtos/product-specification.dto";
 import { CategoryConstant } from "../../../../common/constant/category.constant";
 import { ProductConstant } from "../../../../common/constant/product.constant";
@@ -118,6 +116,15 @@ export class ProductService implements IProductService {
 
 
   async updateProductDetailsById(id: string, productDto: ProductDto): Promise<boolean> {
+    if(StringUtils.isEmpty(id)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
+    }
+
+    const validId = await this.productRepository.findOneById(id);
+    if (ObjectUtils.isEmpty(validId)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
     const updateProduct = await this.productRepository.update(id, { ...productDto, _id: productDto.pro_id });
     const updateProductSpec = await this.productSpecificationRepository.updateProductSpecifications(id, productDto.specification);
 
@@ -139,6 +146,15 @@ export class ProductService implements IProductService {
   }
 
   async deleteProductById(id: string): Promise<boolean> {
+    if(StringUtils.isEmpty(id)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
+    }
+
+    const product = await this.productRepository.findOneById(id)
+    if(ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
     const specResult = await this.productSpecificationRepository.deleteProductSpecificationByProId(id);
     const productResult = await this.productRepository.delete(id);
     return ObjectUtils.isNotEmpty(productResult) && ObjectUtils.isNotEmpty(specResult);
@@ -358,6 +374,11 @@ export class ProductService implements IProductService {
   }
 
   async updateProductVerificationDetailsById(req: Request, id: string, productDto: ProductDto): Promise<boolean> {
+    const validId = await this.productVerificationRepository.findOneById(id);
+    if(ObjectUtils.isEmpty(validId)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND)
+    }
+
     const username = String(req.user);
 
     const updateProductSpec = await this.productVerificationSpecificationRepository.updateProductSpecifications(id, productDto.specification);
@@ -374,6 +395,18 @@ export class ProductService implements IProductService {
   }
 
   async updateProductVerificationReviewById(req: Request, id: string, productDto: ProductDto): Promise<boolean> {
+    if(ObjectUtils.isNotEmpty(productDto) &&
+      productDto.status === ProductConstant.REJECTED &&
+      StringUtils.isEmpty(productDto.rejected_reason)) {
+      throw new ProductException(ProductErrorConstant.REJECT_REASON_MISSING)
+    }
+
+    if(ObjectUtils.isNotEmpty(productDto) &&
+      productDto.status === ProductConstant.APPROVED &&
+      productDto.rating === 0) {
+      throw new ProductException(ProductErrorConstant.MINIMUM_STAR_RATING_NOT_ARCHIVED)
+    }
+
     const username = String(req.user);
 
     const updateProductData: any = {
@@ -401,6 +434,15 @@ export class ProductService implements IProductService {
   }
 
   async deleteProductVerificationDetailsById(id: string): Promise<boolean> {
+    if(StringUtils.isEmpty(id)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_ID_IS_EMPTY);
+    }
+
+    const product = await this.productVerificationRepository.findOneById(id)
+    if(ObjectUtils.isEmpty(product)) {
+      throw new ProductException(ProductErrorConstant.PRODUCT_NOT_FOUND);
+    }
+
     const specResult = await this.productVerificationSpecificationRepository.deleteProductSpecificationByVerificationId(id);
     const productResult = await this.productVerificationRepository.delete(id);
     return ObjectUtils.isNotEmpty(productResult) && ObjectUtils.isNotEmpty(specResult);
