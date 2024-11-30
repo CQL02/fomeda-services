@@ -32,6 +32,10 @@ export class ConsumerService implements IConsumerService {
   }
 
   async getConsumerComparedProduct(subcat_id: string, ids: string[]): Promise<ProductDto[]> {
+    if(ids.length <= 1 || !Array.isArray(ids)) {
+      throw new ProductException(ProductErrorConstant.MINIMUM_PRODUCT_NOT_ARCHIVED);
+    }
+
     const specList = await this.subcategorySpecificationService.findActiveSubcategorySpecificationByCatId(subcat_id);
     const { specMap, subspecMap } = this.getSpecMaps(specList);
 
