@@ -6,6 +6,7 @@ import { ReportService } from "./services/implementations/report.service";
 import { ReportRepository } from "./domain/repositories/report.repository";
 import { AuthenticationModule } from "../authentication/authentication.module";
 import { ReportMapper } from "./services/mapper/ReportMapper";
+import { ProductModule } from "../product/product.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ReportMapper } from "./services/mapper/ReportMapper";
       { name: Report.name, schema: ReportSchema }
     ]),
     AuthenticationModule,
+    ProductModule,
   ],
   controllers: [ReportController],
   providers: [
