@@ -14,4 +14,10 @@ export class SequenceService implements ISequenceService {
     const paddedValue = sequenceDoc.sequence_value.toString().padStart(12, '0');
     return `${prefix}${paddedValue}`;
   }
+
+  async getLastId(prefix: string): Promise<string> {
+    const sequenceDoc = await this.sequenceRepository.findOneByFilter({ prefix: prefix })
+    const paddedValue = sequenceDoc.sequence_value.toString().padStart(12, '0');
+    return `${prefix}${paddedValue}`;
+  }
 }
