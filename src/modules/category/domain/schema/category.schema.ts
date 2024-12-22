@@ -6,13 +6,6 @@ export class Category extends SchemaAbstract {
   @Prop({
     required: true,
     type: String,
-    maxlength: 12,
-  })
-  cat_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
   })
   cat_name: string;
 

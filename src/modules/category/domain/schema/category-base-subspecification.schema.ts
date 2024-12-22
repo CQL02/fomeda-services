@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaAbstract } from '../../../../common/database/abstracts/schema.abstract';
+import { RatingScore } from "./rating_score.schema";
 
 @Schema({ versionKey: false, collection: 'category_base_subspecification' })
 export class CategoryBaseSubspecification extends SchemaAbstract {
@@ -7,19 +8,7 @@ export class CategoryBaseSubspecification extends SchemaAbstract {
     required: true,
     type: String,
   })
-  cat_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  subcat_spec_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  subcat_subspec_code: string;
+  subcat_spec_id: string;
 
   @Prop({
     required: true,
@@ -59,6 +48,45 @@ export class CategoryBaseSubspecification extends SchemaAbstract {
     default: false,
   })
   is_active: boolean;
+
+  @Prop({
+    required: true,
+    type: Boolean,
+    default: false,
+  })
+  allow_input: boolean;
+
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  is_required: boolean;
+
+  @Prop({
+    type: String,
+  })
+  prefix: string;
+
+  @Prop({
+    type: String,
+  })
+  suffix: string;
+
+  @Prop({
+    type: String,
+  })
+  field_type: string;
+
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  is_score_contributed: boolean;
+
+  @Prop({
+    type: [RatingScore],
+  })
+  rating_score: RatingScore[];
 }
 
 export const CategoryBaseSubspecificationSchema = SchemaFactory.createForClass(

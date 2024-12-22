@@ -1,24 +1,24 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '../src/app/app.module';
+import { categoryTest } from "./category.e2e";
+import { closeTestApp, getTestApp } from "./test-app.factory";
+import { productSearchAndComparisonTest } from "./product-search-and-comparison.e2e";
+import { reportTest } from "./report.e2e";
+import { productVerificationTest } from "./product-verification.e2e";
+import { productManagementTest } from "./product-management.e2e";
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    await getTestApp(); // Ensure app is initialised
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  afterAll(async () => {
+    await closeTestApp(); // Ensure app is closed after all tests
   });
+
+
+  // categoryTest();
+  // productSearchAndComparisonTest();
+  // reportTest();
+  // productVerificationTest();
+  // productManagementTest();
 });

@@ -1,21 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaAbstract } from '../../../../common/database/abstracts/schema.abstract';
+import { SubcategoryRatingScore } from "./subcategory-rating-score.schema";
 
 @Schema({ versionKey: false, collection: 'subcategory' })
 export class Subcategory extends SchemaAbstract {
   @Prop({
     required: true,
     type: String,
-    maxlength: 12,
   })
-  cat_code: string;
-
-  @Prop({
-    required: true,
-    type: String,
-    maxlength: 12,
-  })
-  subcat_code: string;
+  cat_id: string;
 
   @Prop({
     required: true,
@@ -55,6 +48,12 @@ export class Subcategory extends SchemaAbstract {
     default: false,
   })
   is_active: boolean;
+
+  @Prop({
+    required: true,
+    type: [SubcategoryRatingScore],
+  })
+  rating_score: SubcategoryRatingScore[];
 }
 
 export const SubcategorySchema = SchemaFactory.createForClass(Subcategory);

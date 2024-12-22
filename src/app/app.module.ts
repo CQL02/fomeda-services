@@ -5,6 +5,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getMongoConfig } from '../config/database.config';
 import { CategoryModule } from '../modules/category/category.module';
+import { AuthenticationModule } from '../modules/authentication/authentication.module';
+import { AnnouncementModule } from '../modules/announcement/announcement.module';
+import { ContentModule } from '../modules/content/content.module';
+import { ProductModule } from "../modules/product/product.module";
+import { RoleModule } from '../modules/role/role.module';
+import { ReportModule } from "../modules/report/report.module";
 
 @Module({
   imports: [
@@ -12,7 +18,7 @@ import { CategoryModule } from '../modules/category/category.module';
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule, CategoryModule],
+      imports: [ConfigModule, CategoryModule, AuthenticationModule, AnnouncementModule, ContentModule, ProductModule, RoleModule, ReportModule],
       useFactory: (configService: ConfigService) =>
         getMongoConfig(configService),
       inject: [ConfigService],

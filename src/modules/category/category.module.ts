@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CategoryService } from './services/category.service';
+import { CategoryService } from './services/implementations/category.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Category, CategorySchema } from './domain/schema/category.schema';
 import { CategoryRepository } from './domain/repositories/category.repository';
@@ -32,65 +32,51 @@ import {
   CategoryGeneralSubspecification,
   CategoryGeneralSubspecificationSchema,
 } from './domain/schema/category-general-subspecification.schema';
-import {
-  CategoryType,
-  CategoryTypeSchema,
-} from './domain/schema/category-type.schema';
 import { CategoryBaseSpecificationRepository } from './domain/repositories/category-base-specification.repository';
 import { CategoryGeneralSpecificationRepository } from './domain/repositories/category-general-specification.repository';
 import { CategoryGeneralSubspecificationRepository } from './domain/repositories/category-general-subspecification.repository';
 import { CategoryBaseSubspecificationRepository } from './domain/repositories/category-base-subspecification.repository';
-import { CategoryTypeRepository } from './domain/repositories/category-type.repository';
 import { SubcategorySubspecificationRepository } from './domain/repositories/subcategory-subspecification.repository';
 import { SubcategorySpecificationRepository } from './domain/repositories/subcategory-specification.repository';
 import { SubcategoryRepository } from './domain/repositories/subcategory.repository';
 import { SequenceModule } from '../sequence/sequence.module';
+import { GeneralSpecificationService } from "./services/implementations/general-specification.service";
+import { BaseSpecificationService } from "./services/implementations/base-specification.service";
+import { SubcategorySpecificationService } from "./services/implementations/subcategory-specification.service";
+import { CategoryMapper } from "./services/mapper/category.mapper";
+import { AuthenticationModule } from "../authentication/authentication.module";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Category.name, schema: CategorySchema },
-      {
-        name: CategoryBaseSpecification.name,
-        schema: CategoryBaseSpecificationSchema,
-      },
-      {
-        name: CategoryBaseSubspecification.name,
-        schema: CategoryBaseSubspecificationSchema,
-      },
-      {
-        name: CategoryGeneralSpecification.name,
-        schema: CategoryGeneralSpecificationSchema,
-      },
-      {
-        name: CategoryGeneralSubspecification.name,
-        schema: CategoryGeneralSubspecificationSchema,
-      },
-      { name: CategoryType.name, schema: CategoryTypeSchema },
+      { name: CategoryBaseSpecification.name, schema: CategoryBaseSpecificationSchema, },
+      { name: CategoryBaseSubspecification.name, schema: CategoryBaseSubspecificationSchema, },
+      { name: CategoryGeneralSpecification.name, schema: CategoryGeneralSpecificationSchema, },
+      { name: CategoryGeneralSubspecification.name, schema: CategoryGeneralSubspecificationSchema, },
       { name: Subcategory.name, schema: SubcategorySchema },
-      {
-        name: SubcategorySpecification.name,
-        schema: SubcategorySpecificationSchema,
-      },
-      {
-        name: SubcategorySubspecification.name,
-        schema: SubcategorySubspecificationSchema,
-      },
+      { name: SubcategorySpecification.name, schema: SubcategorySpecificationSchema, },
+      { name: SubcategorySubspecification.name, schema: SubcategorySubspecificationSchema, },
     ]),
     SequenceModule,
+    AuthenticationModule,
   ],
   controllers: [CategoryController],
+  exports: [CategoryService.name, SubcategorySpecificationService.name],
   providers: [
-    CategoryService,
+    { provide: CategoryService.name, useClass: CategoryService },
+    { provide: GeneralSpecificationService.name, useClass: GeneralSpecificationService },
+    { provide: BaseSpecificationService.name, useClass: BaseSpecificationService },
+    { provide: SubcategorySpecificationService.name, useClass: SubcategorySpecificationService },
     CategoryRepository,
     CategoryBaseSpecificationRepository,
     CategoryBaseSubspecificationRepository,
     CategoryGeneralSpecificationRepository,
     CategoryGeneralSubspecificationRepository,
-    CategoryTypeRepository,
     SubcategoryRepository,
     SubcategorySpecificationRepository,
     SubcategorySubspecificationRepository,
+    CategoryMapper,
   ],
 })
 export class CategoryModule {}
