@@ -156,9 +156,13 @@ export class CategoryService implements ICategoryService {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
-    const subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name);
-    if(ObjectUtils.isNotEmpty(subcategory)){
-      throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBCATEGORY);
+    let subcategory: SubcategoryDto;
+    // skip checking duplication if update rating score
+    if(subcategoryDto.subcat_name) {
+      subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name.trim());
+      if (ObjectUtils.isNotEmpty(subcategory)) {
+        throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBCATEGORY);
+      }
     }
 
     const user_id = String(req.user);
