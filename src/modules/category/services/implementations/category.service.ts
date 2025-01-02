@@ -156,7 +156,7 @@ export class CategoryService implements ICategoryService {
       throw new CategoryException(CategoryErrorConstant.INVALID_CATEGORY);
     }
 
-    const subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name.trim());
+    const subcategory = await this.subcategoryRepository.findBySubcategoryName(subcategoryDto.cat_id, subcategoryDto.subcat_name);
     if(ObjectUtils.isNotEmpty(subcategory)){
       throw new CategoryException(CategoryErrorConstant.DUPLICATE_SUBCATEGORY);
     }
