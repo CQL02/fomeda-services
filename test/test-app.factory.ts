@@ -10,7 +10,7 @@ let app: INestApplication;
 
 export const getTestApp = async (): Promise<INestApplication> => {
   if (!app) {
-    const mainDbUri = "mongodb+srv://db-user:mongo123@fomeda-test.ubf7j.mongodb.net/fomeda-test";
+    const mainDbUri = "mongodb+srv://db-user:mongo123@fomeda.nuwzhid.mongodb.net/fomeda";
     await setupInMemoryDatabase(mainDbUri);
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
